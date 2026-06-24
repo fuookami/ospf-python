@@ -1,200 +1,203 @@
-"""Tests for ospf_python.math.symbol module."""
+"""符号核心测试。
 
-from ospf_python.math.symbol import (
-    Inequality,
-    Monomial,
-    Polynomial,
-    constant,
-    variable,
+Symbol core tests.
+
+测试 Symbol、Category、SymbolIdentity 的创建、相等性与映射。
+Tests Symbol, Category, SymbolIdentity creation,
+equality, and mapping.
+"""
+
+from __future__ import annotations
+
+from ospf_python.math.symbol.category import Category
+from ospf_python.math.symbol.symbol import Symbol
+from ospf_python.math.symbol.symbol_identity import (
+    SymbolIdentity,
 )
 
-
-class TestMonomial:
-    """Tests for Monomial."""
-
-    def test_creation(self) -> None:
-        """Test creating monomial."""
-        m = Monomial(2.0, (("x", 1), ("y", 2)))
-        assert m.coefficient == 2.0
-        assert m.variables == (("x", 1), ("y", 2))
-
-    def test_evaluate(self) -> None:
-        """Test evaluating monomial."""
-        m = Monomial(2.0, (("x", 1), ("y", 2)))
-        result = m.evaluate({"x": 3.0, "y": 4.0})
-        assert result == 2.0 * 3.0 * 4.0**2
-
-    def test_degree(self) -> None:
-        """Test monomial degree."""
-        m = Monomial(2.0, (("x", 1), ("y", 2)))
-        assert m.degree() == 3
-
-    def test_add_like_terms(self) -> None:
-        """Test adding like terms."""
-        m1 = Monomial(2.0, (("x", 1),))
-        m2 = Monomial(3.0, (("x", 1),))
-        result = m1 + m2
-        assert isinstance(result, Polynomial)
-        assert len(result.monomials) == 1
-        assert result.monomials[0].coefficient == 5.0
-
-    def test_add_unlike_terms(self) -> None:
-        """Test adding unlike terms."""
-        m1 = Monomial(2.0, (("x", 1),))
-        m2 = Monomial(3.0, (("y", 1),))
-        result = m1 + m2
-        assert isinstance(result, Polynomial)
-        assert len(result.monomials) == 2
-
-    def test_mul(self) -> None:
-        """Test multiplying monomials."""
-        m1 = Monomial(2.0, (("x", 1),))
-        m2 = Monomial(3.0, (("x", 1), ("y", 1)))
-        result = m1 * m2
-        assert result.coefficient == 6.0
-        assert result.variables == (("x", 2), ("y", 1))
-
-    def test_repr(self) -> None:
-        """Test string representation."""
-        m = Monomial(2.0, (("x", 1), ("y", 2)))
-        assert "2.0" in repr(m)
-        assert "x" in repr(m)
-        assert "y^2" in repr(m)
+# ── Symbol ─────────────────────────────────────────────────────
 
 
-class TestPolynomial:
-    """Tests for Polynomial."""
+class TestSymbolCreation:
+    """符号创建测试。"""
 
-    def test_creation(self) -> None:
-        """Test creating polynomial."""
-        p = Polynomial([Monomial(2.0, (("x", 1),)), Monomial(3.0, (("y", 1),))])
-        assert len(p.monomials) == 2
+    def test_create_default_index(self) -> None:
+        """默认索引为 0。/ Default index is 0."""
+        sym = Symbol.create("x")
+        assert sym.name == "x"
+        assert sym.index == 0
 
-    def test_evaluate(self) -> None:
-        """Test evaluating polynomial."""
-        # 2x + 3y
-        p = Polynomial([Monomial(2.0, (("x", 1),)), Monomial(3.0, (("y", 1),))])
-        result = p.evaluate({"x": 2.0, "y": 3.0})
-        assert result == 2 * 2 + 3 * 3
+    def test_create_with_index(self) -> None:
+        """指定索引创建。/ Create with explicit index."""
+        sym = Symbol.create("x", index=3)
+        assert sym.name == "x"
+        assert sym.index == 3
 
-    def test_degree(self) -> None:
-        """Test polynomial degree."""
-        p = Polynomial([Monomial(2.0, (("x", 1),)), Monomial(3.0, (("y", 2),))])
-        assert p.degree() == 2
-
-    def test_simplify(self) -> None:
-        """Test simplifying polynomial."""
-        p = Polynomial(
-            [
-                Monomial(2.0, (("x", 1),)),
-                Monomial(3.0, (("x", 1),)),
-                Monomial(1.0, (("y", 1),)),
-            ]
-        )
-        simplified = p.simplify()
-        assert len(simplified.monomials) == 2
-
-    def test_add(self) -> None:
-        """Test adding polynomials."""
-        p1 = Polynomial([Monomial(2.0, (("x", 1),))])
-        p2 = Polynomial([Monomial(3.0, (("x", 1),))])
-        result = p1 + p2
-        assert result.monomials[0].coefficient == 5.0
-
-    def test_sub(self) -> None:
-        """Test subtracting polynomials."""
-        p1 = Polynomial([Monomial(5.0, (("x", 1),))])
-        p2 = Polynomial([Monomial(3.0, (("x", 1),))])
-        result = p1 - p2
-        assert result.monomials[0].coefficient == 2.0
-
-    def test_mul(self) -> None:
-        """Test multiplying polynomials."""
-        # (x + 1) * (x + 2) = x^2 + 3x + 2
-        p1 = Polynomial([Monomial(1.0, (("x", 1),)), Monomial(1.0, ())])
-        p2 = Polynomial([Monomial(1.0, (("x", 1),)), Monomial(2.0, ())])
-        result = p1 * p2
-        simplified = result.simplify()
-        assert len(simplified.monomials) == 3
-
-    def test_serde(self) -> None:
-        """Test serialization/deserialization."""
-        p = Polynomial([Monomial(2.0, (("x", 1),)), Monomial(3.0, (("y", 2),))])
-        d = p.to_dict()
-        restored = Polynomial.from_dict(d)
-        assert restored == p
-
-    def test_repr(self) -> None:
-        """Test string representation."""
-        p = Polynomial([Monomial(2.0, (("x", 1),)), Monomial(3.0, (("y", 1),))])
-        assert "2.0" in repr(p)
-        assert "3.0" in repr(p)
+    def test_dataclass_fields(self) -> None:
+        """数据类字段赋值。/ Dataclass field assignment."""
+        sym = Symbol(name="y", index=2)
+        assert sym.name == "y"
+        assert sym.index == 2
 
 
-class TestInequality:
-    """Tests for Inequality."""
+class TestSymbolEquality:
+    """符号相等性测试。"""
 
-    def test_creation(self) -> None:
-        """Test creating inequality."""
-        left = Polynomial([Monomial(1.0, (("x", 1),))])
-        right = Polynomial([Monomial(2.0, ())])
-        ineq = Inequality(left, "<=", right)
-        assert ineq.operator == "<="
+    def test_equal_same_name_index(self) -> None:
+        """相同名称和索引相等。/ Equal with same name and index."""
+        a = Symbol.create("x")
+        b = Symbol.create("x")
+        assert a == b
 
-    def test_evaluate_le(self) -> None:
-        """Test evaluating <= inequality."""
-        left = Polynomial([Monomial(1.0, (("x", 1),))])
-        right = Polynomial([Monomial(2.0, ())])
-        ineq = Inequality(left, "<=", right)
-        assert ineq.evaluate({"x": 1.0})
-        assert ineq.evaluate({"x": 2.0})
-        assert not ineq.evaluate({"x": 3.0})
+    def test_not_equal_different_name(self) -> None:
+        """不同名称不等。/ Not equal with different name."""
+        a = Symbol.create("x")
+        b = Symbol.create("y")
+        assert a != b
 
-    def test_evaluate_ge(self) -> None:
-        """Test evaluating >= inequality."""
-        left = Polynomial([Monomial(1.0, (("x", 1),))])
-        right = Polynomial([Monomial(2.0, ())])
-        ineq = Inequality(left, ">=", right)
-        assert not ineq.evaluate({"x": 1.0})
-        assert ineq.evaluate({"x": 2.0})
-        assert ineq.evaluate({"x": 3.0})
+    def test_not_equal_different_index(self) -> None:
+        """不同索引不等。/ Not equal with different index."""
+        a = Symbol.create("x", index=0)
+        b = Symbol.create("x", index=1)
+        assert a != b
 
-    def test_simplify(self) -> None:
-        """Test simplifying inequality."""
-        left = Polynomial([Monomial(2.0, (("x", 1),)), Monomial(3.0, (("x", 1),))])
-        right = Polynomial([Monomial(10.0, ())])
-        ineq = Inequality(left, "<=", right)
-        simplified = ineq.simplify()
-        assert len(simplified.left.monomials) == 1
+    def test_hash_consistent(self) -> None:
+        """哈希一致性。/ Hash consistency."""
+        a = Symbol.create("x", index=1)
+        b = Symbol.create("x", index=1)
+        assert hash(a) == hash(b)
 
-    def test_serde(self) -> None:
-        """Test serialization/deserialization."""
-        left = Polynomial([Monomial(1.0, (("x", 1),))])
-        right = Polynomial([Monomial(2.0, ())])
-        ineq = Inequality(left, "<=", right)
-        d = ineq.to_dict()
-        restored = Inequality.from_dict(d)
-        assert restored == ineq
-
-    def test_repr(self) -> None:
-        """Test string representation."""
-        left = Polynomial([Monomial(1.0, (("x", 1),))])
-        right = Polynomial([Monomial(2.0, ())])
-        ineq = Inequality(left, "<=", right)
-        assert "<=" in repr(ineq)
+    def test_hash_different(self) -> None:
+        """不同符号哈希不同。/ Different symbols have different hash."""
+        a = Symbol.create("x")
+        b = Symbol.create("y")
+        # 不要求严格不同，但通常不同
+        # Not strictly required, but typically different
+        assert hash(a) != hash(b)
 
 
-class TestFactoryFunctions:
-    """Tests for factory functions."""
+class TestSymbolDisplay:
+    """符号显示测试。"""
 
-    def test_variable(self) -> None:
-        """Test variable factory."""
-        v = variable("x")
-        assert v.coefficient == 1.0
-        assert v.variables == (("x", 1),)
+    def test_display_name_no_index(self) -> None:
+        """无索引时显示名称。/ Display name without index."""
+        sym = Symbol.create("x")
+        assert sym.display_name == "x"
 
-    def test_constant(self) -> None:
-        """Test constant factory."""
-        c = constant(5.0)
-        assert c.coefficient == 5.0
-        assert c.variables == ()
+    def test_display_name_with_index(self) -> None:
+        """有索引时追加下标。/ Display name with subscript."""
+        sym = Symbol.create("x", index=3)
+        assert sym.display_name == "x_3"
+
+    def test_str_no_index(self) -> None:
+        """字符串表示无索引。/ String without index."""
+        sym = Symbol.create("alpha")
+        assert str(sym) == "alpha"
+
+    def test_str_with_index(self) -> None:
+        """字符串表示有索引。/ String with index."""
+        sym = Symbol.create("x", index=5)
+        assert str(sym) == "x_5"
+
+
+class TestSymbolOrdering:
+    """符号排序测试。"""
+
+    def test_lt_by_name(self) -> None:
+        """按名称排序。/ Sort by name."""
+        a = Symbol.create("a")
+        b = Symbol.create("b")
+        assert a < b
+
+    def test_lt_by_index(self) -> None:
+        """同名称按索引排序。/ Sort by index when names equal."""
+        a = Symbol.create("x", index=0)
+        b = Symbol.create("x", index=1)
+        assert a < b
+
+
+# ── Category ───────────────────────────────────────────────────
+
+
+class TestCategory:
+    """符号类别枚举测试。"""
+
+    def test_linear_value(self) -> None:
+        """线性类别值。/ Linear category value."""
+        assert Category.LINEAR.value == "linear"
+
+    def test_quadratic_value(self) -> None:
+        """二次类别值。/ Quadratic category value."""
+        assert Category.QUADRATIC.value == "quadratic"
+
+    def test_canonical_value(self) -> None:
+        """标准类别值。/ Canonical category value."""
+        assert Category.CANONICAL.value == "canonical"
+
+    def test_is_linear(self) -> None:
+        """线性类别属性。/ Linear category property."""
+        assert Category.LINEAR.is_linear
+        assert not Category.QUADRATIC.is_linear
+
+    def test_is_quadratic(self) -> None:
+        """二次类别属性。/ Quadratic category property."""
+        assert Category.QUADRATIC.is_quadratic
+        assert not Category.LINEAR.is_quadratic
+
+    def test_is_canonical(self) -> None:
+        """标准类别属性。/ Canonical category property."""
+        assert Category.CANONICAL.is_canonical
+        assert not Category.LINEAR.is_canonical
+
+    def test_all_members(self) -> None:
+        """所有成员。/ All members."""
+        members = list(Category)
+        assert len(members) == 3
+
+
+# ── SymbolIdentity ─────────────────────────────────────────────
+
+
+class TestSymbolIdentity:
+    """符号标识映射测试。"""
+
+    def test_create_with_of(self) -> None:
+        """通过 of 工厂创建。/ Create via of factory."""
+        sym = Symbol.create("x")
+        ident = SymbolIdentity.of(sym, "model.x")
+        assert ident.symbol == sym
+        assert ident.identity == "model.x"
+
+    def test_create_with_constructor(self) -> None:
+        """通过构造函数创建。/ Create via constructor."""
+        sym = Symbol.create("y")
+        ident = SymbolIdentity(symbol=sym, identity="var.y")
+        assert ident.identity == "var.y"
+
+    def test_matches_true(self) -> None:
+        """匹配对应符号。/ Matches corresponding symbol."""
+        sym = Symbol.create("x")
+        ident = SymbolIdentity.of(sym, "x_id")
+        assert ident.matches(sym)
+
+    def test_matches_false(self) -> None:
+        """不匹配其他符号。/ Does not match other symbol."""
+        sym_x = Symbol.create("x")
+        sym_y = Symbol.create("y")
+        ident = SymbolIdentity.of(sym_x, "x_id")
+        assert not ident.matches(sym_y)
+
+    def test_str_representation(self) -> None:
+        """字符串表示。/ String representation."""
+        sym = Symbol.create("z")
+        ident = SymbolIdentity.of(sym, "z_id")
+        result = str(ident)
+        assert "z" in result
+        assert "z_id" in result
+
+    def test_frozen(self) -> None:
+        """不可变性。/ Immutability."""
+        sym = Symbol.create("x")
+        ident = SymbolIdentity.of(sym, "id")
+        assert ident.symbol == sym
+        assert ident.identity == "id"

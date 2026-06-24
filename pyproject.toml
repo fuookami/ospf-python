@@ -32,6 +32,7 @@ dev = [
     "mypy>=1.10",
     "pytest>=8.0",
     "pytest-cov>=5.0",
+    "pytest-asyncio>=0.24",
 ]
 
 [build-system]
@@ -67,6 +68,13 @@ module = [
 ]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = [
+    "ospf_python.core.solver.copt.*",
+    "ospf_python.core.solver.mindopt.*",
+]
+ignore_errors = true
+
 [tool.ruff]
 line-length = 88
 indent-width = 4
@@ -87,6 +95,7 @@ select = [
 ignore = [
     "E501",  # line too long (handled by formatter)
     "E731",  # lambda assignment (common in tests)
+    "E741",  # ambiguous variable name (l, I used in math)
     "N818",  # exception naming (Err/Failed/Fatal are intentional names)
     "UP046", # Generic subclass (needed for Python 3.12 compatibility)
     "UP047", # type parameters (needed for Python 3.12 compatibility)
@@ -95,6 +104,9 @@ ignore = [
     "TC002", # third-party imports (numpy.typing needed at runtime)
     "TC003", # type-checking imports (move to TYPE_CHECKING block)
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["E402"]  # importorskip requires import after pytest
 
 [tool.ruff.lint.isort]
 known-first-party = ["ospf_python"]

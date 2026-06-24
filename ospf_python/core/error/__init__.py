@@ -1,45 +1,11 @@
-"""Core error module.
+"""核心错误模块 / Core error module.
 
-Provides error codes for the core modeling framework.
+提供核心模块专用错误码定义。
+Provides core module-specific error code definitions.
 """
 
-from __future__ import annotations
+from ospf_python.core.error.core_error import CoreErrorCode
 
-from enum import Enum, unique
-
-
-@unique
-class CoreErrorCode(Enum):
-    """Core-specific error codes.
-
-    核心模块错误码。
-    """
-
-    # Variable errors
-    VARIABLE_NOT_FOUND = "VARIABLE_NOT_FOUND"
-    VARIABLE_ALREADY_EXISTS = "VARIABLE_ALREADY_EXISTS"
-    VARIABLE_INVALID_BOUNDS = "VARIABLE_INVALID_BOUNDS"
-
-    # Model errors
-    MODEL_NOT_SOLVED = "MODEL_NOT_SOLVED"
-    MODEL_INFEASIBLE = "MODEL_INFEASIBLE"
-    MODEL_UNBOUNDED = "MODEL_UNBOUNDED"
-    MODEL_ERROR = "MODEL_ERROR"
-    ILLEGAL_STATE = "ILLEGAL_STATE"
-
-    # Constraint errors
-    CONSTRAINT_NOT_FOUND = "CONSTRAINT_NOT_FOUND"
-    CONSTRAINT_INVALID = "CONSTRAINT_INVALID"
-
-    # Objective errors
-    OBJECTIVE_NOT_SET = "OBJECTIVE_NOT_SET"
-    OBJECTIVE_INVALID = "OBJECTIVE_INVALID"
-
-    # Solver errors
-    SOLVER_NOT_AVAILABLE = "SOLVER_NOT_AVAILABLE"
-    SOLVER_ERROR = "SOLVER_ERROR"
-    SOLVER_TIMEOUT = "SOLVER_TIMEOUT"
-
-    # Token errors
-    TOKEN_NOT_FOUND = "TOKEN_NOT_FOUND"
-    TOKEN_INVALID = "TOKEN_INVALID"
+__all__ = [
+    "CoreErrorCode",
+]
