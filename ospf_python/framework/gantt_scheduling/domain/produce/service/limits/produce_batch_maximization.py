@@ -1,4 +1,7 @@
-"""Gantt produce_batch_maximization."""
+"""Gantt scheduling produce_batch_maximization.
+
+Provides produce_batch_maximization functionality for the gantt scheduling framework.
+"""
 
 from __future__ import annotations
 
@@ -7,6 +10,6 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class ProduceBatchMaximization:
-    """Gantt ProduceBatchMaximization."""
+    """Gantt scheduling ProduceBatchMaximization."""
 
     pass

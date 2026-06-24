@@ -1,4 +1,7 @@
-"""Gantt batch_demand_constraint."""
+"""Gantt scheduling batch_demand_constraint.
+
+Provides batch_demand_constraint functionality for the gantt scheduling framework.
+"""
 
 from __future__ import annotations
 
@@ -7,6 +10,6 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class BatchDemandConstraint:
-    """Gantt BatchDemandConstraint."""
+    """Gantt scheduling BatchDemandConstraint."""
 
     pass

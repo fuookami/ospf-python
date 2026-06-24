@@ -25,3 +25,9 @@ def test_gantt_demo_runs() -> None:
     from examples.framework_demo.demo4.gantt_demo import run_demo
 
     run_demo()
+
+
+def test_csp1d_demo_runs() -> None:
+    from examples.framework_demo.demo3.csp1d_demo import run_demo
+
+    run_demo()

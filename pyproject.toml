@@ -45,6 +45,7 @@ packages = ["ospf_python"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
+asyncio_mode = "auto"
 
 [tool.mypy]
 python_version = "3.13"
@@ -72,6 +73,7 @@ ignore_missing_imports = true
 module = [
     "ospf_python.core.solver.copt.*",
     "ospf_python.core.solver.mindopt.*",
+    "ospf_python.framework.csp1d.*",
 ]
 ignore_errors = true
 

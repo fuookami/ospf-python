@@ -1,4 +1,7 @@
-"""Gantt time_order_constraint."""
+"""Gantt scheduling time_order_constraint.
+
+Provides time_order_constraint functionality for the gantt scheduling framework.
+"""
 
 from __future__ import annotations
 
@@ -7,6 +10,6 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class TimeOrderConstraint:
-    """Gantt TimeOrderConstraint."""
+    """Gantt scheduling TimeOrderConstraint."""
 
     pass

@@ -1,86 +1,81 @@
 # ospf-python
 
-Python implementation of the ospf-kotlin optimization framework.
+[中文版](README_ch.md)
 
-[中文文档](README_ch.md)
+Python implementation of the ospf-kotlin optimization framework.
 
 ## Overview
 
-ospf-python is a comprehensive optimization modeling framework that provides:
+ospf-python is a comprehensive optimization modeling framework with support for:
+- Linear Programming (LP)
+- Mixed-Integer Programming (MILP)
+- Quadratic Programming (QP)
+- Domain-specific frameworks for bin packing, cutting stock, and scheduling
 
-- **Core modeling**: MetaModel-based optimization with variable/constraint/objective registration
-- **Solver abstraction**: Unified interface for multiple solvers (Gurobi, SCIP, COPT, MindOpt)
-- **Domain frameworks**: Pre-built frameworks for:
-  - 3D Bin Packing (BPP3D)
-  - 1D Cutting Stock (CSP1D)
-  - Gantt Scheduling
-- **Math library**: Algebra, geometry, symbolic computation, and chaos theory
-- **Physical quantities**: Type-safe unit system with dimensional analysis
+## Module Structure
 
-## Installation
+| Module | Description |
+|--------|-------------|
+| `ospf_python.utils` | Error handling (Result pattern), functional utilities, protocols |
+| `ospf_python.multiarray` | N-dimensional arrays with numpy backend |
+| `ospf_python.math` | Algebra, geometry, combinatorics, chaotic maps, symbolic math |
+| `ospf_python.quantities` | Physical quantities with unit system |
+| `ospf_python.core` | Optimization core: variables, tokens, models, solvers |
+| `ospf_python.framework` | Domain frameworks: bpp3d, csp1d, gantt_scheduling |
 
-```bash
-# Basic installation
-uv pip install -e .
+## Public API
 
-# With solver support
-uv pip install -e ".[gurobi,scip]"
+### Core Modeling
 
-# Development
-uv pip install -e ".[dev]"
+```python
+from ospf_python.core.model.mechanism.meta_model import MetaModel
+from ospf_python.core.solver.solver import Solver
+from ospf_python.core.solver.mock_solver import MockSolver
 ```
+
+### Physical Quantities
+
+```python
+from ospf_python.quantities.quantity.quantity import Quantity
+from ospf_python.quantities.unit.length import METER, KILOMETER
+from ospf_python.quantities.unit.mass import KILOGRAM
+```
+
+### Error Handling (Result Pattern)
+
+```python
+from ospf_python.utils.functional import Result, Ok, Failed
+from ospf_python.utils.error import ErrorCode
+```
+
+## Extension Points
+
+- **Extra Context**: Add custom variables/constraints via `extra context` pattern
+- **Extra Pipeline**: Add custom constraints/objectives via `pipeline` pattern
+- **Solver Adapters**: gurobi, scip, copt, mindopt (via `core.solver.<vendor>`)
+
+## Generic Numeric Types
+
+- `RealNumber` — abstract numeric type for generic algorithms
+- `Quantity[T]` — physical quantity with unit (`.rules §5`)
+- Different unit raw values must not mix
+
+## Solvers
+
+| Solver | Status |
+|--------|--------|
+| MockSolver | Built-in, for testing |
+| gurobi | via gurobipy |
+| scip | via pyscipopt |
+| copt | via coptpy |
+| mindopt | via mindoptpy |
 
 ## Quick Start
 
-```python
-from ospf_python.core.model import MetaModel
-from ospf_python.core.variable import LinearVariable
-
-# Create a model
-model = MetaModel("my_model")
-
-# Add variables
-x = model.add_variable("x", lower_bound=0)
-y = model.add_variable("y", lower_bound=0)
-
-# Add objective
-model.set_objective(x + y, minimize=True)
-
-# Add constraints
-model.add_constraint(x + 2 * y >= 10)
-
-# Solve
-result = model.solve()
-print(f"Optimal value: {result.objective_value}")
+```bash
+uv sync
+uv run pytest -q
 ```
-
-## Project Structure
-
-```
-ospf_python/
-├── utils/          # Error handling, Result pattern, functional utilities
-├── multiarray/     # Multi-dimensional array abstraction (numpy backend)
-├── math/           # Algebra, geometry, symbolic computation, chaos
-├── quantities/     # Physical quantities and unit system
-├── core/           # Core modeling framework
-│   ├── variable/   # Variable types
-│   ├── token/      # Token system
-│   ├── symbol/     # Symbolic functions
-│   ├── model/      # MetaModel and model variants
-│   ├── solver/     # Solver abstraction and mock
-│   └── plugin/     # Solver adapters (gurobi, scip, copt, mindopt)
-└── framework/      # Domain-specific frameworks
-    ├── bpp3d/      # 3D Bin Packing
-    ├── csp1d/      # 1D Cutting Stock
-    └── gantt_scheduling/  # Gantt Scheduling
-```
-
-## Requirements
-
-- Python 3.13+
-- NumPy 1.26+
-- Pydantic 2.0+
-- Returns 0.22+
 
 ## License
 
