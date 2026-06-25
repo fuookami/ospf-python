@@ -1,7 +1,4 @@
-"""Gantt scheduling produce_aggregation.
-
-Provides produce_aggregation functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling produce aggregation."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class ProduceAggregation:
-    """Gantt scheduling ProduceAggregation."""
+    """Gantt scheduling produce aggregation."""
 
-    pass
+    name: str = "produce_aggregation"
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if valid."""
+        return bool(self.name)

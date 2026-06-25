@@ -1,1 +1,1 @@
-# ospf_python.framework.gantt_scheduling.domain
+"""Gantt scheduling module."""

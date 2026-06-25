@@ -1,7 +1,4 @@
-"""Gantt scheduling capacity_scheduling_modeling_config.
-
-Provides capacity_scheduling_modeling_config functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling capacity scheduling modeling config."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class CapacitySchedulingModelingConfig:
-    """Gantt scheduling CapacitySchedulingModelingConfig."""
+    """Gantt scheduling capacity scheduling modeling config."""
 
-    pass
+    name: str = "capacity_scheduling_modeling_config"
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if valid."""
+        return bool(self.name)

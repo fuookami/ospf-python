@@ -1,7 +1,4 @@
-"""Gantt scheduling produce_context.
-
-Provides produce_context functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling produce context."""
 
 from __future__ import annotations
 
@@ -10,6 +7,10 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class ProduceContext:
-    """Gantt scheduling ProduceContext."""
+    """Gantt scheduling produce context."""
 
-    pass
+    name: str = "produce context"
+
+    def analyze(self, data):
+        """Analyze scheduling data."""
+        return {"status": "ok"}

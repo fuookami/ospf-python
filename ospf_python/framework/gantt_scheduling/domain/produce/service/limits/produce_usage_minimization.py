@@ -1,7 +1,4 @@
-"""Gantt scheduling produce_usage_minimization.
-
-Provides produce_usage_minimization functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling produce usage minimization."""
 
 from __future__ import annotations
 
@@ -10,6 +7,14 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class ProduceUsageMinimization:
-    """Gantt scheduling ProduceUsageMinimization."""
+    """Gantt scheduling produce usage minimization."""
 
-    pass
+    name: str = "produce usage minimization"
+
+    def build_objective_terms(self, model, tasks):
+        """Build solver objective terms."""
+        return ()
+
+    def compute_value(self, schedule):
+        """Compute objective value."""
+        return 0.0

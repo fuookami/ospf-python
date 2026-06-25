@@ -1,7 +1,4 @@
-"""Gantt scheduling capacity_scheduling_solver_value_adapter.
-
-Provides capacity_scheduling_solver_value_adapter functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling capacity scheduling solver value adapter."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class CapacitySchedulingSolverValueAdapter:
-    """Gantt scheduling CapacitySchedulingSolverValueAdapter."""
+    """Gantt scheduling capacity scheduling solver value adapter."""
 
-    pass
+    name: str = "capacity_scheduling_solver_value_adapter"
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if valid."""
+        return bool(self.name)

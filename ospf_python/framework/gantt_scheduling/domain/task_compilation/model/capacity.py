@@ -1,7 +1,4 @@
-"""Gantt scheduling capacity.
-
-Provides capacity functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling capacity."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Capacity:
-    """Gantt scheduling Capacity."""
+    """Gantt scheduling capacity."""
 
-    pass
+    name: str = "capacity"
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if valid."""
+        return bool(self.name)

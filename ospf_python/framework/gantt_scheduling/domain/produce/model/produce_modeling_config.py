@@ -1,7 +1,4 @@
-"""Gantt scheduling produce_modeling_config.
-
-Provides produce_modeling_config functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling produce modeling config."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class ProduceModelingConfig:
-    """Gantt scheduling ProduceModelingConfig."""
+    """Gantt scheduling produce modeling config."""
 
-    pass
+    name: str = "produce_modeling_config"
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if valid."""
+        return bool(self.name)

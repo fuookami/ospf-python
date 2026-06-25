@@ -1,7 +1,4 @@
-"""Gantt scheduling render_dto.
-
-Provides render_dto functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling render dto."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class RenderDto:
-    """Gantt scheduling RenderDto."""
+    """Gantt scheduling render dto."""
 
-    pass
+    name: str = "render dto"
+
+    @property
+    def is_valid(self):
+        """Check if model is valid."""
+        return bool(self.name)

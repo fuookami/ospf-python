@@ -1,7 +1,4 @@
-"""Gantt scheduling gantt_material.
-
-Provides gantt_material functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling gantt material."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class GanttMaterial:
-    """Gantt scheduling GanttMaterial."""
+    """Gantt scheduling gantt material."""
 
-    pass
+    name: str = "gantt material"
+
+    @property
+    def is_valid(self):
+        """Check if model is valid."""
+        return bool(self.name)

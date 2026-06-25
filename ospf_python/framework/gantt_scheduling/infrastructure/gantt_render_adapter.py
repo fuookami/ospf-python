@@ -1,7 +1,4 @@
-"""Gantt scheduling gantt_render_adapter.
-
-Provides gantt_render_adapter functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling gantt render adapter."""
 
 from __future__ import annotations
 
@@ -10,6 +7,14 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class GanttRenderAdapter:
-    """Gantt scheduling GanttRenderAdapter."""
+    """Gantt scheduling gantt render adapter."""
 
-    pass
+    name: str = "gantt render adapter"
+
+    def convert(self, data):
+        """Convert data format."""
+        return data
+
+    def restore(self, data):
+        """Restore original format."""
+        return data

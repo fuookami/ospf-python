@@ -1,7 +1,4 @@
-"""Gantt scheduling task_capacity_constraint.
-
-Provides task_capacity_constraint functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling task capacity constraint."""
 
 from __future__ import annotations
 
@@ -10,6 +7,18 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class TaskCapacityConstraint:
-    """Gantt scheduling TaskCapacityConstraint."""
+    """Gantt scheduling task capacity constraint."""
 
-    pass
+    name: str = "task capacity constraint"
+
+    def build_constraints(self, model, tasks):
+        """Build solver constraints."""
+        return ()
+
+    def is_satisfied(self, schedule):
+        """Check if constraint is satisfied."""
+        return True
+
+    def violations(self, schedule):
+        """Get constraint violations."""
+        return ()

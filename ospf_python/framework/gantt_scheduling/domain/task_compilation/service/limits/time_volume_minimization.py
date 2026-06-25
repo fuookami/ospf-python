@@ -1,7 +1,4 @@
-"""Gantt scheduling time_volume_minimization.
-
-Provides time_volume_minimization functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling time volume minimization."""
 
 from __future__ import annotations
 
@@ -10,6 +7,14 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class TimeVolumeMinimization:
-    """Gantt scheduling TimeVolumeMinimization."""
+    """Gantt scheduling time volume minimization."""
 
-    pass
+    name: str = "time volume minimization"
+
+    def build_objective_terms(self, model, tasks):
+        """Build solver objective terms."""
+        return ()
+
+    def compute_value(self, schedule):
+        """Compute objective value."""
+        return 0.0

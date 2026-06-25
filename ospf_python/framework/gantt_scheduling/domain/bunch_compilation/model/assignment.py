@@ -1,7 +1,4 @@
-"""Gantt scheduling assignment.
-
-Provides assignment functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling assignment."""
 
 from __future__ import annotations
 
@@ -10,6 +7,15 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Assignment:
-    """Gantt scheduling Assignment."""
+    """Gantt scheduling assignment."""
 
-    pass
+    name: str = "assignment"
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if valid."""
+        return bool(self.name)
+
+
+# Alias for backward compatibility
+BunchAssignment = Assignment

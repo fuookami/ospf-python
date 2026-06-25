@@ -1,7 +1,4 @@
-"""Gantt scheduling capacity_scheduling_aggregation.
-
-Provides capacity_scheduling_aggregation functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling capacity scheduling aggregation."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class CapacitySchedulingAggregation:
-    """Gantt scheduling CapacitySchedulingAggregation."""
+    """Gantt scheduling capacity scheduling aggregation."""
 
-    pass
+    name: str = "capacity_scheduling_aggregation"
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if valid."""
+        return bool(self.name)

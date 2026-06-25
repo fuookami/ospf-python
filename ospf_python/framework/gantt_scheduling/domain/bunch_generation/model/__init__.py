@@ -1,1 +1,11 @@
-# ospf_python.framework.gantt_scheduling.domain.bunch_generation.model
+"""Gantt scheduling module."""
+
+from .bunch_generation_context import BunchGenerationContext
+from .bunch_generation_program_candidate_adapters import (
+    BunchGenerationProgramCandidateAdapters,
+)
+
+__all__ = [
+    "BunchGenerationContext",
+    "BunchGenerationProgramCandidateAdapters",
+]

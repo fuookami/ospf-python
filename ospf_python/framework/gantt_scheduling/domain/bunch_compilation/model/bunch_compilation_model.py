@@ -1,7 +1,4 @@
-"""Gantt scheduling bunch_compilation_model.
-
-Provides bunch_compilation_model functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling bunch compilation model."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class BunchCompilationModel:
-    """Gantt scheduling BunchCompilationModel."""
+    """Gantt scheduling bunch compilation model."""
 
-    pass
+    name: str = "bunch_compilation_model"
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if valid."""
+        return bool(self.name)

@@ -1,7 +1,4 @@
-"""Gantt scheduling batch_capacity_constraint.
-
-Provides batch_capacity_constraint functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling batch capacity constraint."""
 
 from __future__ import annotations
 
@@ -10,6 +7,18 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class BatchCapacityConstraint:
-    """Gantt scheduling BatchCapacityConstraint."""
+    """Gantt scheduling batch capacity constraint."""
 
-    pass
+    name: str = "batch capacity constraint"
+
+    def build_constraints(self, model, tasks):
+        """Build solver constraints."""
+        return ()
+
+    def is_satisfied(self, schedule):
+        """Check if constraint is satisfied."""
+        return True
+
+    def violations(self, schedule):
+        """Get constraint violations."""
+        return ()

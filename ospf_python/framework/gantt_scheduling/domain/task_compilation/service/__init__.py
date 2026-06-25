@@ -1,1 +1,7 @@
-# ospf_python.framework.gantt_scheduling.domain.task_compilation.service
+"""Gantt scheduling module."""
+
+from .solution_analyzer import SolutionAnalyzer
+
+__all__ = [
+    "SolutionAnalyzer",
+]

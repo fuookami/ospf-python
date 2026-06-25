@@ -1,7 +1,4 @@
-"""Gantt scheduling task_solution.
-
-Provides task_solution functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling task solution."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class TaskSolution:
-    """Gantt scheduling TaskSolution."""
+    """Gantt scheduling task solution."""
 
-    pass
+    name: str = "task solution"
+
+    @property
+    def is_valid(self):
+        """Check if model is valid."""
+        return bool(self.name)

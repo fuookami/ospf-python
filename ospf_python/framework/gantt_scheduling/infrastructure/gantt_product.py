@@ -1,7 +1,4 @@
-"""Gantt scheduling gantt_product.
-
-Provides gantt_product functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling gantt product."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class GanttProduct:
-    """Gantt scheduling GanttProduct."""
+    """Gantt scheduling gantt product."""
 
-    pass
+    name: str = "gantt product"
+
+    @property
+    def is_valid(self):
+        """Check if model is valid."""
+        return bool(self.name)

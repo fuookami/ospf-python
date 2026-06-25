@@ -1,1 +1,7 @@
-# ospf_python.framework.gantt_scheduling.domain.task.error
+"""Gantt scheduling module."""
+
+from .gantt_errors import GanttErrors
+
+__all__ = [
+    "GanttErrors",
+]

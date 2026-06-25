@@ -112,7 +112,7 @@ class TestGanttProblem:
 
     def test_instantiate(self) -> None:
         """可实例化 / Can instantiate."""
-        p = GanttProblem()
+        p = GanttProblem(name="test")
         assert p is not None
 
 
@@ -171,13 +171,21 @@ class TestResource:
 
     def test_instantiate(self) -> None:
         """可实例化 / Can instantiate."""
-        r = Resource()
+        r = Resource(
+            resource_key="res-1",
+            name="Machine A",
+            capacity=10.0,
+        )
         assert r is not None
+        assert r.resource_key == "res-1"
 
     def test_frozen(self) -> None:
         """实例不可变 / Instance is frozen."""
-        r = Resource()
-        # Resource is an empty frozen dataclass
+        r = Resource(
+            resource_key="res-1",
+            name="Machine A",
+            capacity=10.0,
+        )
         assert isinstance(r, Resource)
 
 
@@ -186,12 +194,12 @@ class TestTask:
 
     def test_instantiate(self) -> None:
         """可实例化 / Can instantiate."""
-        t = Task()
+        t = Task(task_key="t1", name="task1", duration=1.0)
         assert t is not None
 
     def test_frozen(self) -> None:
         """实例不可变 / Instance is frozen."""
-        t = Task()
+        t = Task(task_key="t1", name="task1", duration=1.0)
         assert isinstance(t, Task)
 
 
@@ -200,7 +208,7 @@ class TestResourceType:
 
     def test_instantiate(self) -> None:
         """可实例化 / Can instantiate."""
-        rt = ResourceType()
+        rt = ResourceType.MACHINE
         assert rt is not None
 
 
@@ -209,7 +217,13 @@ class TestResourceDemand:
 
     def test_instantiate(self) -> None:
         """可实例化 / Can instantiate."""
-        rd = ResourceDemand()
+        rd = ResourceDemand(
+            resource_key="res-1",
+            task_key="task-1",
+            time_window_start=0.0,
+            time_window_end=10.0,
+            demand_amount=5.0,
+        )
         assert rd is not None
 
 
@@ -218,7 +232,12 @@ class TestResourceCapacity:
 
     def test_instantiate(self) -> None:
         """可实例化 / Can instantiate."""
-        rc = ResourceCapacity()
+        rc = ResourceCapacity(
+            resource_key="res-1",
+            time_window_start=0.0,
+            time_window_end=10.0,
+            max_capacity=10.0,
+        )
         assert rc is not None
 
 
@@ -245,7 +264,7 @@ class TestTaskDemand:
 
     def test_instantiate(self) -> None:
         """可实例化 / Can instantiate."""
-        td = TaskDemand()
+        td = TaskDemand(task_key="t1", resource_key="r1", amount=1.0)
         assert td is not None
 
 

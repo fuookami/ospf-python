@@ -1,7 +1,4 @@
-"""Gantt scheduling batch_maximization.
-
-Provides batch_maximization functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling batch maximization."""
 
 from __future__ import annotations
 
@@ -10,6 +7,14 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class BatchMaximization:
-    """Gantt scheduling BatchMaximization."""
+    """Gantt scheduling batch maximization."""
 
-    pass
+    name: str = "batch maximization"
+
+    def build_objective_terms(self, model, tasks):
+        """Build solver objective terms."""
+        return ()
+
+    def compute_value(self, schedule):
+        """Compute objective value."""
+        return 0.0

@@ -1,7 +1,4 @@
-"""Gantt scheduling gantt_container.
-
-Provides gantt_container functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling gantt container."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class GanttContainer:
-    """Gantt scheduling GanttContainer."""
+    """Gantt scheduling gantt container."""
 
-    pass
+    name: str = "gantt container"
+
+    @property
+    def is_valid(self):
+        """Check if model is valid."""
+        return bool(self.name)

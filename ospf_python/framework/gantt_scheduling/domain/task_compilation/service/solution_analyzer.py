@@ -1,7 +1,4 @@
-"""Gantt scheduling solution_analyzer.
-
-Provides solution_analyzer functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling solution analyzer."""
 
 from __future__ import annotations
 
@@ -10,6 +7,10 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class SolutionAnalyzer:
-    """Gantt scheduling SolutionAnalyzer."""
+    """Gantt scheduling solution analyzer."""
 
-    pass
+    name: str = "solution_analyzer"
+
+    def analyze(self, data):
+        """Analyze scheduling data."""
+        return {"status": "ok"}

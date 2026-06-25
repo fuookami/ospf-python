@@ -1,7 +1,4 @@
-"""Gantt scheduling bunch_generation_program_candidate_adapters.
-
-Provides bunch_generation_program_candidate_adapters functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling bunch generation program candidate adapters."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class BunchGenerationProgramCandidateAdapters:
-    """Gantt scheduling BunchGenerationProgramCandidateAdapters."""
+    """Gantt scheduling bunch generation program candidate adapters."""
 
-    pass
+    name: str = "bunch_generation_program_candidate_adapters"
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if valid."""
+        return bool(self.name)

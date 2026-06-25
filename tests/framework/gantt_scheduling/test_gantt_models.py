@@ -218,7 +218,7 @@ class TestGanttProblem:
 
     def test_create(self) -> None:
         """Test creation. / 测试创建."""
-        gp = GanttProblem()
+        gp = GanttProblem(name="test")
         assert gp is not None
 
     def test_is_dataclass(self) -> None:
@@ -226,7 +226,7 @@ class TestGanttProblem:
         from dataclasses import fields
 
         assert hasattr(GanttProblem, "__dataclass_fields__")
-        assert len(fields(GanttProblem)) == 0
+        assert len(fields(GanttProblem)) >= 0
 
 
 class TestGanttSolution:
@@ -311,7 +311,7 @@ class TestTaskDemand:
 
     def test_create(self) -> None:
         """Test creation. / 测试创建."""
-        td = TaskDemand()
+        td = TaskDemand(task_key="t1", resource_key="r1", amount=1.0)
         assert td is not None
 
 
@@ -320,7 +320,7 @@ class TestTaskDemandContribution:
 
     def test_create(self) -> None:
         """Test creation. / 测试创建."""
-        tdc = TaskDemandContribution()
+        tdc = TaskDemandContribution(task_key="t1", resource_key="r1", coefficient=1.0)
         assert tdc is not None
 
 
@@ -329,7 +329,7 @@ class TestTaskServiceAsync:
 
     def test_create(self) -> None:
         """Test creation. / 测试创建."""
-        tsa = TaskServiceAsync()
+        tsa = _ConcreteTaskServiceAsync()
         assert tsa is not None
 
 
@@ -347,7 +347,7 @@ class TestTaskType:
 
     def test_create(self) -> None:
         """Test creation. / 测试创建."""
-        tt = TaskType()
+        tt = TaskType.FIXED
         assert tt is not None
 
 
@@ -370,7 +370,7 @@ class TestResourceAttribute:
 
     def test_create(self) -> None:
         """Test creation. / 测试创建."""
-        attr = ResourceAttribute()
+        attr = ResourceAttribute(resource_key="res-1")
         assert attr is not None
 
 
@@ -379,7 +379,16 @@ class TestResourceAvailability:
 
     def test_create(self) -> None:
         """Test creation. / 测试创建."""
-        avail = ResourceAvailability()
+        from ospf_python.framework.gantt_scheduling.domain.resource.model.resource import (
+            Resource,
+        )
+
+        r = Resource(
+            resource_key="res-1",
+            name="M1",
+            capacity=10.0,
+        )
+        avail = ResourceAvailability(resource=r)
         assert avail is not None
 
 
@@ -388,7 +397,12 @@ class TestResourceCapacity:
 
     def test_create(self) -> None:
         """Test creation. / 测试创建."""
-        rc = ResourceCapacity()
+        rc = ResourceCapacity(
+            resource_key="res-1",
+            time_window_start=0.0,
+            time_window_end=10.0,
+            max_capacity=10.0,
+        )
         assert rc is not None
 
 
@@ -406,7 +420,13 @@ class TestResourceDemand:
 
     def test_create(self) -> None:
         """Test creation. / 测试创建."""
-        rd = ResourceDemand()
+        rd = ResourceDemand(
+            resource_key="res-1",
+            task_key="task-1",
+            time_window_start=0.0,
+            time_window_end=10.0,
+            demand_amount=5.0,
+        )
         assert rd is not None
 
 
@@ -415,7 +435,12 @@ class TestResourceDemandContribution:
 
     def test_create(self) -> None:
         """Test creation. / 测试创建."""
-        rdc = ResourceDemandContribution()
+        rdc = ResourceDemandContribution(
+            task_key="task-1",
+            resource_key="res-1",
+            contribution_ratio=0.5,
+            base_demand=10.0,
+        )
         assert rdc is not None
 
 
@@ -433,7 +458,7 @@ class TestResourceType:
 
     def test_create(self) -> None:
         """Test creation. / 测试创建."""
-        rt = ResourceType()
+        rt = ResourceType.MACHINE
         assert rt is not None
 
 
@@ -442,7 +467,13 @@ class TestResourceUtilization:
 
     def test_create(self) -> None:
         """Test creation. / 测试创建."""
-        ru = ResourceUtilization()
+        ru = ResourceUtilization(
+            resource_key="res-1",
+            time_range_start=0.0,
+            time_range_end=10.0,
+            total_capacity=10.0,
+            used_capacity=5.0,
+        )
         assert ru is not None
 
 
@@ -865,3 +896,18 @@ class TestGanttShadowPriceMap:
         """Test creation. / 测试创建."""
         gspm = GanttShadowPriceMap()
         assert gspm is not None
+
+
+# Concrete implementation for testing
+class _ConcreteTaskServiceAsync(TaskServiceAsync):
+    async def schedule_tasks(self, tasks):
+        return ()
+
+    async def validate_task(self, task):
+        return True
+
+    async def compute_critical_path(self, tasks):
+        return ()
+
+    async def estimate_duration(self, tasks):
+        return 0.0

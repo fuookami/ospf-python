@@ -1,7 +1,4 @@
-"""Gantt scheduling better_task_maximization.
-
-Provides better_task_maximization functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling better task maximization."""
 
 from __future__ import annotations
 
@@ -10,6 +7,14 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class BetterTaskMaximization:
-    """Gantt scheduling BetterTaskMaximization."""
+    """Gantt scheduling better task maximization."""
 
-    pass
+    name: str = "better task maximization"
+
+    def build_objective_terms(self, model, tasks):
+        """Build solver objective terms."""
+        return ()
+
+    def compute_value(self, schedule):
+        """Compute objective value."""
+        return 0.0

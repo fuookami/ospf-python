@@ -1,1 +1,7 @@
-# ospf_python.framework.gantt_scheduling.application.service.bunch
+"""Gantt scheduling module."""
+
+from .bunch_application_service import BunchApplicationService
+
+__all__ = [
+    "BunchApplicationService",
+]

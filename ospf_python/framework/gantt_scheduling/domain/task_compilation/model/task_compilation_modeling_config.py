@@ -1,7 +1,4 @@
-"""Gantt scheduling task_compilation_modeling_config.
-
-Provides task_compilation_modeling_config functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling task compilation modeling config."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class TaskCompilationModelingConfig:
-    """Gantt scheduling TaskCompilationModelingConfig."""
+    """Gantt scheduling task compilation modeling config."""
 
-    pass
+    name: str = "task_compilation_modeling_config"
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if valid."""
+        return bool(self.name)

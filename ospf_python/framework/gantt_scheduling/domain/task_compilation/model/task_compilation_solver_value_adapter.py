@@ -1,7 +1,4 @@
-"""Gantt scheduling task_compilation_solver_value_adapter.
-
-Provides task_compilation_solver_value_adapter functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling task compilation solver value adapter."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class TaskCompilationSolverValueAdapter:
-    """Gantt scheduling TaskCompilationSolverValueAdapter."""
+    """Gantt scheduling task compilation solver value adapter."""
 
-    pass
+    name: str = "task_compilation_solver_value_adapter"
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if valid."""
+        return bool(self.name)

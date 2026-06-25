@@ -1,7 +1,4 @@
-"""Gantt scheduling bunch_problem.
-
-Provides bunch_problem functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling bunch problem."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class BunchProblem:
-    """Gantt scheduling BunchProblem."""
+    """Gantt scheduling bunch problem."""
 
-    pass
+    name: str = "bunch problem"
+
+    @property
+    def is_valid(self):
+        """Check if model is valid."""
+        return bool(self.name)

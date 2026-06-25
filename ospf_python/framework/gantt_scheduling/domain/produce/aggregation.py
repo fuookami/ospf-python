@@ -1,7 +1,4 @@
-"""Gantt scheduling aggregation.
-
-Provides aggregation functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling aggregation."""
 
 from __future__ import annotations
 
@@ -10,6 +7,14 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Aggregation:
-    """Gantt scheduling Aggregation."""
+    """Gantt scheduling aggregation."""
 
-    pass
+    name: str = "aggregation"
+
+    def add(self, item):
+        """Add item to aggregation."""
+        return self
+
+    def remove(self, key):
+        """Remove item from aggregation."""
+        return self

@@ -1,7 +1,4 @@
-"""Gantt scheduling produce_batch_minimization.
-
-Provides produce_batch_minimization functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling produce batch minimization."""
 
 from __future__ import annotations
 
@@ -10,6 +7,14 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class ProduceBatchMinimization:
-    """Gantt scheduling ProduceBatchMinimization."""
+    """Gantt scheduling produce batch minimization."""
 
-    pass
+    name: str = "produce batch minimization"
+
+    def build_objective_terms(self, model, tasks):
+        """Build solver objective terms."""
+        return ()
+
+    def compute_value(self, schedule):
+        """Compute objective value."""
+        return 0.0

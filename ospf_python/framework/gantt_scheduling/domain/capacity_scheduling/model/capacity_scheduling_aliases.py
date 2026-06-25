@@ -1,7 +1,4 @@
-"""Gantt scheduling capacity_scheduling_aliases.
-
-Provides capacity_scheduling_aliases functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling capacity scheduling aliases."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class CapacitySchedulingAliases:
-    """Gantt scheduling CapacitySchedulingAliases."""
+    """Gantt scheduling capacity scheduling aliases."""
 
-    pass
+    name: str = "capacity_scheduling_aliases"
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if valid."""
+        return bool(self.name)

@@ -1,7 +1,4 @@
-"""Gantt scheduling gantt_shadow_price_map.
-
-Provides gantt_shadow_price_map functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling gantt shadow price map."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class GanttShadowPriceMap:
-    """Gantt scheduling GanttShadowPriceMap."""
+    """Gantt scheduling gantt shadow price map."""
 
-    pass
+    name: str = "gantt shadow price map"
+
+    @property
+    def is_valid(self):
+        """Check if model is valid."""
+        return bool(self.name)

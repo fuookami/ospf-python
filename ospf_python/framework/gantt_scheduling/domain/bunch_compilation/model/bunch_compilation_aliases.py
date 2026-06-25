@@ -1,7 +1,4 @@
-"""Gantt scheduling bunch_compilation_aliases.
-
-Provides bunch_compilation_aliases functionality for the gantt scheduling framework.
-"""
+"""Gantt scheduling bunch compilation aliases."""
 
 from __future__ import annotations
 
@@ -10,6 +7,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class BunchCompilationAliases:
-    """Gantt scheduling BunchCompilationAliases."""
+    """Gantt scheduling bunch compilation aliases."""
 
-    pass
+    name: str = "bunch_compilation_aliases"
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if valid."""
+        return bool(self.name)
