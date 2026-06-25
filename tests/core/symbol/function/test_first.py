@@ -5,4 +5,4 @@ from __future__ import annotations
 
 def test_test_first_basic() -> None:
     """Basic test."""
-    assert True
+    pass  # TODO: implement real test

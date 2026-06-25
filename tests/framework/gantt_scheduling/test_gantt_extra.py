@@ -32,6 +32,9 @@ from ospf_python.framework.gantt_scheduling.application.service.bunch.bunch_appl
 from ospf_python.framework.gantt_scheduling.application.service.task.task_application_service import (
     TaskApplicationService,
 )
+from ospf_python.framework.gantt_scheduling.domain.bunch_generation.model.bunch_generation_context import (
+    BunchGenerationContext,
+)
 from ospf_python.framework.gantt_scheduling.domain.capacity_scheduling.model.capacity import (
     Capacity,
 )
@@ -77,15 +80,30 @@ class TestBunchApplicationService:
 
     def test_instantiate(self) -> None:
         """可实例化 / Can instantiate."""
-        svc = BunchApplicationService()
+        from ospf_python.core.solver.mock_solver import MockSolver
+
+        svc = BunchApplicationService(
+            solver=MockSolver(),
+            task_context=TaskContext(),
+            resource_context=ResourceContext(),
+            bunch_context=BunchGenerationContext(),
+        )
         assert svc is not None
 
-    def test_frozen(self) -> None:
-        """实例不可变 / Instance is frozen."""
-        svc = BunchApplicationService()
-        # frozen dataclass has no mutable attrs, so just
-        # verify it exists
-        assert isinstance(svc, BunchApplicationService)
+    def test_properties(self) -> None:
+        """初始属性值正确 / Initial properties are correct."""
+        from ospf_python.core.solver.mock_solver import MockSolver
+
+        svc = BunchApplicationService(
+            solver=MockSolver(),
+            task_context=TaskContext(),
+            resource_context=ResourceContext(),
+            bunch_context=BunchGenerationContext(),
+        )
+        assert svc.iteration == 0
+        assert svc.converged is False
+        assert svc.shadow_prices == {}
+        assert svc.active_columns == ()
 
 
 class TestTaskApplicationService:
@@ -93,13 +111,28 @@ class TestTaskApplicationService:
 
     def test_instantiate(self) -> None:
         """可实例化 / Can instantiate."""
-        svc = TaskApplicationService()
+        from ospf_python.core.solver.mock_solver import MockSolver
+
+        svc = TaskApplicationService(
+            solver=MockSolver(),
+            task_context=TaskContext(),
+            resource_context=ResourceContext(),
+        )
         assert svc is not None
 
-    def test_frozen(self) -> None:
-        """实例不可变 / Instance is frozen."""
-        svc = TaskApplicationService()
-        assert isinstance(svc, TaskApplicationService)
+    def test_properties(self) -> None:
+        """初始属性值正确 / Initial properties are correct."""
+        from ospf_python.core.solver.mock_solver import MockSolver
+
+        svc = TaskApplicationService(
+            solver=MockSolver(),
+            task_context=TaskContext(),
+            resource_context=ResourceContext(),
+        )
+        assert svc.iteration == 0
+        assert svc.converged is False
+        assert svc.shadow_prices == {}
+        assert svc.active_columns == ()
 
 
 # ============================================================
