@@ -127,9 +127,7 @@ class TestMutableLinearPolynomialRemoveTerms:
         p.remove_term(x_term)
         assert p.term_count == 0
 
-    def test_remove_term_not_present(
-        self, x_term: LinearMonomial
-    ) -> None:
+    def test_remove_term_not_present(self, x_term: LinearMonomial) -> None:
         """移除不存在的项引发错误。/ Remove absent term raises."""
         p = MutableLinearPolynomial()
         with pytest.raises(ValueError):
@@ -164,9 +162,7 @@ class TestMutableLinearPolynomialProperties:
         p.add_constant(1.0)
         assert not p.is_zero
 
-    def test_is_zero_with_term(
-        self, x_term: LinearMonomial
-    ) -> None:
+    def test_is_zero_with_term(self, x_term: LinearMonomial) -> None:
         """有项不是零多项式。/ With terms is not zero."""
         p = MutableLinearPolynomial()
         p.add_term(x_term)
@@ -179,9 +175,7 @@ class TestMutableLinearPolynomialProperties:
         p.add_term(x_term)
         assert p.term_count == 1
 
-    def test_symbols_deduplicated(
-        self, x: Symbol, x_term: LinearMonomial
-    ) -> None:
+    def test_symbols_deduplicated(self, x: Symbol, x_term: LinearMonomial) -> None:
         """符号去重。/ Symbols deduplicated."""
         p = MutableLinearPolynomial()
         p.add_term(x_term)
@@ -203,9 +197,7 @@ class TestMutableLinearPolynomialProperties:
         assert x in p.symbols
         assert y in p.symbols
 
-    def test_terms_returns_copy(
-        self, x_term: LinearMonomial
-    ) -> None:
+    def test_terms_returns_copy(self, x_term: LinearMonomial) -> None:
         """项列表返回副本。/ Terms returns copy."""
         p = MutableLinearPolynomial()
         p.add_term(x_term)
@@ -226,25 +218,19 @@ class TestMutableLinearPolynomialEvaluate:
         p.add_constant(7.0)
         assert p.evaluate({}) == 7.0
 
-    def test_evaluate_single_term(
-        self, x: Symbol, x_term: LinearMonomial
-    ) -> None:
+    def test_evaluate_single_term(self, x: Symbol, x_term: LinearMonomial) -> None:
         """单项求值。/ Evaluate single term."""
         p = MutableLinearPolynomial()
         p.add_term(x_term)
         assert p.evaluate({x: 3.0}) == 3.0
 
-    def test_evaluate_with_coefficient(
-        self, x: Symbol
-    ) -> None:
+    def test_evaluate_with_coefficient(self, x: Symbol) -> None:
         """带系数求值。/ Evaluate with coefficient."""
         p = MutableLinearPolynomial()
         p.add_term(LinearMonomial.create(x, coefficient=4.0))
         assert p.evaluate({x: 2.0}) == 8.0
 
-    def test_evaluate_full_polynomial(
-        self, x: Symbol, y: Symbol
-    ) -> None:
+    def test_evaluate_full_polynomial(self, x: Symbol, y: Symbol) -> None:
         """完整多项式求值。/ Evaluate full polynomial."""
         p = MutableLinearPolynomial()
         p.add_term(LinearMonomial.create(x, coefficient=2.0))
@@ -253,9 +239,7 @@ class TestMutableLinearPolynomialEvaluate:
         # 2*5 + 3*4 + 1 = 10 + 12 + 1 = 23
         assert p.evaluate({x: 5.0, y: 4.0}) == 23.0
 
-    def test_evaluate_missing_binding(
-        self, x: Symbol, x_term: LinearMonomial
-    ) -> None:
+    def test_evaluate_missing_binding(self, x: Symbol, x_term: LinearMonomial) -> None:
         """缺失绑定默认为 0。/ Missing binding defaults to 0."""
         p = MutableLinearPolynomial()
         p.add_term(x_term)
@@ -273,9 +257,7 @@ class TestMutableLinearPolynomialEvaluate:
 class TestMutableLinearPolynomialClear:
     """可变线性多项式清空测试。"""
 
-    def test_clear(
-        self, x_term: LinearMonomial
-    ) -> None:
+    def test_clear(self, x_term: LinearMonomial) -> None:
         """清空所有项。/ Clear all terms."""
         p = MutableLinearPolynomial()
         p.add_term(x_term)
@@ -304,9 +286,7 @@ class TestMutableLinearPolynomialConversion:
         assert isinstance(imm, LinearPolynomial)
         assert imm.is_zero
 
-    def test_to_immutable_preserves_data(
-        self, x: Symbol
-    ) -> None:
+    def test_to_immutable_preserves_data(self, x: Symbol) -> None:
         """转换保留数据。/ Conversion preserves data."""
         p = MutableLinearPolynomial()
         p.add_term(LinearMonomial.create(x, coefficient=3.0))
@@ -316,9 +296,7 @@ class TestMutableLinearPolynomialConversion:
         assert imm.constant == 5.0
         assert imm.evaluate({x: 2.0}) == 11.0
 
-    def test_to_immutable_independence(
-        self, x: Symbol
-    ) -> None:
+    def test_to_immutable_independence(self, x: Symbol) -> None:
         """转换后修改不影响副本。/ Mutations do not affect immutable copy."""
         p = MutableLinearPolynomial()
         p.add_term(LinearMonomial.create(x, coefficient=2.0))
@@ -339,9 +317,7 @@ class TestMutableLinearPolynomialStr:
         s = str(p)
         assert "0.0" in s
 
-    def test_str_with_terms(
-        self, x_term: LinearMonomial
-    ) -> None:
+    def test_str_with_terms(self, x_term: LinearMonomial) -> None:
         """带项的字符串。/ String with terms."""
         p = MutableLinearPolynomial()
         p.add_term(x_term)

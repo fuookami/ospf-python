@@ -33,7 +33,11 @@ class TestCoupledLorenzAttractorCreation:
     def test_custom_params(self) -> None:
         """自定义参数。/ Custom parameters."""
         cla = CoupledLorenzAttractor(
-            sigma=5.0, r=20.0, b=2.0, k=0.5, dt=0.01,
+            sigma=5.0,
+            r=20.0,
+            b=2.0,
+            k=0.5,
+            dt=0.01,
         )
         assert cla.sigma == 5.0
         assert cla.r == 20.0
@@ -64,7 +68,12 @@ class TestCoupledLorenzAttractorCall:
         """单步已知值验证。/ Single step known value check."""
         cla = CoupledLorenzAttractor(dt=0.01)
         x1, y1, z1, x2, y2, z2 = cla(
-            1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
         )
         # System 1: dx1 = sigma*(y1-x1) = 10*(1-1) = 0
         # dy1 = r*x1 - y1 - x1*z1 = 28 - 1 - 1 = 26
@@ -77,7 +86,12 @@ class TestCoupledLorenzAttractorCall:
         """原点是不动点。/ Origin is a fixed point."""
         cla = CoupledLorenzAttractor()
         x1, y1, z1, x2, y2, z2 = cla(
-            0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
         )
         assert abs(x1) < 1e-15
         assert abs(y1) < 1e-15
@@ -92,13 +106,23 @@ class TestCoupledLorenzAttractorCall:
         # Start with identical states but slightly perturb
         # system 1
         x1, y1, z1, x2, y2, z2 = cla(
-            1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
         )
         # After one step systems should differ due to
         # coupling term k*(x1-x2) in dx2; here x1==x2
         # so coupling term is zero. Let's perturb.
         x1p, y1p, z1p, x2p, y2p, z2p = cla(
-            1.1, 1.0, 1.0, 1.0, 1.0, 1.0,
+            1.1,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
         )
         # dx2 has coupling k*(x1-x2) = 1*(1.1-1.0) = 0.1
         # so x2p should differ from the no-perturbation case
@@ -124,7 +148,13 @@ class TestCoupledLorenzAttractorIterate:
         """多步迭代返回六元组。/ Multi-step returns 6-tuple."""
         cla = CoupledLorenzAttractor()
         result = cla.iterate(
-            1.0, 1.0, 1.0, 1.0, 1.0, 1.0, n=100,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            n=100,
         )
         assert len(result) == 6
 
@@ -132,7 +162,13 @@ class TestCoupledLorenzAttractorIterate:
         """轨迹保持有限值。/ Trajectory stays finite."""
         cla = CoupledLorenzAttractor()
         result = cla.iterate(
-            1.0, 1.0, 1.0, 1.0, 1.0, 1.0, n=1000,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            n=1000,
         )
         for v in result:
             assert math.isfinite(v)
@@ -142,7 +178,13 @@ class TestCoupledLorenzAttractorIterate:
         """长迭代轨迹有界。/ Long iteration stays bounded."""
         cla = CoupledLorenzAttractor()
         result = cla.iterate(
-            1.0, 1.0, 1.0, 1.0, 1.0, 1.0, n=5000,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            n=5000,
         )
         for v in result:
             assert math.isfinite(v)
@@ -185,7 +227,13 @@ class TestCoupledLorenzAttractorCoupling:
         """大耦合强度仍保持稳定。/ Large coupling stays stable."""
         cla = CoupledLorenzAttractor(k=10.0, dt=0.0005)
         result = cla.iterate(
-            1.0, 1.0, 1.0, 1.0, 1.0, 1.0, n=2000,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            n=2000,
         )
         for v in result:
             assert math.isfinite(v)
@@ -194,7 +242,13 @@ class TestCoupledLorenzAttractorCoupling:
         """负耦合强度。/ Negative coupling strength."""
         cla = CoupledLorenzAttractor(k=-1.0, dt=0.001)
         result = cla.iterate(
-            1.0, 1.0, 1.0, 1.0, 1.0, 1.0, n=500,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            n=500,
         )
         for v in result:
             assert math.isfinite(v)
@@ -224,7 +278,12 @@ class TestCoupledLorenzAttractorSymmetry:
         cla = CoupledLorenzAttractor(k=1.0, dt=0.01)
         # Same initial conditions for both systems
         x1, y1, z1, x2, y2, z2 = cla(
-            1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
         )
         # With identical states, coupling term is k*(x1-x2)=0
         # so both systems should evolve identically
@@ -237,7 +296,13 @@ class TestCoupledLorenzAttractorSymmetry:
         cla = CoupledLorenzAttractor(k=1.0, dt=0.001)
         # System 1 starts at (1,1,1), system 2 at (1.01,1,1)
         result = cla.iterate(
-            1.0, 1.0, 1.0, 1.01, 1.0, 1.0, n=5000,
+            1.0,
+            1.0,
+            1.0,
+            1.01,
+            1.0,
+            1.0,
+            n=5000,
         )
         x1, y1, z1, x2, y2, z2 = result
         # After many steps with coupling, states should diverge

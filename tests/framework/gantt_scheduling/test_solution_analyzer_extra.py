@@ -22,6 +22,7 @@ from ospf_python.framework.gantt_scheduling.domain.bunch_compilation.service.sol
 @dataclass(frozen=True)
 class _FakeCapacity:
     """测试用容量记录。/ Test capacity record."""
+
     bunch_key: str
     max_capacity: float
     remaining_capacity: float
@@ -30,6 +31,7 @@ class _FakeCapacity:
 @dataclass(frozen=True)
 class _FakeAssignment:
     """测试用分配记录。/ Test assignment record."""
+
     bunch_key: str
     item_key: str
     demand: float
@@ -38,6 +40,7 @@ class _FakeAssignment:
 @dataclass(frozen=True)
 class _FakeAggregation:
     """测试用聚合。/ Test aggregation."""
+
     _bunch_keys: tuple[str, ...] = ()
     _capacities: tuple[_FakeCapacity, ...] = ()
     _assignments: tuple[_FakeAssignment, ...] = ()
@@ -56,10 +59,7 @@ class _FakeAggregation:
 
     def total_demand_for_bunch(self, bunch_key: str) -> float:
         """计算束编组总需求。/ Compute total demand for bunch."""
-        return sum(
-            a.demand for a in self._assignments
-            if a.bunch_key == bunch_key
-        )
+        return sum(a.demand for a in self._assignments if a.bunch_key == bunch_key)
 
 
 # ==================== SolutionQuality 测试 ========================
@@ -135,9 +135,7 @@ class TestAnalyzeQuality:
         analyzer = SolutionAnalyzer()
         agg = _FakeAggregation(
             _bunch_keys=("b1",),
-            _assignments=(
-                _FakeAssignment(bunch_key="b1", item_key="i1", demand=5.0),
-            ),
+            _assignments=(_FakeAssignment(bunch_key="b1", item_key="i1", demand=5.0),),
         )
         q = analyzer.analyze_quality(agg)
         assert q.total_bunches == 1
@@ -181,9 +179,7 @@ class TestAnalyzeQuality:
         analyzer = SolutionAnalyzer(tolerance=1e-3)
         agg = _FakeAggregation(
             _bunch_keys=("b1",),
-            _assignments=(
-                _FakeAssignment(bunch_key="b1", item_key="i1", demand=5.0),
-            ),
+            _assignments=(_FakeAssignment(bunch_key="b1", item_key="i1", demand=5.0),),
         )
         q = analyzer.analyze_quality(agg)
         assert q.total_bunches == 1
@@ -214,9 +210,7 @@ class TestCheckFeasibility:
                     remaining_capacity=5.0,
                 ),
             ),
-            _assignments=(
-                _FakeAssignment(bunch_key="b1", item_key="i1", demand=5.0),
-            ),
+            _assignments=(_FakeAssignment(bunch_key="b1", item_key="i1", demand=5.0),),
         )
         report = analyzer.check_feasibility(agg)
         assert report.is_feasible is True
@@ -234,9 +228,7 @@ class TestCheckFeasibility:
                     remaining_capacity=0.0,
                 ),
             ),
-            _assignments=(
-                _FakeAssignment(bunch_key="b1", item_key="i1", demand=10.0),
-            ),
+            _assignments=(_FakeAssignment(bunch_key="b1", item_key="i1", demand=10.0),),
         )
         report = analyzer.check_feasibility(agg)
         assert report.is_feasible is False
@@ -255,9 +247,7 @@ class TestCheckFeasibility:
                     remaining_capacity=3.0,
                 ),
             ),
-            _assignments=(
-                _FakeAssignment(bunch_key="b1", item_key="i1", demand=5.0),
-            ),
+            _assignments=(_FakeAssignment(bunch_key="b1", item_key="i1", demand=5.0),),
         )
         report = analyzer.check_feasibility(agg)
         # demand(5) > remaining(3) => demand violation
@@ -268,9 +258,7 @@ class TestCheckFeasibility:
         analyzer = SolutionAnalyzer()
         agg = _FakeAggregation(
             _bunch_keys=("b1",),
-            _assignments=(
-                _FakeAssignment(bunch_key="b1", item_key="i1", demand=5.0),
-            ),
+            _assignments=(_FakeAssignment(bunch_key="b1", item_key="i1", demand=5.0),),
         )
         report = analyzer.check_feasibility(agg)
         assert report.is_feasible is True
@@ -301,9 +289,7 @@ class TestComputeUtilization:
                     remaining_capacity=5.0,
                 ),
             ),
-            _assignments=(
-                _FakeAssignment(bunch_key="b1", item_key="i1", demand=5.0),
-            ),
+            _assignments=(_FakeAssignment(bunch_key="b1", item_key="i1", demand=5.0),),
         )
         result = analyzer.compute_utilization(agg)
         assert result["b1"] == 0.5
@@ -320,9 +306,7 @@ class TestComputeUtilization:
                     remaining_capacity=0.0,
                 ),
             ),
-            _assignments=(
-                _FakeAssignment(bunch_key="b1", item_key="i1", demand=10.0),
-            ),
+            _assignments=(_FakeAssignment(bunch_key="b1", item_key="i1", demand=10.0),),
         )
         result = analyzer.compute_utilization(agg)
         assert result["b1"] == 1.0
@@ -388,9 +372,7 @@ class TestOverloadedBunches:
                     remaining_capacity=5.0,
                 ),
             ),
-            _assignments=(
-                _FakeAssignment(bunch_key="b1", item_key="i1", demand=5.0),
-            ),
+            _assignments=(_FakeAssignment(bunch_key="b1", item_key="i1", demand=5.0),),
         )
         result = analyzer.overloaded_bunches(agg)
         assert result == ()

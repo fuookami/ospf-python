@@ -46,7 +46,9 @@ def _make_problem() -> GanttProblem:
         resources=resources,
         precedence_relations=(
             PrecedenceRelation(
-                predecessor_key="t1", successor_key="t2", min_gap=0.0,
+                predecessor_key="t1",
+                successor_key="t2",
+                min_gap=0.0,
             ),
         ),
         time_horizon=20.0,

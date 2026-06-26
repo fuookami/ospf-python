@@ -34,17 +34,23 @@ def _make_problem() -> GanttProblem:
     """构建测试用甘特问题。/ Build test gantt problem."""
     tasks = (
         Task(
-            task_key="t1", name="Task 1", duration=3.0,
+            task_key="t1",
+            name="Task 1",
+            duration=3.0,
             priority=1,
             resource_requirements=(("r1", 1.0),),
         ),
         Task(
-            task_key="t2", name="Task 2", duration=2.0,
+            task_key="t2",
+            name="Task 2",
+            duration=2.0,
             priority=2,
             resource_requirements=(("r1", 1.0),),
         ),
         Task(
-            task_key="t3", name="Task 3", duration=4.0,
+            task_key="t3",
+            name="Task 3",
+            duration=4.0,
             priority=1,
             resource_requirements=(("r1", 1.0),),
         ),
@@ -56,7 +62,8 @@ def _make_problem() -> GanttProblem:
         resources=resources,
         precedence_relations=(
             PrecedenceRelation(
-                predecessor_key="t1", successor_key="t2",
+                predecessor_key="t1",
+                successor_key="t2",
             ),
         ),
         time_horizon=20.0,

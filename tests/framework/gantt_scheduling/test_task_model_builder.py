@@ -27,13 +27,16 @@ def _make_meta_model() -> MetaModel:
     """构建测试用元模型。/ Build test meta model."""
     mm = MetaModel(name="test_model")
     mm.register_variable(
-        "start_t1", {"type": "continuous", "lb": 0.0, "ub": 10.0},
+        "start_t1",
+        {"type": "continuous", "lb": 0.0, "ub": 10.0},
     )
     mm.register_variable(
-        "start_t2", {"type": "continuous", "lb": 0.0, "ub": 10.0},
+        "start_t2",
+        {"type": "continuous", "lb": 0.0, "ub": 10.0},
     )
     mm.register_variable(
-        "col_c1", TaskColumn(
+        "col_c1",
+        TaskColumn(
             column_key="c1",
             task_assignments=(("t1", "r1", 0.0),),
             cost=5.0,
@@ -324,7 +327,9 @@ class TestBuildSchedule:
         """调度分配资源。/ Schedule assigns resource."""
         tasks = (
             Task(
-                task_key="t1", name="T1", duration=3.0,
+                task_key="t1",
+                name="T1",
+                duration=3.0,
                 resource_requirements=(("r1", 1.0),),
             ),
         )

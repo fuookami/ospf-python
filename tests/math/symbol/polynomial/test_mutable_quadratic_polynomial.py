@@ -83,9 +83,7 @@ class TestMutableQuadraticPolynomialCreation:
 class TestMutableQuadraticPolynomialAddTerms:
     """可变二次多项式添加项测试。"""
 
-    def test_add_quadratic_term(
-        self, xy_term: QuadraticMonomial
-    ) -> None:
+    def test_add_quadratic_term(self, xy_term: QuadraticMonomial) -> None:
         """添加二次项。/ Add quadratic term."""
         p = MutableQuadraticPolynomial()
         p.add_quadratic_term(xy_term)
@@ -103,18 +101,14 @@ class TestMutableQuadraticPolynomialAddTerms:
         p.add_quadratic_term(x2_term)
         assert len(p.quadratic_terms) == 2
 
-    def test_add_linear_coefficient(
-        self, x: Symbol
-    ) -> None:
+    def test_add_linear_coefficient(self, x: Symbol) -> None:
         """添加线性系数。/ Add linear coefficient."""
         p = MutableQuadraticPolynomial()
         p.add_linear_coefficient(x, 3.0)
         assert p.linear_terms[x] == 3.0
         assert p.degree == 1
 
-    def test_add_linear_coefficient_accumulate(
-        self, x: Symbol
-    ) -> None:
+    def test_add_linear_coefficient_accumulate(self, x: Symbol) -> None:
         """累加线性系数。/ Accumulate linear coefficient."""
         p = MutableQuadraticPolynomial()
         p.add_linear_coefficient(x, 2.0)
@@ -141,9 +135,7 @@ class TestMutableQuadraticPolynomialAddTerms:
 class TestMutableQuadraticPolynomialRemoveTerms:
     """可变二次多项式移除项测试。"""
 
-    def test_remove_quadratic_term(
-        self, xy_term: QuadraticMonomial
-    ) -> None:
+    def test_remove_quadratic_term(self, xy_term: QuadraticMonomial) -> None:
         """移除二次项。/ Remove quadratic term."""
         p = MutableQuadraticPolynomial()
         p.add_quadratic_term(xy_term)
@@ -170,17 +162,13 @@ class TestMutableQuadraticPolynomialProperties:
         p = MutableQuadraticPolynomial()
         assert p.degree == 0
 
-    def test_degree_one(
-        self, x: Symbol
-    ) -> None:
+    def test_degree_one(self, x: Symbol) -> None:
         """仅线性项时次数为 1。/ Degree 1 with linear terms."""
         p = MutableQuadraticPolynomial()
         p.add_linear_coefficient(x, 2.0)
         assert p.degree == 1
 
-    def test_degree_two(
-        self, xy_term: QuadraticMonomial
-    ) -> None:
+    def test_degree_two(self, xy_term: QuadraticMonomial) -> None:
         """有二次项时次数为 2。/ Degree 2 with quadratic terms."""
         p = MutableQuadraticPolynomial()
         p.add_quadratic_term(xy_term)
@@ -197,25 +185,19 @@ class TestMutableQuadraticPolynomialProperties:
         p.add_constant(1.0)
         assert not p.is_zero
 
-    def test_is_zero_with_linear(
-        self, x: Symbol
-    ) -> None:
+    def test_is_zero_with_linear(self, x: Symbol) -> None:
         """有线性项不是零多项式。/ Linear terms not zero."""
         p = MutableQuadraticPolynomial()
         p.add_linear_coefficient(x, 1.0)
         assert not p.is_zero
 
-    def test_is_zero_with_quadratic(
-        self, xy_term: QuadraticMonomial
-    ) -> None:
+    def test_is_zero_with_quadratic(self, xy_term: QuadraticMonomial) -> None:
         """有二次项不是零多项式。/ Quadratic terms not zero."""
         p = MutableQuadraticPolynomial()
         p.add_quadratic_term(xy_term)
         assert not p.is_zero
 
-    def test_symbols_deduplicated(
-        self, x2_term: QuadraticMonomial, x: Symbol
-    ) -> None:
+    def test_symbols_deduplicated(self, x2_term: QuadraticMonomial, x: Symbol) -> None:
         """符号去重。/ Symbols are deduplicated."""
         p = MutableQuadraticPolynomial()
         p.add_quadratic_term(x2_term)
@@ -237,9 +219,7 @@ class TestMutableQuadraticPolynomialProperties:
         assert x in syms
         assert y in syms
 
-    def test_quadratic_terms_returns_copy(
-        self, xy_term: QuadraticMonomial
-    ) -> None:
+    def test_quadratic_terms_returns_copy(self, xy_term: QuadraticMonomial) -> None:
         """二次项列表返回副本。/ Quadratic terms returns copy."""
         p = MutableQuadraticPolynomial()
         p.add_quadratic_term(xy_term)
@@ -247,9 +227,7 @@ class TestMutableQuadraticPolynomialProperties:
         terms.clear()
         assert len(p.quadratic_terms) == 1
 
-    def test_linear_terms_returns_copy(
-        self, x: Symbol
-    ) -> None:
+    def test_linear_terms_returns_copy(self, x: Symbol) -> None:
         """线性项映射返回副本。/ Linear terms returns copy."""
         p = MutableQuadraticPolynomial()
         p.add_linear_coefficient(x, 2.0)
@@ -270,16 +248,15 @@ class TestMutableQuadraticPolynomialEvaluate:
         p.add_constant(7.0)
         assert p.evaluate({}) == 7.0
 
-    def test_evaluate_linear_only(
-        self, x: Symbol
-    ) -> None:
+    def test_evaluate_linear_only(self, x: Symbol) -> None:
         """仅线性项求值。/ Evaluate linear only."""
         p = MutableQuadraticPolynomial()
         p.add_linear_coefficient(x, 3.0)
         assert p.evaluate({x: 2.0}) == 6.0
 
     def test_evaluate_quadratic_only(
-        self, xy_term: QuadraticMonomial,
+        self,
+        xy_term: QuadraticMonomial,
         x: Symbol,
         y: Symbol,
     ) -> None:
@@ -287,19 +264,21 @@ class TestMutableQuadraticPolynomialEvaluate:
         p = MutableQuadraticPolynomial()
         p.add_quadratic_term(
             QuadraticMonomial.create(
-                coefficient=2.0, lhs=x, rhs=y,
+                coefficient=2.0,
+                lhs=x,
+                rhs=y,
             )
         )
         assert p.evaluate({x: 3.0, y: 4.0}) == 24.0
 
-    def test_evaluate_full_polynomial(
-        self, x: Symbol, y: Symbol
-    ) -> None:
+    def test_evaluate_full_polynomial(self, x: Symbol, y: Symbol) -> None:
         """完整多项式求值。/ Evaluate full polynomial."""
         p = MutableQuadraticPolynomial()
         p.add_quadratic_term(
             QuadraticMonomial.create(
-                coefficient=2.0, lhs=x, rhs=y,
+                coefficient=2.0,
+                lhs=x,
+                rhs=y,
             )
         )
         p.add_linear_coefficient(x, 3.0)
@@ -307,9 +286,7 @@ class TestMutableQuadraticPolynomialEvaluate:
         # 2*3*4 + 3*3 + 1 = 24 + 9 + 1 = 34
         assert p.evaluate({x: 3.0, y: 4.0}) == 34.0
 
-    def test_evaluate_missing_binding(
-        self, x: Symbol
-    ) -> None:
+    def test_evaluate_missing_binding(self, x: Symbol) -> None:
         """缺失绑定默认为 0。/ Missing binding defaults to 0."""
         p = MutableQuadraticPolynomial()
         p.add_linear_coefficient(x, 5.0)
@@ -361,14 +338,14 @@ class TestMutableQuadraticPolynomialConversion:
         assert isinstance(imm, QuadraticPolynomial)
         assert imm.is_zero
 
-    def test_to_immutable_preserves_data(
-        self, x: Symbol, y: Symbol
-    ) -> None:
+    def test_to_immutable_preserves_data(self, x: Symbol, y: Symbol) -> None:
         """转换保留数据。/ Conversion preserves data."""
         p = MutableQuadraticPolynomial()
         p.add_quadratic_term(
             QuadraticMonomial.create(
-                coefficient=2.0, lhs=x, rhs=y,
+                coefficient=2.0,
+                lhs=x,
+                rhs=y,
             )
         )
         p.add_linear_coefficient(x, 3.0)
@@ -379,9 +356,7 @@ class TestMutableQuadraticPolynomialConversion:
         assert imm.constant == 5.0
         assert imm.evaluate({x: 3.0, y: 4.0}) == 38.0
 
-    def test_to_immutable_independence(
-        self, x: Symbol
-    ) -> None:
+    def test_to_immutable_independence(self, x: Symbol) -> None:
         """转换后修改不影响不可变副本。/ Mutations after conversion do not affect immutable copy."""
         p = MutableQuadraticPolynomial()
         p.add_linear_coefficient(x, 2.0)
@@ -402,9 +377,7 @@ class TestMutableQuadraticPolynomialStr:
         s = str(p)
         assert "0.0" in s
 
-    def test_str_with_terms(
-        self, xy_term: QuadraticMonomial
-    ) -> None:
+    def test_str_with_terms(self, xy_term: QuadraticMonomial) -> None:
         """带项的字符串。/ String with terms."""
         p = MutableQuadraticPolynomial()
         p.add_quadratic_term(xy_term)

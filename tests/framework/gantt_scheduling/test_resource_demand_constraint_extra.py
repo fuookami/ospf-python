@@ -59,7 +59,9 @@ class TestDemandSatisfaction:
             demand_amount=5.0,
         )
         ds = DemandSatisfaction(
-            demand=demand, is_satisfied=True, shortfall=0.0,
+            demand=demand,
+            is_satisfied=True,
+            shortfall=0.0,
         )
         assert ds.is_satisfied is True
         assert ds.shortfall == 0.0
@@ -74,7 +76,9 @@ class TestDemandSatisfaction:
             demand_amount=10.0,
         )
         ds = DemandSatisfaction(
-            demand=demand, is_satisfied=False, shortfall=5.0,
+            demand=demand,
+            is_satisfied=False,
+            shortfall=5.0,
         )
         assert ds.is_satisfied is False
         assert ds.shortfall == 5.0
@@ -90,7 +94,8 @@ class TestConstraintName:
         """默认前缀。/ Default prefix."""
         c = ResourceDemandConstraint()
         name = c.constraint_name(
-            task_key="t1", resource_key="r1",
+            task_key="t1",
+            resource_key="r1",
         )
         assert name == "resource_demand_t1_r1"
 
@@ -100,7 +105,8 @@ class TestConstraintName:
             constraint_name_prefix="custom",
         )
         name = c.constraint_name(
-            task_key="t1", resource_key="r1",
+            task_key="t1",
+            resource_key="r1",
         )
         assert name == "custom_t1_r1"
 

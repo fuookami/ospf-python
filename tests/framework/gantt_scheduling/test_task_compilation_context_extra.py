@@ -19,6 +19,7 @@ from ospf_python.framework.gantt_scheduling.domain.task_compilation.task_compila
 @dataclass(frozen=True)
 class _FakeTask:
     """测试用任务。/ Test task."""
+
     task_key: str
     name: str = ""
     duration: float = 1.0
@@ -28,6 +29,7 @@ class _FakeTask:
 @dataclass(frozen=True)
 class _FakeAssignment:
     """测试用分配。/ Test assignment."""
+
     task_key: str
     resource_key: str
     name: str = "assignment"
@@ -36,6 +38,7 @@ class _FakeAssignment:
 @dataclass(frozen=True)
 class _FakeCapacity:
     """测试用容量。/ Test capacity."""
+
     resource_key: str
     window_start: float
     window_end: float
@@ -46,6 +49,7 @@ class _FakeCapacity:
 @dataclass(frozen=True)
 class _FakeLoad:
     """测试用负载。/ Test load."""
+
     resource_key: str
     load_amount: float
     name: str = "load"
