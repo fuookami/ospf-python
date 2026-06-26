@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import importlib
 from dataclasses import dataclass, field
+from typing import Any
 
 
-def _load_yield_model():  # type: ignore[no-untyped-def]
+def _load_yield_model() -> Any:
     """加载 YieldModel / Load YieldModel."""
     mod = importlib.import_module(
         "ospf_python.framework.csp1d.domain.yield.model.yield_model"
@@ -18,7 +19,7 @@ def _load_yield_model():  # type: ignore[no-untyped-def]
     return mod.YieldModel
 
 
-def _load_yield_modeling_config():  # type: ignore[no-untyped-def]
+def _load_yield_modeling_config() -> Any:
     """加载 YieldModelingConfig / Load YieldModelingConfig."""
     mod = importlib.import_module(
         "ospf_python.framework.csp1d.domain.yield.model.yield_modeling_config"
@@ -131,4 +132,4 @@ class YieldAggregation:
             总体产出率。
             Overall yield ratio.
         """
-        return self.model.overall_yield_ratio
+        return self.model.overall_yield_ratio  # type: ignore[attr-defined, no-any-return]

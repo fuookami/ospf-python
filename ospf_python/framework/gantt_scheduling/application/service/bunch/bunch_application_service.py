@@ -132,7 +132,7 @@ class BunchApplicationService:
         """
         validation = problem.validate()
         if validation.is_failed():
-            return validation  # type: ignore[return-value]
+            return validation
 
         self._problem = problem
         self._meta_model = MetaModel(

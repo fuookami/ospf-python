@@ -11,6 +11,6 @@ class SolutionAnalyzer:
 
     name: str = "solution_analyzer"
 
-    def analyze(self, data):
+    def analyze(self, data: object) -> dict[str, str]:
         """Analyze scheduling data."""
         return {"status": "ok"}

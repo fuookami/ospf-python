@@ -70,11 +70,6 @@ class TestCsp1dColumnGeneration:
         assert result.is_ok()
         assert len(cg.active_columns) == 1
 
-    @pytest.mark.xfail(
-        reason="Source code Failed() signature mismatch",
-        raises=TypeError,
-        strict=True,
-    )
     def test_register_empty_fails(self) -> None:
         """Register empty columns fails. / 空列注册失败。"""
         cg = Csp1dColumnGeneration()

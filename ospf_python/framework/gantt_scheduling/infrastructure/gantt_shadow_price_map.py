@@ -12,6 +12,6 @@ class GanttShadowPriceMap:
     name: str = "gantt shadow price map"
 
     @property
-    def is_valid(self):
+    def is_valid(self) -> bool:
         """Check if model is valid."""
         return bool(self.name)

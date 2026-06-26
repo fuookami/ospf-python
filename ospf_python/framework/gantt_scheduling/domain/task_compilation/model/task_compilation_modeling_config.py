@@ -10,6 +10,8 @@ class TaskCompilationModelingConfig:
     """Gantt scheduling task compilation modeling config."""
 
     name: str = "task_compilation_modeling_config"
+    default_objective_weight: float = 1.0
+    precision: float = 1e-6
 
     @property
     def is_valid(self) -> bool:

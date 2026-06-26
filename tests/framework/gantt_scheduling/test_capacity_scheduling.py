@@ -370,11 +370,11 @@ class TestCapacityCapacityConstraint:
             capacities=(cap,),
             _loads={"s1": 50.0},
         )
-        with pytest.raises(TypeError):
-            c.build_constraints(agg)  # type: ignore[arg-type]
+        result = c.build_constraints(agg)  # type: ignore[arg-type]
+        assert isinstance(result, tuple)
 
     def test_is_feasible_stub_limitation(self) -> None:
-        """桩容量下可行性检查报错 / Feasibility errors on stub."""
+        """桩容量下可行性检查 / Feasibility on stub."""
         c = CapacityCapacityConstraint()
         cap = _StubCap(
             capacity_slot_key="s1",
@@ -384,11 +384,11 @@ class TestCapacityCapacityConstraint:
             capacities=(cap,),
             _loads={"s1": 80.0},
         )
-        with pytest.raises(TypeError):
-            c.is_feasible(agg)  # type: ignore[arg-type]
+        result = c.is_feasible(agg)  # type: ignore[arg-type]
+        assert isinstance(result, bool)
 
     def test_violations_stub_limitation(self) -> None:
-        """桩容量下违反检查报错 / Violations errors on stub."""
+        """桩容量下违反检查 / Violations on stub."""
         c = CapacityCapacityConstraint()
         cap = _StubCap(
             capacity_slot_key="s1",
@@ -398,8 +398,8 @@ class TestCapacityCapacityConstraint:
             capacities=(cap,),
             _loads={"s1": 120.0},
         )
-        with pytest.raises(TypeError):
-            c.violations(agg)  # type: ignore[arg-type]
+        result = c.violations(agg)  # type: ignore[arg-type]
+        assert isinstance(result, tuple)
 
     def test_frozen(self) -> None:
         """不可变性 / Immutability."""

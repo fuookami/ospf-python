@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import importlib
 from dataclasses import dataclass, field
+from typing import Any
 
 
-def _load_yield_modeling_config():  # type: ignore[no-untyped-def]
+def _load_yield_modeling_config() -> Any:
     """加载 YieldModelingConfig / Load YieldModelingConfig."""
     mod = importlib.import_module(
         "ospf_python.framework.csp1d.domain.yield.model.yield_modeling_config"

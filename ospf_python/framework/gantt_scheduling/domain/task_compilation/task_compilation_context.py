@@ -275,14 +275,16 @@ class TaskCompilationContext:
             window_end=window_end,
         )
         if cap is not None:
-            return max(
-                0.0,
-                cap.max_capacity
-                - sum(
-                    ld.load_amount
-                    for ld in self.aggregation.loads
-                    if ld.resource_key == resource_key
-                ),
+            return float(
+                max(
+                    0.0,
+                    cap.max_capacity
+                    - sum(
+                        ld.load_amount
+                        for ld in self.aggregation.loads
+                        if ld.resource_key == resource_key
+                    ),
+                )
             )
         total_cap = self.total_capacity_for_resource(
             resource_key,
@@ -391,9 +393,9 @@ class TaskCompilationContext:
         """
         task = self.aggregation.get_task(task_key)
         if task is None:
-            return self.config.default_objective_weight
+            return float(self.config.default_objective_weight)
         priority_factor = max(1, task.priority + 1)
-        return self.config.default_objective_weight * priority_factor
+        return float(self.config.default_objective_weight * priority_factor)
 
     # ==================== 可行性 / Feasibility ==================
 

@@ -4,18 +4,19 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from ospf_python.framework.csp1d.domain.material.model.shadow_price_map import (
     ShadowPriceMap,
 )
 from ospf_python.utils.error.code import ErrorCode
-from ospf_python.utils.functional.result import Failed, Ok, Result
+from ospf_python.utils.functional.result import Ok, Result, failed_from_code
 
 if TYPE_CHECKING:
     from ospf_python.framework.csp1d.application.model.csp1d_solution import (
         Csp1dSolution,
     )
+    from ospf_python.utils.error.error import Error
 
 
 @dataclass(frozen=True)
@@ -74,7 +75,7 @@ class Csp1dColumnGeneration:
     def register(
         self,
         initial_columns: tuple[ColumnRecord, ...],
-    ) -> Result[None, str, object]:
+    ) -> Result[None, str, Error[Any]]:
         """注册初始列 / Register initial columns.
 
         在列生成开始前注册初始切割方案列。
@@ -88,7 +89,7 @@ class Csp1dColumnGeneration:
             注册结果 / Registration result.
         """
         if not initial_columns:
-            return Failed(
+            return failed_from_code(
                 ErrorCode.ILLEGAL_ARGUMENT,
                 "初始列集合不能为空 / Initial columns must not be empty",
             )
@@ -100,7 +101,7 @@ class Csp1dColumnGeneration:
     def add_columns(
         self,
         new_columns: tuple[ColumnRecord, ...],
-    ) -> Result[None, str, object]:
+    ) -> Result[None, str, Error[Any]]:
         """新增列 / Add new columns.
 
         向当前模型中追加新生成的切割方案列。
@@ -121,7 +122,7 @@ class Csp1dColumnGeneration:
     def remove_columns(
         self,
         column_names: tuple[str, ...],
-    ) -> Result[None, str, object]:
+    ) -> Result[None, str, Error[Any]]:
         """移除列 / Remove columns.
 
         按名称移除不再有价值的切割方案列。
@@ -141,7 +142,7 @@ class Csp1dColumnGeneration:
     def refresh_shadow_price(
         self,
         updater: Callable[[ShadowPriceMap], None],
-    ) -> Result[None, str, object]:
+    ) -> Result[None, str, Error[Any]]:
         """刷新影子价格 / Refresh shadow prices.
 
         通过回调函数更新影子价格映射。
@@ -159,7 +160,7 @@ class Csp1dColumnGeneration:
             self._converged = True
         return Ok(None)
 
-    def finalize(self) -> Result[None, str, object]:
+    def finalize(self) -> Result[None, str, Error[Any]]:
         """终止列生成 / Finalize column generation.
 
         标记列生成迭代完成，准备进入最终 MILP 阶段。
@@ -175,7 +176,7 @@ class Csp1dColumnGeneration:
     def extract_solution(
         self,
         extractor: Callable[[], Csp1dSolution],
-    ) -> Result[Csp1dSolution, str, object]:
+    ) -> Result[Csp1dSolution, str, Error[Any]]:
         """提取解决方案 / Extract solution.
 
         从求解器结果中提取最终解决方案。

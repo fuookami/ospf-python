@@ -138,7 +138,7 @@ class TaskServiceAsync(abc.ABC):
         if task_result.is_failed():
             from ospf_python.utils.functional.result import Failed
 
-            err = task_result.error  # type: ignore[union-attr]
+            err = task_result.error  # type: ignore[attr-defined]
             return Failed(err)
         return await self.schedule_tasks(context)
 

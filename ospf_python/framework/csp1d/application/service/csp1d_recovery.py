@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
 from ospf_python.framework.csp1d.application.model.csp1d_assignment import (
     Csp1dAssignment,
 )
@@ -9,7 +11,10 @@ from ospf_python.framework.csp1d.application.model.csp1d_solution import (
     Csp1dSolution,
 )
 from ospf_python.utils.error.code import ErrorCode
-from ospf_python.utils.functional.result import Failed, Ok, Result
+from ospf_python.utils.functional.result import Ok, Result, failed_from_code
+
+if TYPE_CHECKING:
+    from ospf_python.utils.error.error import Error
 
 
 class Csp1dRecovery:
@@ -39,7 +44,7 @@ class Csp1dRecovery:
         variable_values: tuple[tuple[str, float], ...],
         material_names: tuple[str, ...],
         plan_names: tuple[str, ...],
-    ) -> Result[Csp1dSolution, str, object]:
+    ) -> Result[Csp1dSolution, str, Error[Any]]:
         """从变量值恢复解决方案 / Recover solution from variable values.
 
         Args:
@@ -73,7 +78,7 @@ class Csp1dRecovery:
                     total_waste += waste * qty
 
         if not assignments:
-            return Failed(
+            return failed_from_code(
                 ErrorCode.APPLICATION_ERROR,
                 "无法从变量值恢复有效分配 / "
                 "Cannot recover valid assignments "

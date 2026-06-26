@@ -4,18 +4,19 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from ospf_python.framework.csp1d.application.service.csp1d_final_milp_status import (
     Csp1dFinalMilpStatus,
 )
 from ospf_python.utils.error.code import ErrorCode
-from ospf_python.utils.functional.result import Failed, Ok, Result
+from ospf_python.utils.functional.result import Ok, Result, failed_from_code
 
 if TYPE_CHECKING:
     from ospf_python.framework.csp1d.application.service.csp1d_milp import (
         Csp1dMilp,
     )
+    from ospf_python.utils.error.error import Error
 
 
 @dataclass(frozen=True)
@@ -59,7 +60,7 @@ class Csp1dMilpSolver:
     def solve(
         self,
         model: Csp1dMilp,
-    ) -> Result[SolverResult, str, object]:
+    ) -> Result[SolverResult, str, Error[Any]]:
         """求解 MILP 模型 / Solve the MILP model.
 
         Args:
@@ -70,7 +71,7 @@ class Csp1dMilpSolver:
         """
         result = self._solver_fn(model)
         if result.status == Csp1dFinalMilpStatus.INFEASIBLE:
-            return Failed(
+            return failed_from_code(
                 ErrorCode.APPLICATION_ERROR,
                 "MILP 模型不可行 / MILP model is infeasible",
             )

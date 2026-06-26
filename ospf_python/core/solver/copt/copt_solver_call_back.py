@@ -114,7 +114,7 @@ class CoptSolverCallBack:
         """
         for _name, cb in self.callbacks.items():
             if callable(cb):
-                model._callback = cb
+                model._callback = cb  # type: ignore[attr-defined]
 
     @property
     def has_callbacks(self) -> bool:

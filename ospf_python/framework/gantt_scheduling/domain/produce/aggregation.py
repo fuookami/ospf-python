@@ -11,10 +11,10 @@ class Aggregation:
 
     name: str = "aggregation"
 
-    def add(self, item):
+    def add(self, item: object) -> Aggregation:
         """Add item to aggregation."""
         return self
 
-    def remove(self, key):
+    def remove(self, key: str) -> Aggregation:
         """Remove item from aggregation."""
         return self

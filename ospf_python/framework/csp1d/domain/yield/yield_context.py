@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import importlib
 from dataclasses import dataclass, field
+from typing import Any
 
 
-def _load_yield_modeling_config():  # type: ignore[no-untyped-def]
+def _load_yield_modeling_config() -> Any:
     """加载 YieldModelingConfig / Load YieldModelingConfig."""
     mod = importlib.import_module(
         "ospf_python.framework.csp1d.domain.yield.model.yield_modeling_config"
@@ -18,25 +19,27 @@ def _load_yield_modeling_config():  # type: ignore[no-untyped-def]
     return mod.YieldModelingConfig
 
 
-def _load_yield_constraint_pipeline():  # type: ignore[no-untyped-def]
+def _load_yield_constraint_pipeline() -> Any:
     """加载 YieldConstraintPipeline."""
     mod = importlib.import_module(
         "ospf_python.framework.csp1d.domain"
-        ".yield.service.pipeline.yield_constraint_pipeline"
+        ".yield.service.pipeline"
+        ".yield_constraint_pipeline"
     )
     return mod.YieldConstraintPipeline
 
 
-def _load_yield_objective_pipeline():  # type: ignore[no-untyped-def]
+def _load_yield_objective_pipeline() -> Any:
     """加载 YieldObjectivePipeline."""
     mod = importlib.import_module(
         "ospf_python.framework.csp1d.domain"
-        ".yield.service.pipeline.yield_objective_pipeline"
+        ".yield.service.pipeline"
+        ".yield_objective_pipeline"
     )
     return mod.YieldObjectivePipeline
 
 
-def _load_yield_aggregation():  # type: ignore[no-untyped-def]
+def _load_yield_aggregation() -> Any:
     """加载 YieldAggregation."""
     mod = importlib.import_module(
         "ospf_python.framework.csp1d.domain.yield.yield_aggregation"
@@ -106,7 +109,7 @@ class YieldContext:
             更新后的聚合。
             Updated aggregation.
         """
-        return self.constraint_pipeline.apply(aggregation)
+        return self.constraint_pipeline.apply(aggregation)  # type: ignore[attr-defined]
 
     def apply_objectives(
         self,
@@ -124,4 +127,4 @@ class YieldContext:
             更新后的聚合。
             Updated aggregation.
         """
-        return self.objective_pipeline.apply(aggregation)
+        return self.objective_pipeline.apply(aggregation)  # type: ignore[attr-defined]

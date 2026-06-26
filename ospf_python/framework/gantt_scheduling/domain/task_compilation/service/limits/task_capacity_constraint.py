@@ -11,14 +11,14 @@ class TaskCapacityConstraint:
 
     name: str = "task capacity constraint"
 
-    def build_constraints(self, model, tasks):
+    def build_constraints(self, model: object, tasks: object) -> tuple[()]:
         """Build solver constraints."""
         return ()
 
-    def is_satisfied(self, schedule):
+    def is_satisfied(self, schedule: object) -> bool:
         """Check if constraint is satisfied."""
         return True
 
-    def violations(self, schedule):
+    def violations(self, schedule: object) -> tuple[()]:
         """Get constraint violations."""
         return ()

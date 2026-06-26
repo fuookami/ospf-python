@@ -322,8 +322,8 @@ def _find_assigned_resource(
     """
     assigned_res = ""
     best_val = 0.0
-    for res_key, _ in task.resource_requirements:  # type: ignore[union-attr]
-        assign_var = f"assign_{task.task_key}_{res_key}"  # type: ignore[union-attr]
+    for res_key, _ in task.resource_requirements:  # type: ignore[attr-defined]
+        assign_var = f"assign_{task.task_key}_{res_key}"  # type: ignore[attr-defined]
         val = values.get(assign_var, 0.0)
         if val > best_val:
             best_val = val

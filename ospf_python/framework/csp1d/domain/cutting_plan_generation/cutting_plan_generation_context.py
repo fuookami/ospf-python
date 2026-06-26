@@ -7,6 +7,7 @@ Context for cutting plan generation lifecycle.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Union
 
 from ospf_python.framework.csp1d.domain.cutting_plan_generation.model.generation_constraints import (
     GenerationConstraints,
@@ -26,6 +27,14 @@ from ospf_python.framework.csp1d.domain.cutting_plan_generation.service.n_same_g
 from ospf_python.framework.csp1d.domain.cutting_plan_generation.service.n_sum_generator import (
     NSumGenerator,
 )
+
+# 生成器联合类型 / Generator union type
+_Generator = Union[
+    FullSumGenerator,
+    NSameGenerator,
+    NSumGenerator,
+    DfsGenerator,
+]
 
 
 @dataclass(frozen=True)
@@ -173,6 +182,7 @@ class RegisteredGeneration:
             切割方案列表。
             List of cutting plans.
         """
+        gen: _Generator
         if strategy == "full_sum":
             gen = FullSumGenerator(
                 constraints=self.constraints,

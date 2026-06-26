@@ -187,7 +187,7 @@ class BunchCompilationContext:
         cap = self.aggregation.get_capacity(bunch_key)
         if cap is None:
             return 0.0
-        return cap.remaining_capacity
+        return float(cap.remaining_capacity)
 
     # ==================== 约束构建 / Constraint building =======
 

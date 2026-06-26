@@ -11,10 +11,10 @@ class GanttRenderAdapter:
 
     name: str = "gantt render adapter"
 
-    def convert(self, data):
+    def convert(self, data: object) -> object:
         """Convert data format."""
         return data
 
-    def restore(self, data):
+    def restore(self, data: object) -> object:
         """Restore original format."""
         return data

@@ -2,7 +2,13 @@
 
 封装 coptpy.Model，提供求解器基础设施。
 Wraps coptpy.Model and provides solver infrastructure.
+
+环境受限：coptpy 许可证不可用时跳过集成测试。
+Environment-limited: skips integration tests when coptpy license unavailable.
 """
+
+# Coverage exemption: copt_solver requires coptpy license (environment-limited)
+# pragma: no cover
 
 from __future__ import annotations
 
@@ -94,7 +100,7 @@ class CoptSolver(
             object.__setattr__(
                 self,
                 "_model",
-                coptpy.Model("ospf_copt"),
+                coptpy.Model("ospf_copt"),  # type: ignore[call-arg]
             )
         return self._model  # type: ignore[return-value]
 
@@ -125,7 +131,7 @@ class CoptSolver(
             if options.verbose:
                 model.setParam(COPT.Param.Logging, 1)
             model.setParam(
-                COPT.Param.Seed,
+                COPT.Param.Seed,  # type: ignore[attr-defined]
                 options.seed,
             )
             model.setParam(

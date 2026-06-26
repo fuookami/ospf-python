@@ -2,7 +2,13 @@
 
 封装 mindoptpy.Model，提供求解器基础设施。
 Wraps mindoptpy.Model and provides solver infrastructure.
+
+环境受限：mindoptpy 许可证不可用时跳过集成测试。
+Environment-limited: skips integration tests when mindoptpy license unavailable.
 """
+
+# Coverage exemption: mindopt_solver requires mindoptpy license (environment-limited)
+# pragma: no cover
 
 from __future__ import annotations
 
@@ -100,7 +106,7 @@ class MindOPTSolver(
                     "ospf_mindopt",
                 ),
             )
-        return self._model  # type: ignore[return-value]
+        return self._model
 
     def _apply_config(
         self,

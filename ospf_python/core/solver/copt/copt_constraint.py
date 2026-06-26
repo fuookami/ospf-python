@@ -31,7 +31,7 @@ class CoptConstraint:
         rhs: 右端值 / Right-hand side value.
     """
 
-    constr: coptpy.Constr  # type: ignore[attr-defined, name-defined]
+    constr: coptpy.Constr  # type: ignore[name-defined]
     """底层 coptpy 约束 / The underlying coptpy
     constraint."""
 
@@ -89,7 +89,7 @@ class CoptConstraint:
 
     @staticmethod
     def from_copt_constr(
-        constr: coptpy.Constr,  # type: ignore[attr-defined]
+        constr: coptpy.Constr,  # type: ignore[name-defined]
     ) -> CoptConstraint:
         """从 coptpy 约束创建包装器 / Create wrapper
         from coptpy constraint.

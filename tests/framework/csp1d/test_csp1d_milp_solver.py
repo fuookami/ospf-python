@@ -10,8 +10,6 @@ call with a source code signature mismatch.
 
 from __future__ import annotations
 
-import pytest
-
 from ospf_python.framework.csp1d.application.service.csp1d_final_milp_status import (
     Csp1dFinalMilpStatus,
 )
@@ -68,11 +66,6 @@ class TestCsp1dMilpSolver:
         assert solution.status == Csp1dFinalMilpStatus.OPTIMAL
         assert solution.objective_value == 10.0
 
-    @pytest.mark.xfail(
-        reason="Source code Failed() signature mismatch",
-        raises=TypeError,
-        strict=True,
-    )
     def test_solve_infeasible(self) -> None:
         """Solve returns failure for infeasible. / 不可行返回失败。"""
         solver = Csp1dMilpSolver(self._infeasible_solver_fn)

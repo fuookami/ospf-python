@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
 from ospf_python.utils.error.code import ErrorCode
-from ospf_python.utils.functional.result import Failed, Ok, Result
+from ospf_python.utils.functional.result import Ok, Result, failed_from_code
+
+if TYPE_CHECKING:
+    from ospf_python.utils.error.error import Error
 
 
 class QuantityArithmetic:
@@ -18,7 +23,7 @@ class QuantityArithmetic:
     def add(
         lhs: int,
         rhs: int,
-    ) -> Result[int, str, object]:
+    ) -> Result[int, str, Error[Any]]:
         """安全加法 / Safe addition.
 
         Args:
@@ -30,7 +35,7 @@ class QuantityArithmetic:
         """
         result = lhs + rhs
         if result < 0:
-            return Failed(
+            return failed_from_code(
                 ErrorCode.ILLEGAL_ARGUMENT,
                 f"加法结果为负数: {lhs} + {rhs} / "
                 f"Addition result is negative: {lhs} + {rhs}",
@@ -41,7 +46,7 @@ class QuantityArithmetic:
     def subtract(
         lhs: int,
         rhs: int,
-    ) -> Result[int, str, object]:
+    ) -> Result[int, str, Error[Any]]:
         """安全减法 / Safe subtraction.
 
         Args:
@@ -53,7 +58,7 @@ class QuantityArithmetic:
         """
         result = lhs - rhs
         if result < 0:
-            return Failed(
+            return failed_from_code(
                 ErrorCode.ILLEGAL_ARGUMENT,
                 f"减法结果为负数: {lhs} - {rhs} / "
                 f"Subtraction result is negative: {lhs} - {rhs}",
@@ -64,7 +69,7 @@ class QuantityArithmetic:
     def multiply(
         lhs: int,
         rhs: int,
-    ) -> Result[int, str, object]:
+    ) -> Result[int, str, Error[Any]]:
         """安全乘法 / Safe multiplication.
 
         Args:
@@ -76,7 +81,7 @@ class QuantityArithmetic:
         """
         result = lhs * rhs
         if result < 0:
-            return Failed(
+            return failed_from_code(
                 ErrorCode.ILLEGAL_ARGUMENT,
                 f"乘法结果为负数: {lhs} * {rhs} / "
                 f"Multiplication result is negative: {lhs} * {rhs}",

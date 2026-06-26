@@ -8,14 +8,11 @@ Tests IntList, FloatList, NumberList type aliases.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ospf_python.math.collection_aliases import (
-        FloatList,
-        IntList,
-        NumberList,
-    )
+from ospf_python.math.collection_aliases import (  # noqa: F401, TC001
+    FloatList,
+    IntList,
+    NumberList,
+)
 
 # ── IntList ─────────────────────────────────────────────────────
 

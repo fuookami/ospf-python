@@ -12,6 +12,6 @@ class GanttProduct:
     name: str = "gantt product"
 
     @property
-    def is_valid(self):
+    def is_valid(self) -> bool:
         """Check if model is valid."""
         return bool(self.name)

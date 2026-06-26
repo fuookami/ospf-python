@@ -105,7 +105,7 @@ class CapacitySchedulingContext:
         cap = self.aggregation.get_capacity(capacity_slot_key)
         if cap is None:
             return 0.0
-        return cap.remaining_capacity
+        return float(cap.remaining_capacity)
 
     def build_capacity_constraints(
         self,

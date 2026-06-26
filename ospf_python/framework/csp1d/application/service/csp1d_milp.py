@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 from ospf_python.framework.csp1d.application.service.csp1d_final_milp_status import (
     Csp1dFinalMilpStatus,
 )
 from ospf_python.utils.functional.result import Ok, Result
+
+if TYPE_CHECKING:
+    from ospf_python.utils.error.error import Error
 
 
 @dataclass(frozen=True)
@@ -72,7 +76,7 @@ class Csp1dMilp:
         lower: float = 0.0,
         upper: float = float("inf"),
         is_integer: bool = False,
-    ) -> Result[None, str, object]:
+    ) -> Result[None, str, Error[Any]]:
         """添加变量 / Add a variable.
 
         Args:
@@ -101,7 +105,7 @@ class Csp1dMilp:
         coefficients: tuple[tuple[str, float], ...],
         sense: str,
         rhs: float,
-    ) -> Result[None, str, object]:
+    ) -> Result[None, str, Error[Any]]:
         """添加约束 / Add a constraint.
 
         Args:
@@ -126,7 +130,7 @@ class Csp1dMilp:
     def set_objective(
         self,
         coefficients: dict[str, float],
-    ) -> Result[None, str, object]:
+    ) -> Result[None, str, Error[Any]]:
         """设置目标函数 / Set objective function.
 
         Args:

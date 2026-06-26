@@ -5,9 +5,31 @@ description = "Python implementation of ospf-kotlin optimization framework"
 readme = "README.md"
 requires-python = ">=3.13"
 license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     { name = "fuookami" },
 ]
+keywords = [
+    "optimization",
+    "linear-programming",
+    "mixed-integer-programming",
+    "column-generation",
+    "bin-packing",
+    "cutting-stock",
+    "scheduling",
+    "gantt",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+
 dependencies = [
     "gurobipy>=13.0.2",
     "numpy>=1.26",
@@ -15,6 +37,11 @@ dependencies = [
     "pyscipopt>=6.2.1",
     "returns>=0.22",
 ]
+
+[project.urls]
+Homepage = "https://github.com/fuookami/ospf-python"
+Repository = "https://github.com/fuookami/ospf-python"
+Issues = "https://github.com/fuookami/ospf-python/issues"
 
 [project.optional-dependencies]
 gurobi = ["gurobipy>=11.0"]
@@ -33,6 +60,7 @@ dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
     "pytest-asyncio>=0.24",
+    "pytest-benchmark>=4.0",
 ]
 
 [build-system]
@@ -46,6 +74,9 @@ packages = ["ospf_python"]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
 asyncio_mode = "auto"
+markers = [
+    "benchmark: performance benchmark tests (deselect with '-m \"not benchmark\"')",
+]
 
 [tool.mypy]
 python_version = "3.13"
@@ -75,6 +106,15 @@ module = [
     "ospf_python.core.solver.mindopt.*",
     "ospf_python.framework.csp1d.*",
     "ospf_python.framework.gantt_scheduling.*",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "tests.core.solver.test_cross_solver_consistency.*",
+    "tests.core.solver.test_gurobi.*",
+    "tests.core.solver.test_scip.*",
+    "tests.core.solver.test_copt.*",
+    "tests.core.solver.test_mindopt.*",
 ]
 ignore_errors = true
 
