@@ -153,3 +153,9 @@ ignore = [
 
 [tool.ruff.lint.isort]
 known-first-party = ["ospf_python"]
+
+[dependency-groups]
+dev = [
+    "mkdocs-material>=9.7.6",
+    "mkdocstrings[python]>=1.0.4",
+]
