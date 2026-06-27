@@ -111,6 +111,7 @@ module = [
     "ospf_python.framework.bpp2d.*",
     "ospf_python.framework.csp2d.*",
     "ospf_python.framework.network_scheduling.*",
+    "ospf_python.framework.persistence.*",
 ]
 ignore_errors = true
 
