@@ -1,9 +1,16 @@
 """CSP1D 桩类测试。
 
 Tests for CSP1D domain stub dataclasses and Aggregation.
+
+NOTE: All classes under TestCuttingPlanGenerationStubs are empty frozen
+dataclass stubs with no fields or methods. The tests verify structural
+contracts (frozen, no fields, importability) that will hold when real
+logic is added. Each test includes a comment explaining the current state.
 """
 
 from __future__ import annotations
+
+import dataclasses
 
 import pytest
 
@@ -24,7 +31,11 @@ class TestCuttingPlanGenerationStubs:
         )
 
         obj = ConcurrentGenerationMaterialSliceTemplateCache()
-        assert obj is not None
+        # Stub: empty frozen dataclass with no fields.
+        assert isinstance(obj, ConcurrentGenerationMaterialSliceTemplateCache)
+        assert dataclasses.fields(obj) == ()
+        with pytest.raises(AttributeError):
+            obj.x = 1  # type: ignore[misc]
 
     def test_costar_filler(self) -> None:
         """导入并实例化。/ Import and instantiate."""
@@ -33,7 +44,10 @@ class TestCuttingPlanGenerationStubs:
         )
 
         obj = CostarFiller()
-        assert obj is not None
+        assert isinstance(obj, CostarFiller)
+        assert dataclasses.fields(obj) == ()
+        with pytest.raises(AttributeError):
+            obj.x = 1  # type: ignore[misc]
 
     def test_generation_material_slice_template_cache(self) -> None:
         """导入并实例化。/ Import and instantiate."""
@@ -42,7 +56,10 @@ class TestCuttingPlanGenerationStubs:
         )
 
         obj = GenerationMaterialSliceTemplateCache()
-        assert obj is not None
+        assert isinstance(obj, GenerationMaterialSliceTemplateCache)
+        assert dataclasses.fields(obj) == ()
+        with pytest.raises(AttributeError):
+            obj.x = 1  # type: ignore[misc]
 
     def test_generation_material_width_index_cache(self) -> None:
         """导入并实例化。/ Import and instantiate."""
@@ -51,7 +68,10 @@ class TestCuttingPlanGenerationStubs:
         )
 
         obj = GenerationMaterialWidthIndexCache()
-        assert obj is not None
+        assert isinstance(obj, GenerationMaterialWidthIndexCache)
+        assert dataclasses.fields(obj) == ()
+        with pytest.raises(AttributeError):
+            obj.x = 1  # type: ignore[misc]
 
     def test_generation_material_width_range_key(self) -> None:
         """导入并实例化。/ Import and instantiate."""
@@ -60,7 +80,10 @@ class TestCuttingPlanGenerationStubs:
         )
 
         obj = GenerationMaterialWidthRangeKey()
-        assert obj is not None
+        assert isinstance(obj, GenerationMaterialWidthRangeKey)
+        assert dataclasses.fields(obj) == ()
+        with pytest.raises(AttributeError):
+            obj.x = 1  # type: ignore[misc]
 
     def test_generation_quantity_cache(self) -> None:
         """导入并实例化。/ Import and instantiate."""
@@ -69,7 +92,10 @@ class TestCuttingPlanGenerationStubs:
         )
 
         obj = GenerationQuantityCache()
-        assert obj is not None
+        assert isinstance(obj, GenerationQuantityCache)
+        assert dataclasses.fields(obj) == ()
+        with pytest.raises(AttributeError):
+            obj.x = 1  # type: ignore[misc]
 
     def test_generation_slice_template_cache(self) -> None:
         """导入并实例化。/ Import and instantiate."""
@@ -78,7 +104,10 @@ class TestCuttingPlanGenerationStubs:
         )
 
         obj = GenerationSliceTemplateCache()
-        assert obj is not None
+        assert isinstance(obj, GenerationSliceTemplateCache)
+        assert dataclasses.fields(obj) == ()
+        with pytest.raises(AttributeError):
+            obj.x = 1  # type: ignore[misc]
 
     def test_generation_template_reuse(self) -> None:
         """导入并实例化。/ Import and instantiate."""
@@ -87,7 +116,10 @@ class TestCuttingPlanGenerationStubs:
         )
 
         obj = GenerationTemplateReuse()
-        assert obj is not None
+        assert isinstance(obj, GenerationTemplateReuse)
+        assert dataclasses.fields(obj) == ()
+        with pytest.raises(AttributeError):
+            obj.x = 1  # type: ignore[misc]
 
     def test_generation_width_index(self) -> None:
         """导入并实例化。/ Import and instantiate."""
@@ -96,7 +128,10 @@ class TestCuttingPlanGenerationStubs:
         )
 
         obj = GenerationWidthIndex()
-        assert obj is not None
+        assert isinstance(obj, GenerationWidthIndex)
+        assert dataclasses.fields(obj) == ()
+        with pytest.raises(AttributeError):
+            obj.x = 1  # type: ignore[misc]
 
 
 # ============================================================

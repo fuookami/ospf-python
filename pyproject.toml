@@ -76,6 +76,7 @@ addopts = "-v --tb=short"
 asyncio_mode = "auto"
 markers = [
     "benchmark: performance benchmark tests (deselect with '-m \"not benchmark\"')",
+    "migration_consistency: tests verifying Kotlin/Rust alignment",
 ]
 
 [tool.mypy]
@@ -116,6 +117,13 @@ module = [
     "tests.core.solver.test_copt.*",
     "tests.core.solver.test_mindopt.*",
 ]
+
+# CI Hard Gates - 硬门禁配置
+# Production code must not contain:
+# - TODO (use issue tracker instead)
+# - NotImplementedError (implement or exclude)
+# - stub/placeholder (implement or mark as excluded in migration-matrix.md)
+# - Empty constraint returns without justification
 ignore_errors = true
 
 [tool.ruff]

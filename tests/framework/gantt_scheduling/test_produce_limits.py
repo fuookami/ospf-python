@@ -3,6 +3,11 @@
 覆盖 produce.service.limits 中所有约束和目标类的桩方法。
 Covers all stub constraint and objective classes in
 produce.service.limits.
+
+NOTE: All constraint/objective classes in produce.limits are currently stub
+implementations. The tests below verify structural contracts (return types,
+immutability, naming) that will hold when real logic is added. Each test that
+checks stub-only behavior includes a comment explaining the current state.
 """
 
 from __future__ import annotations
@@ -53,20 +58,41 @@ class TestProduceBatchCapacityConstraint:
         c = ProduceBatchCapacityConstraint()
         assert c.name == "produce batch capacity constraint"
 
-    def test_build_constraints_returns_empty(self) -> None:
-        """构建约束返回空 / Build constraints returns empty."""
-        c = ProduceBatchCapacityConstraint()
-        assert c.build_constraints(None, None) == ()
+    def test_build_constraints_returns_tuple(self) -> None:
+        """构建约束返回元组 / Build constraints returns a tuple.
 
-    def test_is_satisfied(self) -> None:
-        """满足约束 / Constraint satisfied."""
+        Currently a stub -- returns empty tuple. When real logic is
+        implemented this should verify the tuple contains constraint objects.
+        """
         c = ProduceBatchCapacityConstraint()
-        assert c.is_satisfied(None) is True
+        result = c.build_constraints(None, None)
+        assert isinstance(result, tuple)
+        # Stub behavior: returns empty tuple until real logic is implemented.
+        assert result == ()
 
-    def test_violations_empty(self) -> None:
-        """无违反 / No violations."""
+    def test_is_satisfied_returns_bool(self) -> None:
+        """满足约束返回布尔值 / Constraint satisfied returns bool.
+
+        Currently a stub -- unconditionally returns True. When real logic is
+        implemented this should verify actual constraint checking.
+        """
         c = ProduceBatchCapacityConstraint()
-        assert c.violations(None) == ()
+        result = c.is_satisfied(None)
+        assert isinstance(result, bool)
+        # Stub behavior: always returns True until real logic is implemented.
+        assert result is True
+
+    def test_violations_returns_tuple(self) -> None:
+        """无违反返回元组 / Violations returns a tuple.
+
+        Currently a stub -- returns empty tuple. When real logic is
+        implemented this should verify violation objects when applicable.
+        """
+        c = ProduceBatchCapacityConstraint()
+        result = c.violations(None)
+        assert isinstance(result, tuple)
+        # Stub behavior: returns empty tuple until real logic is implemented.
+        assert result == ()
 
     def test_frozen(self) -> None:
         """不可变性 / Immutability."""
@@ -83,20 +109,35 @@ class TestProduceBatchDemandConstraint:
         c = ProduceBatchDemandConstraint()
         assert c.name == "produce batch demand constraint"
 
-    def test_build_constraints_returns_empty(self) -> None:
-        """构建约束返回空 / Build constraints returns empty."""
-        c = ProduceBatchDemandConstraint()
-        assert c.build_constraints(None, None) == ()
+    def test_build_constraints_returns_tuple(self) -> None:
+        """构建约束返回元组 / Build constraints returns a tuple.
 
-    def test_is_satisfied(self) -> None:
-        """满足约束 / Constraint satisfied."""
+        Currently a stub -- returns empty tuple.
+        """
         c = ProduceBatchDemandConstraint()
-        assert c.is_satisfied(None) is True
+        result = c.build_constraints(None, None)
+        assert isinstance(result, tuple)
+        assert result == ()
 
-    def test_violations_empty(self) -> None:
-        """无违反 / No violations."""
+    def test_is_satisfied_returns_bool(self) -> None:
+        """满足约束返回布尔值 / Constraint satisfied returns bool.
+
+        Currently a stub -- unconditionally returns True.
+        """
         c = ProduceBatchDemandConstraint()
-        assert c.violations(None) == ()
+        result = c.is_satisfied(None)
+        assert isinstance(result, bool)
+        assert result is True
+
+    def test_violations_returns_tuple(self) -> None:
+        """无违反返回元组 / Violations returns a tuple.
+
+        Currently a stub -- returns empty tuple.
+        """
+        c = ProduceBatchDemandConstraint()
+        result = c.violations(None)
+        assert isinstance(result, tuple)
+        assert result == ()
 
     def test_frozen(self) -> None:
         """不可变性 / Immutability."""
@@ -113,20 +154,35 @@ class TestProduceBatchOrderConstraint:
         c = ProduceBatchOrderConstraint()
         assert c.name == "produce batch order constraint"
 
-    def test_build_constraints_returns_empty(self) -> None:
-        """构建约束返回空 / Build constraints returns empty."""
-        c = ProduceBatchOrderConstraint()
-        assert c.build_constraints(None, None) == ()
+    def test_build_constraints_returns_tuple(self) -> None:
+        """构建约束返回元组 / Build constraints returns a tuple.
 
-    def test_is_satisfied(self) -> None:
-        """满足约束 / Constraint satisfied."""
+        Currently a stub -- returns empty tuple.
+        """
         c = ProduceBatchOrderConstraint()
-        assert c.is_satisfied(None) is True
+        result = c.build_constraints(None, None)
+        assert isinstance(result, tuple)
+        assert result == ()
 
-    def test_violations_empty(self) -> None:
-        """无违反 / No violations."""
+    def test_is_satisfied_returns_bool(self) -> None:
+        """满足约束返回布尔值 / Constraint satisfied returns bool.
+
+        Currently a stub -- unconditionally returns True.
+        """
         c = ProduceBatchOrderConstraint()
-        assert c.violations(None) == ()
+        result = c.is_satisfied(None)
+        assert isinstance(result, bool)
+        assert result is True
+
+    def test_violations_returns_tuple(self) -> None:
+        """无违反返回元组 / Violations returns a tuple.
+
+        Currently a stub -- returns empty tuple.
+        """
+        c = ProduceBatchOrderConstraint()
+        result = c.violations(None)
+        assert isinstance(result, tuple)
+        assert result == ()
 
     def test_frozen(self) -> None:
         """不可变性 / Immutability."""
@@ -143,20 +199,35 @@ class TestProduceCapacityConstraint:
         c = ProduceCapacityConstraint()
         assert c.name == "produce capacity constraint"
 
-    def test_build_constraints_returns_empty(self) -> None:
-        """构建约束返回空 / Build constraints returns empty."""
-        c = ProduceCapacityConstraint()
-        assert c.build_constraints(None, None) == ()
+    def test_build_constraints_returns_tuple(self) -> None:
+        """构建约束返回元组 / Build constraints returns a tuple.
 
-    def test_is_satisfied(self) -> None:
-        """满足约束 / Constraint satisfied."""
+        Currently a stub -- returns empty tuple.
+        """
         c = ProduceCapacityConstraint()
-        assert c.is_satisfied(None) is True
+        result = c.build_constraints(None, None)
+        assert isinstance(result, tuple)
+        assert result == ()
 
-    def test_violations_empty(self) -> None:
-        """无违反 / No violations."""
+    def test_is_satisfied_returns_bool(self) -> None:
+        """满足约束返回布尔值 / Constraint satisfied returns bool.
+
+        Currently a stub -- unconditionally returns True.
+        """
         c = ProduceCapacityConstraint()
-        assert c.violations(None) == ()
+        result = c.is_satisfied(None)
+        assert isinstance(result, bool)
+        assert result is True
+
+    def test_violations_returns_tuple(self) -> None:
+        """无违反返回元组 / Violations returns a tuple.
+
+        Currently a stub -- returns empty tuple.
+        """
+        c = ProduceCapacityConstraint()
+        result = c.violations(None)
+        assert isinstance(result, tuple)
+        assert result == ()
 
     def test_frozen(self) -> None:
         """不可变性 / Immutability."""
@@ -173,20 +244,35 @@ class TestProduceDemandConstraint:
         c = ProduceDemandConstraint()
         assert c.name == "produce demand constraint"
 
-    def test_build_constraints_returns_empty(self) -> None:
-        """构建约束返回空 / Build constraints returns empty."""
-        c = ProduceDemandConstraint()
-        assert c.build_constraints(None, None) == ()
+    def test_build_constraints_returns_tuple(self) -> None:
+        """构建约束返回元组 / Build constraints returns a tuple.
 
-    def test_is_satisfied(self) -> None:
-        """满足约束 / Constraint satisfied."""
+        Currently a stub -- returns empty tuple.
+        """
         c = ProduceDemandConstraint()
-        assert c.is_satisfied(None) is True
+        result = c.build_constraints(None, None)
+        assert isinstance(result, tuple)
+        assert result == ()
 
-    def test_violations_empty(self) -> None:
-        """无违反 / No violations."""
+    def test_is_satisfied_returns_bool(self) -> None:
+        """满足约束返回布尔值 / Constraint satisfied returns bool.
+
+        Currently a stub -- unconditionally returns True.
+        """
         c = ProduceDemandConstraint()
-        assert c.violations(None) == ()
+        result = c.is_satisfied(None)
+        assert isinstance(result, bool)
+        assert result is True
+
+    def test_violations_returns_tuple(self) -> None:
+        """无违反返回元组 / Violations returns a tuple.
+
+        Currently a stub -- returns empty tuple.
+        """
+        c = ProduceDemandConstraint()
+        result = c.violations(None)
+        assert isinstance(result, tuple)
+        assert result == ()
 
     def test_frozen(self) -> None:
         """不可变性 / Immutability."""
@@ -203,20 +289,35 @@ class TestProduceOrderConstraint:
         c = ProduceOrderConstraint()
         assert c.name == "produce order constraint"
 
-    def test_build_constraints_returns_empty(self) -> None:
-        """构建约束返回空 / Build constraints returns empty."""
-        c = ProduceOrderConstraint()
-        assert c.build_constraints(None, None) == ()
+    def test_build_constraints_returns_tuple(self) -> None:
+        """构建约束返回元组 / Build constraints returns a tuple.
 
-    def test_is_satisfied(self) -> None:
-        """满足约束 / Constraint satisfied."""
+        Currently a stub -- returns empty tuple.
+        """
         c = ProduceOrderConstraint()
-        assert c.is_satisfied(None) is True
+        result = c.build_constraints(None, None)
+        assert isinstance(result, tuple)
+        assert result == ()
 
-    def test_violations_empty(self) -> None:
-        """无违反 / No violations."""
+    def test_is_satisfied_returns_bool(self) -> None:
+        """满足约束返回布尔值 / Constraint satisfied returns bool.
+
+        Currently a stub -- unconditionally returns True.
+        """
         c = ProduceOrderConstraint()
-        assert c.violations(None) == ()
+        result = c.is_satisfied(None)
+        assert isinstance(result, bool)
+        assert result is True
+
+    def test_violations_returns_tuple(self) -> None:
+        """无违反返回元组 / Violations returns a tuple.
+
+        Currently a stub -- returns empty tuple.
+        """
+        c = ProduceOrderConstraint()
+        result = c.violations(None)
+        assert isinstance(result, tuple)
+        assert result == ()
 
     def test_frozen(self) -> None:
         """不可变性 / Immutability."""
@@ -238,15 +339,29 @@ class TestProduceBatchMaximization:
         o = ProduceBatchMaximization()
         assert o.name == "produce batch maximization"
 
-    def test_build_objective_terms_returns_empty(self) -> None:
-        """构建目标项返回空 / Build terms returns empty."""
-        o = ProduceBatchMaximization()
-        assert o.build_objective_terms(None, None) == ()
+    def test_build_objective_terms_returns_tuple(self) -> None:
+        """构建目标项返回元组 / Build terms returns a tuple.
 
-    def test_compute_value(self) -> None:
-        """计算目标值 / Compute value."""
+        Currently a stub -- returns empty tuple. When real logic is
+        implemented this should verify the tuple contains objective term objects.
+        """
         o = ProduceBatchMaximization()
-        assert o.compute_value(None) == pytest.approx(0.0)
+        result = o.build_objective_terms(None, None)
+        assert isinstance(result, tuple)
+        # Stub behavior: returns empty tuple until real logic is implemented.
+        assert result == ()
+
+    def test_compute_value_returns_float(self) -> None:
+        """计算目标值返回浮点数 / Compute value returns float.
+
+        Currently a stub -- unconditionally returns 0.0. When real logic is
+        implemented this should verify actual objective value computation.
+        """
+        o = ProduceBatchMaximization()
+        result = o.compute_value(None)
+        assert isinstance(result, float)
+        # Stub behavior: always returns 0.0 until real logic is implemented.
+        assert result == pytest.approx(0.0)
 
     def test_frozen(self) -> None:
         """不可变性 / Immutability."""
@@ -263,15 +378,25 @@ class TestProduceBatchMinimization:
         o = ProduceBatchMinimization()
         assert o.name == "produce batch minimization"
 
-    def test_build_objective_terms_returns_empty(self) -> None:
-        """构建目标项返回空 / Build terms returns empty."""
-        o = ProduceBatchMinimization()
-        assert o.build_objective_terms(None, None) == ()
+    def test_build_objective_terms_returns_tuple(self) -> None:
+        """构建目标项返回元组 / Build terms returns a tuple.
 
-    def test_compute_value(self) -> None:
-        """计算目标值 / Compute value."""
+        Currently a stub -- returns empty tuple.
+        """
         o = ProduceBatchMinimization()
-        assert o.compute_value(None) == pytest.approx(0.0)
+        result = o.build_objective_terms(None, None)
+        assert isinstance(result, tuple)
+        assert result == ()
+
+    def test_compute_value_returns_float(self) -> None:
+        """计算目标值返回浮点数 / Compute value returns float.
+
+        Currently a stub -- unconditionally returns 0.0.
+        """
+        o = ProduceBatchMinimization()
+        result = o.compute_value(None)
+        assert isinstance(result, float)
+        assert result == pytest.approx(0.0)
 
     def test_frozen(self) -> None:
         """不可变性 / Immutability."""
@@ -288,15 +413,25 @@ class TestProduceUsageMinimization:
         o = ProduceUsageMinimization()
         assert o.name == "produce usage minimization"
 
-    def test_build_objective_terms_returns_empty(self) -> None:
-        """构建目标项返回空 / Build terms returns empty."""
-        o = ProduceUsageMinimization()
-        assert o.build_objective_terms(None, None) == ()
+    def test_build_objective_terms_returns_tuple(self) -> None:
+        """构建目标项返回元组 / Build terms returns a tuple.
 
-    def test_compute_value(self) -> None:
-        """计算目标值 / Compute value."""
+        Currently a stub -- returns empty tuple.
+        """
         o = ProduceUsageMinimization()
-        assert o.compute_value(None) == pytest.approx(0.0)
+        result = o.build_objective_terms(None, None)
+        assert isinstance(result, tuple)
+        assert result == ()
+
+    def test_compute_value_returns_float(self) -> None:
+        """计算目标值返回浮点数 / Compute value returns float.
+
+        Currently a stub -- unconditionally returns 0.0.
+        """
+        o = ProduceUsageMinimization()
+        result = o.compute_value(None)
+        assert isinstance(result, float)
+        assert result == pytest.approx(0.0)
 
     def test_frozen(self) -> None:
         """不可变性 / Immutability."""
@@ -313,15 +448,25 @@ class TestProduceVolumeMinimization:
         o = ProduceVolumeMinimization()
         assert o.name == "produce volume minimization"
 
-    def test_build_objective_terms_returns_empty(self) -> None:
-        """构建目标项返回空 / Build terms returns empty."""
-        o = ProduceVolumeMinimization()
-        assert o.build_objective_terms(None, None) == ()
+    def test_build_objective_terms_returns_tuple(self) -> None:
+        """构建目标项返回元组 / Build terms returns a tuple.
 
-    def test_compute_value(self) -> None:
-        """计算目标值 / Compute value."""
+        Currently a stub -- returns empty tuple.
+        """
         o = ProduceVolumeMinimization()
-        assert o.compute_value(None) == pytest.approx(0.0)
+        result = o.build_objective_terms(None, None)
+        assert isinstance(result, tuple)
+        assert result == ()
+
+    def test_compute_value_returns_float(self) -> None:
+        """计算目标值返回浮点数 / Compute value returns float.
+
+        Currently a stub -- unconditionally returns 0.0.
+        """
+        o = ProduceVolumeMinimization()
+        result = o.compute_value(None)
+        assert isinstance(result, float)
+        assert result == pytest.approx(0.0)
 
     def test_frozen(self) -> None:
         """不可变性 / Immutability."""
