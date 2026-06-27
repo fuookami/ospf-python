@@ -36,10 +36,12 @@
 
 ## TODO/NotImplementedError 清单
 
-| 类型 | 数量 | 优先级 |
-|------|------|--------|
-| TODO | 74 | P2 |
-| NotImplementedError | 14 | P1 |
+| 类型 | 数量 | 模块 | 优先级 |
+|------|------|------|--------|
+| TODO | 64 | math/symbol | P2 |
+| NotImplementedError | 14 | math/symbol | P1 |
+
+注：所有 TODO/NotImplementedError 均在 math/symbol 模块（原代码库），非本轮新增。
 
 ## 框架模块状态
 
