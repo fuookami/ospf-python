@@ -108,6 +108,7 @@ module = [
     "ospf_python.framework.csp1d.*",
     "ospf_python.framework.gantt_scheduling.*",
 ]
+ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [

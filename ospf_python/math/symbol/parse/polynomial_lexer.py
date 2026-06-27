@@ -54,20 +54,27 @@ class Token:
     text: str
 
 
-# 词法规则 / Lexical rules
-_LEX_RULES: list[tuple[str, TokenKind | None]] = [
-    (r"\s+", None),  # 空白跳过 / skip whitespace
-    (r"\d+(\.\d*)?|\.\d+", TokenKind.NUMBER),
-    (r"[a-zA-Z_]\w*", TokenKind.VARIABLE),
-    (r"\+", TokenKind.PLUS),
-    (r"-", TokenKind.MINUS),
-    (r"\*", TokenKind.STAR),
-    (r"\^", TokenKind.CARET),
-    (r"\(", TokenKind.LPAREN),
-    (r"\)", TokenKind.RPAREN),
+# 命名组到 TokenKind 的映射 /
+# Named group to TokenKind mapping
+_NAMED_RULES: list[tuple[str, str, TokenKind | None]] = [
+    ("ws", r"\s+", None),
+    ("num", r"\d+(\.\d*)?|\.\d+", TokenKind.NUMBER),
+    ("var", r"[a-zA-Z_]\w*", TokenKind.VARIABLE),
+    ("plus", r"\+", TokenKind.PLUS),
+    ("minus", r"-", TokenKind.MINUS),
+    ("star", r"\*", TokenKind.STAR),
+    ("caret", r"\^", TokenKind.CARET),
+    ("lparen", r"\(", TokenKind.LPAREN),
+    ("rparen", r"\)", TokenKind.RPAREN),
 ]
 
-_COMBINED_PATTERN = re.compile("|".join(f"({pattern})" for pattern, _ in _LEX_RULES))
+# 命名组到 TokenKind 的查找表 /
+# Named group to TokenKind lookup
+_KIND_MAP: dict[str, TokenKind | None] = {name: kind for name, _, kind in _NAMED_RULES}
+
+_COMBINED_PATTERN = re.compile(
+    "|".join(f"(?P<{name}>{pattern})" for name, pattern, _ in _NAMED_RULES),
+)
 
 
 @dataclass(frozen=True)
@@ -98,7 +105,7 @@ class PolynomialLexer:
             if match is None:
                 break
             text = match.group(0)
-            kind = _resolve_kind(text, match)
+            kind = _resolve_kind(match)
             if kind is not None:
                 tokens.append(Token(kind=kind, text=text))
             pos = match.end()
@@ -107,7 +114,6 @@ class PolynomialLexer:
 
 
 def _resolve_kind(
-    text: str,
     match: re.Match[str],
 ) -> TokenKind | None:
     """根据匹配结果确定词法单元类型。
@@ -115,14 +121,12 @@ def _resolve_kind(
     Determine token kind from the match result.
 
     Args:
-        text: 匹配的文本。/ Matched text.
         match: 正则匹配对象。/ Regex match object.
 
     Returns:
         词法单元类型或 None。/ Token kind or None.
     """
-    for idx, (_, kind) in enumerate(_LEX_RULES):
-        group_idx = idx + 1
-        if match.group(group_idx) is not None:
-            return kind
+    for name in _KIND_MAP:
+        if match.group(name) is not None:
+            return _KIND_MAP[name]
     return None

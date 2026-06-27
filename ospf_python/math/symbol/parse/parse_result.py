@@ -6,44 +6,51 @@ Parse result wrapper for parser outputs.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Generic, TypeVar
-
-T = TypeVar("T")
+from typing import Any
 
 
 @dataclass(frozen=True)
-class ParseResult(Generic[T]):
-    """解析结果，包含解析值和剩余输入。
+class ParseResult:
+    """解析结果，封装成功/失败状态、解析值和错误信息。
 
-    Parse result containing the parsed value and
-    remaining unparsed input.
+    Parse result wrapping success/failure state,
+    parsed value, and error message.
 
     Attributes:
+        success: 是否解析成功。/ Whether parsing succeeded.
         value: 解析得到的值。/ Parsed value.
-        remaining: 剩余未解析的输入。/ Remaining input.
+        error: 错误信息（成功时为空字符串）。/
+            Error message (empty on success).
     """
 
-    value: T
-    remaining: str
+    success: bool
+    value: Any
+    error: str
 
     @staticmethod
-    def of(value: T, remaining: str) -> ParseResult[T]:
-        """创建解析结果。
+    def ok(value: Any) -> ParseResult:
+        """创建成功的解析结果。
 
-        Create a parse result.
+        Create a successful parse result.
 
         Args:
             value: 解析得到的值。/ Parsed value.
-            remaining: 剩余输入。/ Remaining input.
 
         Returns:
-            解析结果。/ Parse result.
+            成功的解析结果。/ Successful parse result.
         """
-        return ParseResult(value=value, remaining=remaining)
+        return ParseResult(success=True, value=value, error="")
 
-    @property
-    def is_fully_consumed(self) -> bool:
-        """输入是否已完全消费。/
-        Whether input is fully consumed.
+    @staticmethod
+    def fail(error: str) -> ParseResult:
+        """创建失败的解析结果。
+
+        Create a failed parse result.
+
+        Args:
+            error: 错误信息。/ Error message.
+
+        Returns:
+            失败的解析结果。/ Failed parse result.
         """
-        return self.remaining.strip() == ""
+        return ParseResult(success=False, value=None, error=error)

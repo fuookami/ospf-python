@@ -6,95 +6,84 @@ Numeric literal parser for polynomial strings.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
-from fractions import Fraction
-
-from ospf_python.math.symbol.parse.parse_result import (
-    ParseResult,
-)
 
 # 数值字面量模式 / Numeric literal pattern
-_NUMBER_PATTERN = re.compile(r"[+-]?(\d+\.\d*|\.\d+|\d+)([eE][+-]?\d+)?")
+_FLOAT_PATTERN = re.compile(
+    r"[+-]?(\d+\.\d*|\.\d+|\d+)([eE][+-]?\d+)?",
+)
+_INT_PATTERN = re.compile(r"[+-]?\d+")
 
 
-@dataclass(frozen=True)
 class NumberParser:
-    """数值字面量解析器。
+    """数值字面量解析器，提供静态工具方法。
 
-    Parses numeric literals from the beginning of a
-    string, supporting integers, floats, and scientific
-    notation.
+    Numeric literal parser providing static utility
+    methods for parsing numbers from strings.
 
-    Attributes:
-        input: 待解析的输入字符串。/ Input string.
+    支持整数、浮点数和科学记数法。
+    Supports integers, floats, and scientific notation.
     """
 
-    input: str
+    @staticmethod
+    def parse(text: str) -> float | None:
+        """解析数值字符串为浮点数。
 
-    def parse_int(self) -> ParseResult[int] | None:
-        """解析整数字面量。
+        Parse a numeric string to float.
 
-        Parse an integer literal.
+        Args:
+            text: 待解析的数值字符串。/
+                Numeric string to parse.
 
         Returns:
-            解析结果或 None。/ Parse result or None.
+            解析得到的浮点数，失败返回 None。/
+            Parsed float, or None on failure.
         """
-        trimmed = self.input.lstrip()
-        match = _NUMBER_PATTERN.match(trimmed)
+        trimmed = text.strip()
+        if not trimmed:
+            return None
+        match = _FLOAT_PATTERN.fullmatch(trimmed)
         if match is None:
             return None
-        text = match.group(0)
-        if "." in text or "e" in text.lower():
+        try:
+            return float(trimmed)
+        except ValueError:
             return None
-        remaining = trimmed[match.end() :]
-        return ParseResult.of(int(text), remaining)
 
-    def parse_float(self) -> ParseResult[float] | None:
-        """解析浮点字面量。
+    @staticmethod
+    def parse_int(text: str) -> int | None:
+        """解析整数字符串。
 
-        Parse a float literal.
+        Parse an integer string.
+
+        Args:
+            text: 待解析的整数字符串。/
+                Integer string to parse.
 
         Returns:
-            解析结果或 None。/ Parse result or None.
+            解析得到的整数，失败返回 None。/
+            Parsed int, or None on failure.
         """
-        trimmed = self.input.lstrip()
-        match = _NUMBER_PATTERN.match(trimmed)
+        trimmed = text.strip()
+        if not trimmed:
+            return None
+        match = _INT_PATTERN.fullmatch(trimmed)
         if match is None:
             return None
-        text = match.group(0)
-        remaining = trimmed[match.end() :]
-        return ParseResult.of(float(text), remaining)
+        try:
+            return int(trimmed)
+        except ValueError:
+            return None
 
-    def parse_fraction(
-        self,
-    ) -> ParseResult[Fraction] | None:
-        """解析分数或数值字面量为 Fraction。
+    @staticmethod
+    def is_numeric(text: str) -> bool:
+        """判断字符串是否为数值。
 
-        Parse a numeric literal as Fraction.
+        Check whether a string is numeric.
+
+        Args:
+            text: 待判断的字符串。/ String to check.
 
         Returns:
-            解析结果或 None。/ Parse result or None.
+            是否为数值。/ Whether numeric.
         """
-        trimmed = self.input.lstrip()
-        if "/" in trimmed:
-            parts = trimmed.split("/", 1)
-            num_match = _NUMBER_PATTERN.match(parts[0])
-            if num_match is None:
-                return None
-            den_part = parts[1].lstrip()
-            den_match = _NUMBER_PATTERN.match(den_part)
-            if den_match is None:
-                return None
-            frac = Fraction(
-                int(num_match.group(0)),
-                int(den_match.group(0)),
-            )
-            remaining = den_part[den_match.end() :]
-            return ParseResult.of(frac, remaining)
-        float_result = self.parse_float()
-        if float_result is None:
-            return None
-        return ParseResult.of(
-            Fraction(float_result.value).limit_denominator(),
-            float_result.remaining,
-        )
+        return NumberParser.parse(text) is not None
