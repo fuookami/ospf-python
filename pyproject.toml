@@ -107,6 +107,10 @@ module = [
     "ospf_python.core.solver.mindopt.*",
     "ospf_python.framework.csp1d.*",
     "ospf_python.framework.gantt_scheduling.*",
+    "ospf_python.framework.bpp1d.*",
+    "ospf_python.framework.bpp2d.*",
+    "ospf_python.framework.csp2d.*",
+    "ospf_python.framework.network_scheduling.*",
 ]
 ignore_errors = true
 
