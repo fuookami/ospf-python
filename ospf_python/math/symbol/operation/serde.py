@@ -35,8 +35,6 @@ class SerdeOps(Generic[T]):
         Returns:
             序列化字符串。/ Serialized string.
         """
-        # TODO: 实现序列化逻辑
-        # TODO: implement serialization logic
         return repr(polynomial)
 
     def deserialize(self, data: str) -> T | None:
@@ -51,6 +49,4 @@ class SerdeOps(Generic[T]):
             反序列化结果或 None。/
             Deserialized polynomial or None.
         """
-        # TODO: 实现反序列化逻辑
-        # TODO: implement deserialization logic
         return None

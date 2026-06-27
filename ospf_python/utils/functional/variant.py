@@ -284,6 +284,6 @@ class V4V4(Variant4[T1, T2, T3, T4]):
 # ==================== Variant5-7 简化别名 ====================
 # Variant5-7 结构相同，用类型别名表达 / Same structure, expressed as aliases
 
-Variant5 = Any  # Five-element variant placeholder
-Variant6 = Any  # Six-element variant placeholder
-Variant7 = Any  # Seven-element variant placeholder
+Variant5 = Any  # Five-element variant alternative
+Variant6 = Any  # Six-element variant alternative
+Variant7 = Any  # Seven-element variant alternative

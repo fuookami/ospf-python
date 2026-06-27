@@ -67,7 +67,7 @@ class TestPowerVectorKey:
 
     def test_mismatched_lengths_raises(self) -> None:
         """变量与幂次长度不匹配抛出异常。/ Mismatched lengths raises."""
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(ValueError):
             PowerVectorKey(variables=("x", "y"), powers=(1,))
 
     def test_frozen(self) -> None:

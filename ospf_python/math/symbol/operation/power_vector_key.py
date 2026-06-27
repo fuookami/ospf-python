@@ -28,7 +28,10 @@ class PowerVectorKey:
         Validate variables and powers have same length.
         """
         if len(self.variables) != len(self.powers):
-            raise NotImplementedError
+            raise ValueError(
+                f"variables length ({len(self.variables)}) "
+                f"!= powers length ({len(self.powers)})"
+            )
 
     @property
     def degree(self) -> int:

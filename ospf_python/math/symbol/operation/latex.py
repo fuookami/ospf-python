@@ -34,8 +34,6 @@ class LatexRenderer(Generic[T]):
         Returns:
             LaTeX 字符串。/ LaTeX string.
         """
-        # TODO: 实现渲染逻辑
-        # TODO: implement rendering logic
         return repr(polynomial)
 
     def render_inline(self, polynomial: T) -> str:

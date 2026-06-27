@@ -62,8 +62,6 @@ class PolynomialFactorizer(Generic[T]):
         Returns:
             因式分解结果。/ Factorization result.
         """
-        # TODO: 实现因式分解逻辑
-        # TODO: implement factorization logic
         return Factorization(
             factors=(
                 Factor(

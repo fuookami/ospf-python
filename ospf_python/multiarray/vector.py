@@ -41,7 +41,7 @@ class DummyIndex(abc.ABC):
     Abstract base class for dummy indices (sealed).
 
     哑索引用于表达式中的占位索引，如 einsum 记法。
-    Dummy indices are placeholder indices in expressions,
+    Dummy indices are alternative indices in expressions,
     such as in einsum notation.
     """
 

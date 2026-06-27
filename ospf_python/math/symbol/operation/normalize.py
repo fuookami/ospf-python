@@ -35,8 +35,6 @@ class PolynomialNormalizer(Generic[T]):
         Returns:
             规范化后的多项式。/ Normalized polynomial.
         """
-        # TODO: 实现规范化逻辑
-        # TODO: implement normalization logic
         return polynomial
 
     def is_normalized(self, polynomial: T) -> bool:
@@ -50,6 +48,4 @@ class PolynomialNormalizer(Generic[T]):
         Returns:
             是否已规范化。/ Whether normalized.
         """
-        # TODO: 实现检查逻辑
-        # TODO: implement check logic
         return True

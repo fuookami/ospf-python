@@ -5,10 +5,77 @@ Linear and quadratic polynomial operations.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
+
+from ospf_python.math.symbol.polynomial.canonical_polynomial import (
+    CanonicalPolynomial,
+)
+
+if TYPE_CHECKING:
+    from ospf_python.math.symbol.symbol import Symbol
 
 T = TypeVar("T")
+
+
+def _find_symbol(polynomial: CanonicalPolynomial, variable: str) -> Symbol:
+    """在多项式中查找符号。
+
+    Find symbol in polynomial by name.
+
+    Args:
+        polynomial: 输入多项式。/ Input polynomial.
+        variable: 变量名。/ Variable name.
+
+    Returns:
+        匹配的符号。/ Matching symbol.
+
+    Raises:
+        ValueError: 未找到变量。/ Variable not found.
+    """
+    for symbol in polynomial.symbols:
+        if symbol.name == variable or symbol.display_name == variable:
+            return symbol
+    raise ValueError(f"Variable '{variable}' not found in polynomial")
+
+
+def _extract_quadratic_coefficients(
+    polynomial: CanonicalPolynomial,
+    variable: str,
+) -> tuple[float, float, float]:
+    """提取二次方程系数 a, b, c。
+
+    Extract quadratic equation coefficients a, b, c from
+    polynomial with respect to variable.
+
+    Args:
+        polynomial: 输入多项式。/ Input polynomial.
+        variable: 变量名。/ Variable name.
+
+    Returns:
+        (a, b, c) 系数元组。/ Coefficient tuple.
+    """
+    target = _find_symbol(polynomial, variable)
+    a = 0.0
+    b = 0.0
+    c = 0.0
+    for term in polynomial.terms:
+        power = term.powers.get(target, 0)
+        if power == 0:
+            # 常数项 / constant term
+            c += term.coefficient
+        elif power == 1:
+            # 线性项系数 / linear term coefficient
+            b += term.coefficient
+        elif power == 2:
+            # 二次项系数 / quadratic term coefficient
+            a += term.coefficient
+        else:
+            raise ValueError(
+                f"Degree {power} term found; expected at most degree 2"
+            )
+    return a, b, c
 
 
 @dataclass(frozen=True)
@@ -38,11 +105,34 @@ class LinearQuadraticOps(Generic[T]):
             variable: 求解变量。/ Variable to solve.
 
         Returns:
-            解或 None。/ Solution or None.
+            解或 None（当 a=0 时）。/ Solution or None (when a=0).
         """
-        # TODO: 实现线性求解逻辑
-        # TODO: implement linear solve logic
-        return None
+        if isinstance(polynomial, CanonicalPolynomial):
+            a, b, _c = _extract_quadratic_coefficients(
+                polynomial, variable
+            )
+            if a != 0.0:
+                raise ValueError(
+                    "Polynomial has quadratic term; "
+                    "use solve_quadratic instead"
+                )
+            if b == 0.0:
+                return None
+            target = _find_symbol(polynomial, variable)
+            # 提取关于 target 的常数项
+            constant = 0.0
+            linear_coeff = 0.0
+            for term in polynomial.terms:
+                power = term.powers.get(target, 0)
+                if power == 0:
+                    constant += term.coefficient
+                elif power == 1:
+                    linear_coeff += term.coefficient
+            if linear_coeff == 0.0:
+                return None
+            return -constant / linear_coeff
+
+        raise TypeError(f"Unsupported polynomial type: {type(polynomial)}")
 
     def solve_quadratic(
         self,
@@ -60,9 +150,41 @@ class LinearQuadraticOps(Generic[T]):
         Returns:
             解的元组。/ Tuple of solutions.
         """
-        # TODO: 实现二次求解逻辑
-        # TODO: implement quadratic solve logic
-        return ()
+        if isinstance(polynomial, CanonicalPolynomial):
+            target = _find_symbol(polynomial, variable)
+            a, b, c = 0.0, 0.0, 0.0
+            for term in polynomial.terms:
+                power = term.powers.get(target, 0)
+                if power == 0:
+                    c += term.coefficient
+                elif power == 1:
+                    b += term.coefficient
+                elif power == 2:
+                    a += term.coefficient
+                else:
+                    raise ValueError(
+                        f"Degree {power} term found; "
+                        f"expected at most degree 2"
+                    )
+
+            if a == 0.0:
+                # 退化为线性方程 / Degenerate to linear
+                if b == 0.0:
+                    return ()
+                return (-c / b,)
+
+            disc = b * b - 4.0 * a * c
+            if disc < 0.0:
+                return ()
+            if disc == 0.0:
+                return (-b / (2.0 * a),)
+            sqrt_disc = math.sqrt(disc)
+            return (
+                (-b + sqrt_disc) / (2.0 * a),
+                (-b - sqrt_disc) / (2.0 * a),
+            )
+
+        raise TypeError(f"Unsupported polynomial type: {type(polynomial)}")
 
     def discriminant(
         self,
@@ -80,6 +202,10 @@ class LinearQuadraticOps(Generic[T]):
         Returns:
             判别式值。/ Discriminant value.
         """
-        # TODO: 实现判别式计算
-        # TODO: implement discriminant calculation
-        raise NotImplementedError
+        if isinstance(polynomial, CanonicalPolynomial):
+            a, b, c = _extract_quadratic_coefficients(
+                polynomial, variable
+            )
+            return b * b - 4.0 * a * c
+
+        raise TypeError(f"Unsupported polynomial type: {type(polynomial)}")

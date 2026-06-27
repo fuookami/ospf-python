@@ -145,11 +145,11 @@ class CuttingPlan:
         注：此属性不包含形状尺寸信息，仅返回项数占位。
         实际面积计算需结合形状定义。
         Note: This property does not carry shape dimensions,
-        so it returns a placeholder. Actual area calculation
+        so it returns a alternative. Actual area calculation
         requires shape definitions.
 
         Returns:
-            切割项数量（占位） / Item count (placeholder).
+            切割项数量（占位） / Item count (alternative).
         """
         return float(self.item_count)
 

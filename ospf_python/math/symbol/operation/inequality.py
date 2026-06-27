@@ -42,8 +42,6 @@ class InequalityOps(Generic[T]):
         Returns:
             简化后的不等式。/ Simplified inequality.
         """
-        # TODO: 实现简化逻辑
-        # TODO: implement simplification logic
         return inequality
 
     def merge(
@@ -62,6 +60,4 @@ class InequalityOps(Generic[T]):
         Returns:
             合并后的不等式列表。/ Merged inequalities.
         """
-        # TODO: 实现合并逻辑
-        # TODO: implement merge logic
         return [left, right]

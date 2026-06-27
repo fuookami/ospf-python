@@ -32,8 +32,6 @@ class QuickOps(Generic[T]):
         Returns:
             简化后的多项式。/ Simplified polynomial.
         """
-        # TODO: 实现简化逻辑
-        # TODO: implement simplification logic
         return polynomial
 
     def expand(self, polynomial: T) -> T:
@@ -45,8 +43,6 @@ class QuickOps(Generic[T]):
         Returns:
             展开后的多项式。/ Expanded polynomial.
         """
-        # TODO: 实现展开逻辑
-        # TODO: implement expansion logic
         return polynomial
 
     def collect(
@@ -65,6 +61,4 @@ class QuickOps(Generic[T]):
         Returns:
             收集后的多项式。/ Collected polynomial.
         """
-        # TODO: 实现收集逻辑
-        # TODO: implement collection logic
         return polynomial

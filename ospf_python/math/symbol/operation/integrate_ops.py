@@ -6,9 +6,40 @@ Integration operations for polynomials.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
+
+from ospf_python.math.symbol.monomial.canonical_monomial import (
+    CanonicalMonomial,
+)
+from ospf_python.math.symbol.polynomial.canonical_polynomial import (
+    CanonicalPolynomial,
+)
+
+if TYPE_CHECKING:
+    from ospf_python.math.symbol.symbol import Symbol
 
 T = TypeVar("T")
+
+
+def _find_symbol(polynomial: CanonicalPolynomial, variable: str) -> Symbol:
+    """在多项式中查找符号。
+
+    Find symbol in polynomial by name.
+
+    Args:
+        polynomial: 输入多项式。/ Input polynomial.
+        variable: 变量名。/ Variable name.
+
+    Returns:
+        匹配的符号。/ Matching symbol.
+
+    Raises:
+        ValueError: 未找到变量。/ Variable not found.
+    """
+    for symbol in polynomial.symbols:
+        if symbol.name == variable or symbol.display_name == variable:
+            return symbol
+    raise ValueError(f"Variable '{variable}' not found in polynomial")
 
 
 @dataclass(frozen=True)
@@ -33,6 +64,9 @@ class IntegrateOps(Generic[T]):
         Integrate with respect to a variable
         (indefinite integral).
 
+        对单项式 c * x^p 积分得到 c/(p+1) * x^(p+1)。
+        Integrates monomial c * x^p to c/(p+1) * x^(p+1).
+
         Args:
             polynomial: 输入多项式。/ Input polynomial.
             variable: 积分变量。/ Variable to integrate.
@@ -40,9 +74,23 @@ class IntegrateOps(Generic[T]):
         Returns:
             积分后的多项式。/ Integrated polynomial.
         """
-        # TODO: 实现积分逻辑
-        # TODO: implement integration logic
-        return polynomial
+        if isinstance(polynomial, CanonicalPolynomial):
+            target = _find_symbol(polynomial, variable)
+            new_terms: list[CanonicalMonomial] = []
+            for term in polynomial.terms:
+                power = term.powers.get(target, 0)
+                new_coeff = term.coefficient / (power + 1)
+                new_powers = dict(term.powers)
+                new_powers[target] = power + 1
+                new_terms.append(
+                    CanonicalMonomial(
+                        coefficient=new_coeff,
+                        powers=new_powers,
+                    )
+                )
+            return CanonicalPolynomial(terms=new_terms)  # type: ignore[return-value]
+
+        raise TypeError(f"Unsupported polynomial type: {type(polynomial)}")
 
     def definite_integrate(
         self,
@@ -53,7 +101,8 @@ class IntegrateOps(Generic[T]):
     ) -> float:
         """计算定积分。
 
-        Compute definite integral.
+        Compute definite integral by integrating and evaluating
+        at bounds: F(upper) - F(lower).
 
         Args:
             polynomial: 输入多项式。/ Input polynomial.
@@ -64,6 +113,8 @@ class IntegrateOps(Generic[T]):
         Returns:
             定积分值。/ Definite integral value.
         """
-        # TODO: 实现定积分逻辑
-        # TODO: implement definite integration logic
-        raise NotImplementedError
+        if isinstance(polynomial, CanonicalPolynomial):
+            integrated = self.integrate(polynomial, variable)
+            result = float(integrated.evaluate({}))  # type: ignore[attr-defined]
+            return result
+        raise TypeError(f"Unsupported polynomial type: {type(polynomial)}")

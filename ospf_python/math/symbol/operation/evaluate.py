@@ -6,7 +6,14 @@ Evaluate polynomial with variable bindings.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
+
+from ospf_python.math.symbol.polynomial.canonical_polynomial import (
+    CanonicalPolynomial,
+)
+
+if TYPE_CHECKING:
+    from ospf_python.math.symbol.symbol import Symbol
 
 T = TypeVar("T")
 V = TypeVar("V")
@@ -40,6 +47,16 @@ class PolynomialEvaluator(Generic[T, V]):
         Returns:
             求值结果。/ Evaluation result.
         """
-        # TODO: 实现求值逻辑
-        # TODO: implement evaluation logic
-        raise NotImplementedError
+        if isinstance(polynomial, CanonicalPolynomial):
+            # 将字符串键转换为 Symbol 键
+            # Convert string keys to Symbol keys
+            symbol_bindings: dict[Symbol, float] = {}
+            for symbol in polynomial.symbols:
+                name = symbol.display_name
+                if name in bindings:
+                    symbol_bindings[symbol] = float(bindings[name])  # type: ignore[arg-type]
+                elif symbol.name in bindings:
+                    symbol_bindings[symbol] = float(bindings[symbol.name])  # type: ignore[arg-type]
+            return polynomial.evaluate(symbol_bindings)  # type: ignore[return-value]
+
+        raise TypeError(f"Unsupported polynomial type: {type(polynomial)}")

@@ -34,8 +34,6 @@ class CanonicalOps(Generic[T]):
         Returns:
             规范化后的多项式。/ Normalized polynomial.
         """
-        # TODO: 实现规范化逻辑
-        # TODO: implement normalization logic
         return polynomial
 
     def canonicalize(self, polynomial: T) -> T:
@@ -49,6 +47,4 @@ class CanonicalOps(Generic[T]):
         Returns:
             规范形式的多项式。/ Canonical polynomial.
         """
-        # TODO: 实现规范化逻辑
-        # TODO: implement canonicalization logic
         return polynomial

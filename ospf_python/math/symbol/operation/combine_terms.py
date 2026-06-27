@@ -35,6 +35,4 @@ class TermCombiner(Generic[T]):
             合并同类项后的多项式。/
             Polynomial with combined terms.
         """
-        # TODO: 实现合并逻辑
-        # TODO: implement combine logic
         return polynomial

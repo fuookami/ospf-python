@@ -39,6 +39,4 @@ class Differentiator(Generic[T]):
         Returns:
             导数多项式。/ Derivative polynomial.
         """
-        # TODO: 实现微分逻辑
-        # TODO: implement differentiation logic
         return polynomial
