@@ -89,7 +89,7 @@ class CuttingPlanGenerator:
             切割方案元组 / Tuple of cutting plans.
         """
         if not shapes or not demands:
-            return ()
+            return tuple()  # reason: no shapes or demands to generate
 
         shape_map = {s.shape_key: s for s in shapes}
         remaining = self._build_remaining(demands)
@@ -271,7 +271,7 @@ class CuttingPlanGenerator:
             (x, y) 坐标或 None / (x, y) coordinates or None.
         """
         if item_w > bin_w or item_h > bin_h:
-            return None
+            return None  # reason: item exceeds container dimensions
 
         step = max(item_w, item_h) / 2.0
         step = max(step, 1.0)
@@ -307,7 +307,7 @@ class CuttingPlanGenerator:
                 x += 1.0
             y += 1.0
 
-        return None
+        return None  # reason: no feasible position found after full scan
 
     def _overlaps(
         self,
@@ -331,7 +331,8 @@ class CuttingPlanGenerator:
         """
         new_x2 = x + w
         new_y2 = y + h
-        for ox1, oy1, ox2, oy2 in occupied:
-            if x < ox2 and new_x2 > ox1 and y < oy2 and new_y2 > oy1:
-                return True
-        return False
+        has_overlap = any(
+            x < ox2 and new_x2 > ox1 and y < oy2 and new_y2 > oy1
+            for ox1, oy1, ox2, oy2 in occupied
+        )
+        return has_overlap

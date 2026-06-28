@@ -113,7 +113,7 @@ class GenerationConstraints:
             产品约束或 None。
             Product constraint or None.
         """
-        for c in self.product_constraints:
-            if c.product_key == product_key:
-                return c
-        return None
+        return next(
+            (c for c in self.product_constraints if c.product_key == product_key),
+            None,
+        )

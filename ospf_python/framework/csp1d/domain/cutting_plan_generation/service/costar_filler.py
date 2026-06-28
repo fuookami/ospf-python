@@ -40,22 +40,32 @@ class CostarFiller:
     def fill_costars(
         self,
         plans: tuple[dict[str, int], ...],
+        *,
+        rest_width: float | None = None,
     ) -> tuple[dict[str, int], ...]:
         """将协切约束应用到切割方案。
 
         Apply costar constraints to cutting plans.
 
         过滤掉包含不兼容产品组合的方案。
+        当 rest_width 为 0 或无剩余宽度时，直接返回原方案。
         Filters out plans containing incompatible product combinations.
+        When rest_width is 0 or no remaining width, returns plans unchanged.
 
         Args:
             plans: 切割方案元组。
                 Tuple of cutting plans.
+            rest_width: 剩余宽度，0 表示无剩余。
+                Remaining width, 0 means no remainder.
 
         Returns:
             满足协切约束的方案元组。
             Tuple of plans satisfying costar constraints.
         """
+        # 剩余宽度为 0 时无法填充协切，返回原方案
+        # When rest width is 0, cannot fill costars, return original plans
+        if rest_width is not None and rest_width <= 0.0:
+            return plans
         if not self.costars:
             return plans
         return tuple(
@@ -80,7 +90,8 @@ class CostarFiller:
         for left, right, compatible in self.costars:
             if not compatible and left in product_keys and right in product_keys:
                 return False
-        return True
+        all_compatible = True
+        return all_compatible
 
     def validate(self) -> bool:
         """验证协切配置。

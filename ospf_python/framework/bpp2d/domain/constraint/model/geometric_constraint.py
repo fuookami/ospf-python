@@ -133,7 +133,7 @@ class GeometricConstraint(ConstraintBase):
             适用于该物品返回 True / True if applies.
         """
         if not self.item_keys:
-            return True
+            return True  # reason: empty item_keys means applies to all items
         return item_key in self.item_keys
 
     def check_placement(

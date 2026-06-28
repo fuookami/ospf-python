@@ -45,10 +45,10 @@ class GenerationWidthIndex:
             匹配的键元组，不存在返回空元组。
             Tuple of matching keys, empty if none.
         """
-        for w, keys in self.entries:
-            if abs(w - width) <= self.precision:
-                return keys
-        return ()
+        return next(
+            (keys for w, keys in self.entries if abs(w - width) <= self.precision),
+            (),
+        )
 
     def get_keys_in_range(
         self,

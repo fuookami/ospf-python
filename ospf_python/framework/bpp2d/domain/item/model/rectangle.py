@@ -134,9 +134,9 @@ class Rectangle:
         Returns:
             能放入返回 True / True if fits.
         """
-        if self.width <= container_width and self.height <= container_height:
-            return True
-        return bool(
+        fits_normal = self.width <= container_width and self.height <= container_height
+        fits_rotated = bool(
             self.can_rotate
             and (self.height <= container_width and self.width <= container_height)
         )
+        return fits_normal or fits_rotated

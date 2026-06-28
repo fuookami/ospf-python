@@ -111,10 +111,10 @@ class GenerationTemplateReuse:
             目标材料元组，不存在返回空元组。
             Tuple of target materials, empty if not found.
         """
-        for src, targets in self.reuse_map:
-            if src == source_material:
-                return targets
-        return ()
+        return next(
+            (targets for src, targets in self.reuse_map if src == source_material),
+            (),
+        )
 
     def get_templates_for(
         self,

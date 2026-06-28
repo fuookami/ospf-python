@@ -44,10 +44,10 @@ class GenerationMaterialWidthIndexCache:
             材料宽度，不存在返回 None。
             Material width, None if not found.
         """
-        for name, width in self.width_map:
-            if name == material:
-                return width
-        return None
+        return next(
+            (width for name, width in self.width_map if name == material),
+            None,
+        )
 
     def get_index(self, material: str) -> int | None:
         """获取指定材料的索引。
@@ -62,10 +62,10 @@ class GenerationMaterialWidthIndexCache:
             材料索引，不存在返回 None。
             Material index, None if not found.
         """
-        for name, idx in self.index_map:
-            if name == material:
-                return idx
-        return None
+        return next(
+            (idx for name, idx in self.index_map if name == material),
+            None,
+        )
 
     def put(
         self,

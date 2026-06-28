@@ -22,6 +22,8 @@ jobs:
         run: uv sync --all-extras
       - name: Production quality check
         run: uv run python scripts/check-production-quality.py
+      - name: Migration gates check
+        run: uv run python scripts/check_migration_gates.py
 
   lint:
     name: Lint

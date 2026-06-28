@@ -207,4 +207,4 @@ class FlowOptimizer:
         for edge in out_edges.get(from_key, []):
             if edge.to_node_key == to_key:
                 return edge
-        return None
+        return None  # reason: no matching edge found

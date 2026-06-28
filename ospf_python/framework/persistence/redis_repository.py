@@ -48,7 +48,7 @@ class RedisRepository(Repository[T]):
         client = self._get_client()
         data = client.get(self._make_key(id))
         if data is None:
-            return None
+            return None  # reason: key not found in Redis
         return data  # type: ignore[return-value]
 
     def save(self, entity: T) -> None:

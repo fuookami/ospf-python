@@ -169,8 +169,9 @@ class CuttingPlan:
         """检查方案是否对指定材料有效 /
         Check if plan is valid for material.
 
-        验证浪费率在合理范围内。
-        Validates waste ratio is in a reasonable range.
+        验证浪费率在合理范围内，且材料键匹配。
+        Validates waste ratio is in a reasonable range and
+        material key matches.
 
         Args:
             material: 目标材料 / Target material.
@@ -180,9 +181,11 @@ class CuttingPlan:
         """
         if self.waste_ratio < 0.0 or self.waste_ratio > 1.0:
             return False
+        if self.material_key != material.name:
+            return False
         if self.item_count == 0:
             return self.waste_ratio == 1.0
-        return True
+        return 0.0 <= self.waste_ratio <= 1.0
 
     def add_item(
         self,

@@ -34,6 +34,17 @@ class ConstraintBase(abc.ABC):
     所有二维装箱约束的抽象基类。
     Abstract base class for all 2D bin packing constraints.
 
+    子类必须实现 constraint_type 属性。
+    Subclasses must implement the constraint_type property.
+
+    注意：constraint_key 和 item_keys 不作为抽象属性，
+    因为 dataclass frozen 字段与 abstract property 不兼容。
+    子类可通过 dataclass 字段直接提供这些属性。
+
+    Note: constraint_key and item_keys are not abstract properties
+    because dataclass frozen fields conflict with abstract property.
+    Subclasses provide these via dataclass fields directly.
+
     Attributes:
         constraint_key: 约束标识 / Constraint identifier.
         constraint_type: 约束类型 / Constraint type.
@@ -42,18 +53,8 @@ class ConstraintBase(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def constraint_key(self) -> str:
-        """获取约束标识 / Get constraint identifier."""
-
-    @property
-    @abc.abstractmethod
     def constraint_type(self) -> ConstraintType:
         """获取约束类型 / Get constraint type."""
-
-    @property
-    @abc.abstractmethod
-    def item_keys(self) -> tuple[str, ...]:
-        """获取受约束物品键 / Get constrained item keys."""
 
     @abc.abstractmethod
     def applies_to(self, item_key: str) -> bool:

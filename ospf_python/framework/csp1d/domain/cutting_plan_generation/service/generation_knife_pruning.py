@@ -79,5 +79,6 @@ class GenerationKnifePruning:
             可以增加返回 True / True if can add.
         """
         if self.max_knife_count <= 0:
-            return True
+            no_limit = True
+            return no_limit
         return current_knife_count + additional_cuts <= self.max_knife_count

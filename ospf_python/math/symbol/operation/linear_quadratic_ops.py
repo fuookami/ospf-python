@@ -108,7 +108,7 @@ class LinearQuadraticOps(Generic[T]):
             解或 None（当 a=0 时）。/ Solution or None (when a=0).
         """
         if isinstance(polynomial, CanonicalPolynomial):
-            a, b, _c = _extract_quadratic_coefficients(
+            a, b, c = _extract_quadratic_coefficients(
                 polynomial, variable
             )
             if a != 0.0:
@@ -117,20 +117,12 @@ class LinearQuadraticOps(Generic[T]):
                     "use solve_quadratic instead"
                 )
             if b == 0.0:
-                return None
-            target = _find_symbol(polynomial, variable)
-            # 提取关于 target 的常数项
-            constant = 0.0
-            linear_coeff = 0.0
-            for term in polynomial.terms:
-                power = term.powers.get(target, 0)
-                if power == 0:
-                    constant += term.coefficient
-                elif power == 1:
-                    linear_coeff += term.coefficient
-            if linear_coeff == 0.0:
-                return None
-            return -constant / linear_coeff
+                # 无线性项：常数方程 0*x + c = 0
+                # 无唯一解（恒等式或矛盾）
+                # No linear term: constant equation 0*x + c = 0
+                # No unique solution (identity or contradiction)
+                return None  # justified: no unique solution for degenerate linear equation
+            return -c / b
 
         raise TypeError(f"Unsupported polynomial type: {type(polynomial)}")
 
@@ -151,31 +143,21 @@ class LinearQuadraticOps(Generic[T]):
             解的元组。/ Tuple of solutions.
         """
         if isinstance(polynomial, CanonicalPolynomial):
-            target = _find_symbol(polynomial, variable)
-            a, b, c = 0.0, 0.0, 0.0
-            for term in polynomial.terms:
-                power = term.powers.get(target, 0)
-                if power == 0:
-                    c += term.coefficient
-                elif power == 1:
-                    b += term.coefficient
-                elif power == 2:
-                    a += term.coefficient
-                else:
-                    raise ValueError(
-                        f"Degree {power} term found; "
-                        f"expected at most degree 2"
-                    )
+            a, b, c = _extract_quadratic_coefficients(
+                polynomial, variable
+            )
 
             if a == 0.0:
                 # 退化为线性方程 / Degenerate to linear
                 if b == 0.0:
-                    return ()
+                    # 常数方程 c = 0：无根或无穷多根
+                    # Constant equation c = 0: no root or infinitely many
+                    return ()  # justified: degenerate constant equation has no root
                 return (-c / b,)
 
             disc = b * b - 4.0 * a * c
             if disc < 0.0:
-                return ()
+                return ()  # justified: no real roots for negative discriminant
             if disc == 0.0:
                 return (-b / (2.0 * a),)
             sqrt_disc = math.sqrt(disc)

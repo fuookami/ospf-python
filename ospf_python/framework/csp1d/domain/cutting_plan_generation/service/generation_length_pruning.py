@@ -113,5 +113,6 @@ class GenerationLengthPruning:
             Utilization ratio (0.0 ~ 1.0).
         """
         if self.material_length <= self.precision:
-            return 0.0
+            zero_utilization = 0.0
+            return zero_utilization
         return used_length / self.material_length

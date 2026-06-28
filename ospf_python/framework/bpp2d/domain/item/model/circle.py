@@ -121,31 +121,60 @@ class Circle:
         """
         return self.diameter <= container_width and self.diameter <= container_height
 
-    def overlaps_with(self, other: Circle) -> bool:
+    def overlaps_with(
+        self,
+        other: Circle,
+        self_x: float = 0.0,
+        self_y: float = 0.0,
+        other_x: float = 0.0,
+        other_y: float = 0.0,
+    ) -> bool:
         """检查与另一圆形是否重叠 / Check overlap with another.
 
-        仅检查包围盒是否重叠（保守估计）。
-        Only checks bounding box overlap (conservative).
+        基于圆心距离判断是否重叠。
+        Determines overlap based on center-to-center distance.
 
         Args:
             other: 另一个圆形物品 / Another circle item.
+            self_x: 自身 X 坐标，默认 0 / Self X, default 0.
+            self_y: 自身 Y 坐标，默认 0 / Self Y, default 0.
+            other_x: 另一圆形 X 坐标，默认 0 / Other X, default 0.
+            other_y: 另一圆形 Y 坐标，默认 0 / Other Y, default 0.
 
         Returns:
-            可能重叠返回 True / True if overlap is possible.
+            重叠返回 True / True if circles overlap.
         """
-        return True
+        dx = self_x - other_x
+        dy = self_y - other_y
+        center_dist_sq = dx * dx + dy * dy
+        radius_sum = self.radius + other.radius
+        return center_dist_sq < radius_sum * radius_sum
 
-    def distance_to(self, other: Circle) -> float:
+    def distance_to(
+        self,
+        other: Circle,
+        self_x: float = 0.0,
+        self_y: float = 0.0,
+        other_x: float = 0.0,
+        other_y: float = 0.0,
+    ) -> float:
         """计算到另一圆形的最小距离 / Calc min distance to other.
 
-        基于包围盒计算的保守距离。
-        Conservative distance based on bounding boxes.
+        圆心距离减去两半径之和。
+        Center-to-center distance minus sum of radii.
 
         Args:
             other: 另一个圆形物品 / Another circle item.
+            self_x: 自身 X 坐标，默认 0 / Self X, default 0.
+            self_y: 自身 Y 坐标，默认 0 / Self Y, default 0.
+            other_x: 另一圆形 X 坐标，默认 0 / Other X, default 0.
+            other_y: 另一圆形 Y 坐标，默认 0 / Other Y, default 0.
 
         Returns:
             最小距离（可能为负表示重叠）/
             Min distance (negative if overlap).
         """
-        return -(self.radius + other.radius)
+        dx = self_x - other_x
+        dy = self_y - other_y
+        center_dist = math.sqrt(dx * dx + dy * dy)
+        return center_dist - (self.radius + other.radius)

@@ -86,7 +86,7 @@ class SolutionContext:
             Solution with smallest objective value, or None.
         """
         if not self.solutions:
-            return None
+            return None  # reason: no solutions registered
         return min(
             self.solutions.values(),
             key=lambda s: s.objective_value,

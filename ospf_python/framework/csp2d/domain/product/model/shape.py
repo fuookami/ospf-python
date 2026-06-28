@@ -145,7 +145,7 @@ class Shape:
         """
         if width <= 0.0 or height <= 0.0:
             return False
-        for rotation in self.rotations():
-            if rotation.width <= width and rotation.height <= height:
-                return True
-        return False
+        fits_any = any(
+            r.width <= width and r.height <= height for r in self.rotations()
+        )
+        return fits_any

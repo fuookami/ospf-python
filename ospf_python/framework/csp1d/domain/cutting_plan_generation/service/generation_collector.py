@@ -61,7 +61,8 @@ class GenerationCollector:
             return False
         self.seen_keys.add(key)
         self.collected.append(plan)
-        return True
+        collected = True
+        return collected
 
     def collect_all(
         self,

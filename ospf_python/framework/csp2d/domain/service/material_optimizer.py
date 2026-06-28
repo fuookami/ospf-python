@@ -94,7 +94,7 @@ class MaterialOptimizer:
             Best material selection or None (when no feasible material).
         """
         if not demands or not shapes or not materials:
-            return None
+            return None  # reason: insufficient inputs for optimization
 
         shape_map = {s.shape_key: s for s in shapes}
         total_area = self._calc_total_demand_area(
@@ -102,7 +102,7 @@ class MaterialOptimizer:
             shape_map,
         )
         if total_area <= 0.0:
-            return None
+            return None  # reason: zero demand area
 
         best: MaterialSelection | None = None
         best_eff_cost = float("inf")
@@ -173,7 +173,7 @@ class MaterialOptimizer:
             材料选择结果或 None / Material selection or None.
         """
         if not self._can_fit_any(material, shape_map):
-            return None
+            return None  # reason: no shape fits in this material
 
         raw_count = total_area / material.area
         import math
@@ -209,10 +209,11 @@ class MaterialOptimizer:
         Returns:
             是否有形状能放入 / Whether any shape fits.
         """
-        for shape in shape_map.values():
-            if shape.fits_in(material.width, material.height):
-                return True
-        return False
+        fits_any = any(
+            shape.fits_in(material.width, material.height)
+            for shape in shape_map.values()
+        )
+        return fits_any
 
     def rank_materials(
         self,
@@ -235,7 +236,7 @@ class MaterialOptimizer:
             Sorted material selection tuple.
         """
         if not demands or not shapes or not materials:
-            return ()
+            return tuple()  # reason: insufficient inputs for ranking
 
         shape_map = {s.shape_key: s for s in shapes}
         total_area = self._calc_total_demand_area(
@@ -243,7 +244,7 @@ class MaterialOptimizer:
             shape_map,
         )
         if total_area <= 0.0:
-            return ()
+            return tuple()  # reason: zero demand area
 
         selections: list[MaterialSelection] = []
         for mat in materials:

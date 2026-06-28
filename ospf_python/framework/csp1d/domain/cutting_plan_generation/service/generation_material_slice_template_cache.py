@@ -43,10 +43,10 @@ class GenerationMaterialSliceTemplateCache:
             切片模板元组，不存在返回 None。
             Slice template tuple, None if not found.
         """
-        for name, templates in self.entries:
-            if name == material:
-                return templates
-        return None
+        return next(
+            (templates for name, templates in self.entries if name == material),
+            None,
+        )
 
     def contains(self, material: str) -> bool:
         """检查是否包含指定材料的缓存。

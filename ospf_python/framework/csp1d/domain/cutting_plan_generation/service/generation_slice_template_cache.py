@@ -49,10 +49,10 @@ class GenerationSliceTemplateCache:
             切片模板，不存在返回 None。
             Slice template, None if not found.
         """
-        for cached_key, template in self.templates:
-            if cached_key == key:
-                return template
-        return None
+        return next(
+            (template for cached_key, template in self.templates if cached_key == key),
+            None,
+        )
 
     def put(
         self,

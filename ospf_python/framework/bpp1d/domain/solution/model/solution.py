@@ -100,7 +100,7 @@ class Solution:
             Average capacity utilization across all bins.
         """
         if not self.bins:
-            return 0.0
+            return 0.0  # reason: no bins means zero utilization
         rates = tuple(
             bin.used_capacity / bin.capacity for bin in self.bins if bin.capacity > 0.0
         )
