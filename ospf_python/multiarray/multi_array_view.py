@@ -8,14 +8,31 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any, TypeVar
 
+from ospf_python._binding import shared_view as _shared_view
+from ospf_python._binding.coordinate_materialization import materialize_coordinates
+from ospf_python._binding.result import BindingResult  # noqa: TC001
+from ospf_python._binding.shared_view import materialize_shared_view
 from ospf_python.multiarray.multi_array import MultiArray
-from ospf_python.multiarray.shape import Shape
+from ospf_python.multiarray.shape import DynShape, Shape
 
 # T: 元素类型 / Element type
 T = TypeVar("T")
 
 # S: 形状类型 / Shape type
 S = TypeVar("S", bound=Shape)
+
+_DEFAULT_PROTOCOL = _shared_view._DEFAULT_PROTOCOL
+_DEFAULT_MATERIALIZE = _shared_view._DEFAULT_MATERIALIZE
+_DEFAULT_DYNSHAPE = DynShape
+
+
+def _materialized_constructor() -> Callable[[Any, Any], MultiArray[Any, Any]]:
+    """在复制完成后解析当前公共构造器 / Resolve the current public constructor after copying.
+
+    Returns:
+        当前数组构造器 / Current array constructor.
+    """
+    return MultiArray
 
 
 class MultiArrayView:
@@ -96,16 +113,25 @@ class MultiArrayView:
         """
         return MappedMultiArrayView(self, f=f)
 
-    def materialize(self) -> MultiArray[Any, Any]:
+    def materialize(self) -> BindingResult[MultiArray[Any, Any]]:
         """将视图物化为独立数组。
 
         Materialize the view into a standalone array.
 
         Returns:
-            独立数组副本。/ Standalone array copy.
+            有效剩余区域副本或失败。/ Copy of the valid remaining region, or failure.
         """
-        data = self._source._data.copy()
-        return MultiArray(self._source.shape, data)
+        if (
+            _shared_view._protocol is _DEFAULT_PROTOCOL
+            and _shared_view.DynShape is _DEFAULT_DYNSHAPE
+        ):
+            try:
+                return _DEFAULT_MATERIALIZE(
+                    self, _DEFAULT_DYNSHAPE, _materialized_constructor
+                )
+            except Exception as error:
+                return _shared_view.external_failure(error)
+        return materialize_shared_view(self, _materialized_constructor)
 
 
 class MappedMultiArrayView:
@@ -163,30 +189,17 @@ class MappedMultiArrayView:
         raw = self._source.get(*indices)
         return self._f(raw)  # type: ignore[return-value]
 
-    def materialize(self) -> MultiArray[Any, Any]:
+    def materialize(self) -> BindingResult[MultiArray[Any, Any]]:
         """将映射视图物化为独立数组。
 
         Materialize the mapped view into a standalone array.
 
         Returns:
-            独立数组。/ Standalone array.
+            独立数组或保留外部异常的失败。/ Standalone array or failure retaining external exceptions.
         """
-        import numpy as np
-
-        shape = self._source.shape
-        values: list[Any] = []
-        from ospf_python.multiarray.access_order import (
-            AccessOrder,
-            MultiIndexIterator,
+        return materialize_coordinates(
+            owner=self, finish=lambda shape, data: MultiArray(shape, data)
         )
-
-        for pos in MultiIndexIterator(
-            shape.dims,
-            access_order=AccessOrder.C_ORDER,
-        ):
-            values.append(self.get(*pos.indices))
-        data = np.array(values)
-        return MultiArray(shape, data)
 
 
 def view_of(

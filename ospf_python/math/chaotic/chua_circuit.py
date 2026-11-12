@@ -10,6 +10,8 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
+from ospf_python._binding.chaotic_system import array_step_or_none
+
 
 @dataclass(frozen=True)
 class ChuaCircuit:
@@ -58,6 +60,14 @@ class ChuaCircuit:
         Returns:
             下一步状态。/ Next state.
         """
+        native = array_step_or_none(
+            system="ChuaCircuit",
+            params=(self.alpha, self.beta, self.m0, self.m1, self.dt),
+            state=x,
+        )
+        if native is not None:
+            return native
+
         v1, v2, i_l = x[0], x[1], x[2]
         dv1 = self.alpha * (v2 - v1 - self._nonlinear(v1))
         dv2 = v1 - v2 + i_l

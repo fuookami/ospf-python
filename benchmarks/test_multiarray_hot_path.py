@@ -68,7 +68,7 @@ class TestMultiArrayHotPath:
         arr = MultiArray.ones(shape)
 
         def _run() -> MultiArray[float, DynShape]:
-            return arr.map(lambda x: x * 2.0 + 1.0)
+            return arr.map(lambda x: x * 2.0 + 1.0).unwrap()
 
         benchmark(_run)
 
@@ -92,6 +92,6 @@ class TestMultiArrayHotPath:
         arr = MultiArray.ones(shape)
 
         def _run() -> float:
-            return arr.reduce(lambda a, b: a + b)
+            return arr.reduce(lambda a, b: a + b).unwrap()
 
         benchmark(_run)

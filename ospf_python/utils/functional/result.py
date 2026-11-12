@@ -86,7 +86,7 @@ class Ok(Result[T, C, E]):
     """成功结果 / Success result.
 
     Args:
-        value: 成功值 / Success value.
+        _value: 成功值 / Success value.
     """
 
     _value: T
@@ -130,7 +130,7 @@ class Failed(Result[T, C, E]):
     """失败结果 / Failure result.
 
     Args:
-        error: 单个错误 / Single error.
+        _error: 单个错误 / Single error.
     """
 
     _error: E
@@ -174,7 +174,7 @@ class Fatal(Result[T, C, E]):
     """致命错误结果 / Fatal error result.
 
     Args:
-        errors: 错误列表 / List of errors.
+        _errors: 错误列表 / List of errors.
     """
 
     _errors: tuple[E, ...]
@@ -259,8 +259,8 @@ class Warn(ExResult[T, C, E]):
     Contains both success value and warning error.
 
     Args:
-        value: 成功值 / Success value.
-        warning: 警告错误 / Warning error.
+        _value: 成功值 / Success value.
+        _warning: 警告错误 / Warning error.
     """
 
     _value: T

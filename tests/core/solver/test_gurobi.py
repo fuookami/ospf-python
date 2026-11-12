@@ -11,6 +11,9 @@ import pytest
 
 gurobipy = pytest.importorskip("gurobipy")
 
+from ospf_python.core.model.intermediate.linear_triad_model import (
+    LinearTriadModel,
+)
 from ospf_python.core.solver.config.gurobi_solver_config import (
     GurobiSolverConfig,
 )
@@ -288,6 +291,31 @@ class TestGurobiLinearSolver:
         assert abs(result.values.get("y")) < 1e-6
         solver.cleanup()
 
+    def test_solve_lp_publishes_real_duals_by_constraint_name(self) -> None:
+        """LP 发布真实对偶值 / LP publishes real duals.
+
+        min  2x + y
+        s.t. x + y >= 4     (active)
+             x + 2y >= 6    (slack)
+             x, y >= 0
+        """
+        solver = GurobiLinearSolver()
+        m = solver._get_or_create_model()
+        from gurobipy import GRB
+
+        x = m.addVar(lb=0.0, name="x", vtype=GRB.CONTINUOUS)
+        y = m.addVar(lb=0.0, name="y", vtype=GRB.CONTINUOUS)
+        m.setObjective(2 * x + y, GRB.MINIMIZE)
+        m.addConstr(x + y >= 4, name="c1")
+        m.addConstr(x + 2 * y >= 6, name="c2")
+        m.update()
+
+        result = solver.solve(m)
+
+        assert result.status is SolverStatus.OPTIMAL
+        assert result.dual_values == pytest.approx({"c1": 1.0, "c2": 0.0})
+        solver.cleanup()
+
     def test_solve_milp(self) -> None:
         """求解 MILP / Solve a MILP.
 
@@ -309,6 +337,240 @@ class TestGurobiLinearSolver:
 
         assert result.status is SolverStatus.OPTIMAL
         assert result.objective >= 5.0 - 1e-6
+        assert result.dual_values is None
+        solver.cleanup()
+
+    def test_solve_linear_triad_materializes_variables_and_constraints(
+        self,
+    ) -> None:
+        """线性三元组物化后返回真实 primal/dual。"""
+        solver = GurobiLinearSolver()
+        model = LinearTriadModel(
+            name="triad",
+            variables=["x", "y"],
+            objective={"x": 2.0, "y": 3.0},
+            constraints={
+                "c1": {"x": 1.0, "y": 1.0},
+                "c2": {"x": 1.0, "y": 2.0},
+            },
+            rhs={"c1": 4.0, "c2": 6.0},
+            sense={"c1": ">=", "c2": ">="},
+            lower_bounds={"x": 0.0, "y": 0.0},
+            upper_bounds={"x": float("inf"), "y": float("inf")},
+        )
+
+        result = solver.solve(model)
+
+        assert result.status is SolverStatus.OPTIMAL
+        assert result.objective == pytest.approx(10.0)
+        assert result.values.get("x") == pytest.approx(2.0)
+        assert result.values.get("y") == pytest.approx(2.0)
+        assert result.dual_values is not None
+        assert result.dual_values["c1"] == pytest.approx(1.0)
+        assert result.dual_values["c2"] == pytest.approx(1.0)
+        solver.cleanup()
+
+    @pytest.mark.parametrize(
+        ("variable_type", "rhs", "expected"),
+        [
+            ("continuous", 0.5, 0.5),
+            ("binary", 0.5, 1.0),
+            ("integer", 1.5, 2.0),
+        ],
+    )
+    def test_solve_linear_triad_honors_variable_types(
+        self,
+        variable_type: str,
+        rhs: float,
+        expected: float,
+    ) -> None:
+        """连续、二元和整数类型得到不同真实解。"""
+        solver = GurobiLinearSolver()
+        model = LinearTriadModel(
+            name=f"triad-{variable_type}",
+            variables=["x"],
+            constraints={"lower": {"x": 1.0}},
+            objective={"x": 1.0},
+            lower_bounds={"x": 0.0},
+            rhs={"lower": rhs},
+            sense={"lower": ">="},
+            variable_types={"x": variable_type},
+        )
+
+        result = solver.solve(model)
+
+        assert result.status is SolverStatus.OPTIMAL
+        assert result.values.get("x") == pytest.approx(expected)
+        if variable_type == "continuous":
+            assert result.dual_values is not None
+        else:
+            assert result.dual_values is None
+        solver.cleanup()
+
+    @pytest.mark.parametrize(
+        ("sense", "rhs", "expected"),
+        [
+            ("<", 4.0, 0.0),
+            ("<=", 4.0, 0.0),
+            ("=<", 4.0, 0.0),
+            (">", -1.0, 0.0),
+            (">=", -1.0, 0.0),
+            ("=>", -1.0, 0.0),
+            ("=", 2.0, 2.0),
+            ("==", 2.0, 2.0),
+        ],
+    )
+    def test_solve_linear_triad_supports_sense_aliases(
+        self,
+        sense: str,
+        rhs: float,
+        expected: float,
+    ) -> None:
+        """约束方向别名均正确物化。"""
+        solver = GurobiLinearSolver()
+        model = LinearTriadModel(
+            variables=["x"],
+            objective={"x": 1.0},
+            constraints={"c1": {"x": 1.0}},
+            rhs={"c1": rhs},
+            sense={"c1": sense},
+            lower_bounds={"x": 0.0},
+            upper_bounds={"x": 10.0},
+        )
+
+        result = solver.solve(model)
+
+        assert result.status is SolverStatus.OPTIMAL
+        assert result.values.get("x") == pytest.approx(expected)
+        solver.cleanup()
+
+    @pytest.mark.parametrize(
+        "model",
+        [
+            pytest.param(LinearTriadModel(), id="no-variable"),
+            pytest.param(
+                LinearTriadModel(variables=["x", "x"]),
+                id="duplicate-variable",
+            ),
+            pytest.param(
+                LinearTriadModel(variables=["x"], objective={"x": float("nan")}),
+                id="nan-objective",
+            ),
+            pytest.param(
+                LinearTriadModel(variables=["x"], objective={"x": float("inf")}),
+                id="infinite-objective",
+            ),
+            pytest.param(
+                LinearTriadModel(variables=["x"], lower_bounds={"x": float("nan")}),
+                id="nan-lower-bound",
+            ),
+            pytest.param(
+                LinearTriadModel(
+                    variables=["x"],
+                    lower_bounds={"x": 2.0},
+                    upper_bounds={"x": 1.0},
+                ),
+                id="crossed-bounds",
+            ),
+            pytest.param(
+                LinearTriadModel(
+                    variables=["x"],
+                    constraints={"c1": {"x": float("nan")}},
+                    rhs={"c1": 1.0},
+                ),
+                id="nan-constraint-coefficient",
+            ),
+            pytest.param(
+                LinearTriadModel(
+                    variables=["x"],
+                    constraints={"c1": {"x": 1.0}},
+                    rhs={"c1": float("inf")},
+                ),
+                id="infinite-rhs",
+            ),
+            pytest.param(
+                LinearTriadModel(
+                    variables=["x"],
+                    constraints={"c1": {"x": 1.0}},
+                    rhs={"c1": 1.0},
+                    sense={"c1": "!="},
+                ),
+                id="unsupported-sense",
+            ),
+            pytest.param(
+                LinearTriadModel(
+                    variables=["x"],
+                    constraints={"": {"x": 1.0}},
+                    rhs={"": 1.0},
+                ),
+                id="empty-constraint-name",
+            ),
+            pytest.param(
+                LinearTriadModel(
+                    variables=["x"],
+                    variable_types={"x": "semi_integer"},
+                ),
+                id="unsupported-variable-type",
+            ),
+            pytest.param(
+                LinearTriadModel(
+                    variables=["x"],
+                    variable_types={"x": "binary"},
+                    upper_bounds={"x": 2.0},
+                ),
+                id="invalid-binary-bound",
+            ),
+            pytest.param(
+                LinearTriadModel(
+                    variables=["x"],
+                    variable_types={"unknown": "binary"},
+                ),
+                id="unknown-typed-variable",
+            ),
+        ],
+    )
+    def test_solve_linear_triad_rejects_invalid_shape(
+        self,
+        model: LinearTriadModel,
+    ) -> None:
+        """线性三元组无效形状返回 ERROR。"""
+        solver = GurobiLinearSolver()
+
+        result = solver.solve(model)
+
+        assert result.status is SolverStatus.ERROR
+        solver.cleanup()
+
+    def test_failed_rematerialization_preserves_previous_model(self) -> None:
+        """物化失败不销毁上一模型。"""
+        solver = GurobiLinearSolver()
+        valid = LinearTriadModel(
+            variables=["x"],
+            objective={"x": 1.0},
+            lower_bounds={"x": 0.0},
+        )
+        assert solver.solve(valid).status is SolverStatus.OPTIMAL
+        previous = solver._model
+        assert previous is not None
+
+        invalid = LinearTriadModel(
+            variables=["x"],
+            objective={"x": float("nan")},
+        )
+        result = solver.solve(invalid)
+
+        assert result.status is SolverStatus.ERROR
+        assert solver._model is previous
+        assert previous.NumVars == 1
+        solver.cleanup()
+
+    def test_solve_rejects_unknown_model(self) -> None:
+        """未知模型类型返回 ERROR。"""
+        solver = GurobiLinearSolver()
+
+        result = solver.solve(object())
+
+        assert result.status is SolverStatus.ERROR
         solver.cleanup()
 
 

@@ -22,7 +22,7 @@ class TestChainedViews:
         """视图的视图 / View of view."""
         arr = MultiArray.from_list([1, 2, 3, 4, 5, 6], Shape2(d0=2, d1=3))
         v1 = MultiArrayView(arr)
-        v2 = MultiArrayView(v1.materialize())
+        v2 = MultiArrayView(v1.materialize().unwrap())
         assert v2.get(0, 0) == 1
         assert v2.get(1, 2) == 6
 
@@ -31,7 +31,7 @@ class TestChainedViews:
         arr = MultiArray.from_list([1, 2, 3], Shape1(d0=3))
         v = MultiArrayView(arr)
         m1 = v.map(lambda x: x * 2)
-        mat = m1.materialize()
+        mat = m1.materialize().unwrap()
         v2 = MultiArrayView(mat)
         m2 = v2.map(lambda x: x + 10)
         assert m2.get(0) == 12
@@ -42,10 +42,10 @@ class TestChainedViews:
         arr = MultiArray.from_list([1, 2, 3], Shape1(d0=3))
         v1 = MultiArrayView(arr)
         m1 = v1.map(lambda x: x + 1)
-        mat1 = m1.materialize()
+        mat1 = m1.materialize().unwrap()
         v2 = MultiArrayView(mat1)
         m2 = v2.map(lambda x: x * 3)
-        mat2 = m2.materialize()
+        mat2 = m2.materialize().unwrap()
         v3 = MultiArrayView(mat2)
         m3 = v3.map(lambda x: x - 1)
         # (1+1)*3-1=5, (2+1)*3-1=8, (3+1)*3-1=11
@@ -64,7 +64,7 @@ class TestMaterializeEdgeCases:
         """物化保留值 / Materialize preserves values."""
         arr = MultiArray.from_list([10, 20, 30], Shape1(d0=3))
         view = MultiArrayView(arr)
-        mat = view.materialize()
+        mat = view.materialize().unwrap()
         assert mat.get(0) == 10
         assert mat.get(2) == 30
 
@@ -72,14 +72,18 @@ class TestMaterializeEdgeCases:
         """带偏移物化 / Materialize with offset."""
         arr = MultiArray.from_list([1, 2, 3, 4, 5, 6], Shape2(d0=2, d1=3))
         view = MultiArrayView(arr, offsets=(1, 0))
-        mat = view.materialize()
-        assert mat.size == 6
+        mat = view.materialize().unwrap()
+        assert mat.size == 3
+        assert mat.shape.dims == (1, 3)
+        assert [mat.get(0, col) for col in range(3)] == [4, 5, 6]
+        assert mat._data is not arr._data
+        assert view.shape is arr.shape
 
     def test_materialize_preserves_dtype(self) -> None:
         """物化保留数据类型 / Materialize preserves dtype."""
         arr = MultiArray.from_list([1.5, 2.5, 3.5], Shape1(d0=3))
         view = MultiArrayView(arr)
-        mat = view.materialize()
+        mat = view.materialize().unwrap()
         assert mat.get(0) == 1.5
 
     def test_materialize_3d(self) -> None:
@@ -87,7 +91,7 @@ class TestMaterializeEdgeCases:
         data = list(range(24))
         arr = MultiArray.from_list(data, Shape3(d0=2, d1=3, d2=4))
         view = MultiArrayView(arr)
-        mat = view.materialize()
+        mat = view.materialize().unwrap()
         assert mat.ndim == 3
         assert mat.size == 24
 

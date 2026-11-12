@@ -47,23 +47,23 @@ class TestTrivalentAnd:
 
     def test_true_and_true(self) -> None:
         """真 AND 真 = 真。/ True AND True = True."""
-        assert and_(Trivalent.TRUE, Trivalent.TRUE) == Trivalent.TRUE
+        assert and_(Trivalent.TRUE, Trivalent.TRUE).unwrap() == Trivalent.TRUE
 
     def test_true_and_false(self) -> None:
         """真 AND 假 = 假。/ True AND False = False."""
-        assert and_(Trivalent.TRUE, Trivalent.FALSE) == Trivalent.FALSE
+        assert and_(Trivalent.TRUE, Trivalent.FALSE).unwrap() == Trivalent.FALSE
 
     def test_false_and_unknown(self) -> None:
         """假 AND 未知 = 假。/ False AND Unknown = False."""
-        assert and_(Trivalent.FALSE, Trivalent.UNKNOWN) == Trivalent.FALSE
+        assert and_(Trivalent.FALSE, Trivalent.UNKNOWN).unwrap() == Trivalent.FALSE
 
     def test_true_and_unknown(self) -> None:
         """真 AND 未知 = 未知。/ True AND Unknown = Unknown."""
-        assert and_(Trivalent.TRUE, Trivalent.UNKNOWN) == Trivalent.UNKNOWN
+        assert and_(Trivalent.TRUE, Trivalent.UNKNOWN).unwrap() == Trivalent.UNKNOWN
 
     def test_unknown_and_unknown(self) -> None:
         """未知 AND 未知 = 未知。/ Unknown AND Unknown = Unknown."""
-        result = and_(Trivalent.UNKNOWN, Trivalent.UNKNOWN)
+        result = and_(Trivalent.UNKNOWN, Trivalent.UNKNOWN).unwrap()
         assert result == Trivalent.UNKNOWN
 
 
@@ -75,19 +75,19 @@ class TestTrivalentOr:
 
     def test_true_or_false(self) -> None:
         """真 OR 假 = 真。/ True OR False = True."""
-        assert or_(Trivalent.TRUE, Trivalent.FALSE) == Trivalent.TRUE
+        assert or_(Trivalent.TRUE, Trivalent.FALSE).unwrap() == Trivalent.TRUE
 
     def test_false_or_false(self) -> None:
         """假 OR 假 = 假。/ False OR False = False."""
-        assert or_(Trivalent.FALSE, Trivalent.FALSE) == Trivalent.FALSE
+        assert or_(Trivalent.FALSE, Trivalent.FALSE).unwrap() == Trivalent.FALSE
 
     def test_false_or_unknown(self) -> None:
         """假 OR 未知 = 未知。/ False OR Unknown = Unknown."""
-        assert or_(Trivalent.FALSE, Trivalent.UNKNOWN) == Trivalent.UNKNOWN
+        assert or_(Trivalent.FALSE, Trivalent.UNKNOWN).unwrap() == Trivalent.UNKNOWN
 
     def test_true_or_unknown(self) -> None:
         """真 OR 未知 = 真。/ True OR Unknown = True."""
-        assert or_(Trivalent.TRUE, Trivalent.UNKNOWN) == Trivalent.TRUE
+        assert or_(Trivalent.TRUE, Trivalent.UNKNOWN).unwrap() == Trivalent.TRUE
 
 
 # ── Trivalent NOT ───────────────────────────────────────────────
@@ -98,15 +98,15 @@ class TestTrivalentNot:
 
     def test_not_true(self) -> None:
         """NOT 真 = 假。/ NOT True = False."""
-        assert not_(Trivalent.TRUE) == Trivalent.FALSE
+        assert not_(Trivalent.TRUE).unwrap() == Trivalent.FALSE
 
     def test_not_false(self) -> None:
         """NOT 假 = 真。/ NOT False = True."""
-        assert not_(Trivalent.FALSE) == Trivalent.TRUE
+        assert not_(Trivalent.FALSE).unwrap() == Trivalent.TRUE
 
     def test_not_unknown(self) -> None:
         """NOT 未知 = 未知。/ NOT Unknown = Unknown."""
-        assert not_(Trivalent.UNKNOWN) == Trivalent.UNKNOWN
+        assert not_(Trivalent.UNKNOWN).unwrap() == Trivalent.UNKNOWN
 
 
 # ── BalancedTrivalent ───────────────────────────────────────────
@@ -127,7 +127,7 @@ class TestBalancedTrivalent:
             balanced_and(
                 BalancedTrivalent.TRUE,
                 BalancedTrivalent.BALANCED,
-            )
+            ).unwrap()
             == BalancedTrivalent.BALANCED
         )
 
@@ -137,7 +137,7 @@ class TestBalancedTrivalent:
             balanced_or(
                 BalancedTrivalent.FALSE,
                 BalancedTrivalent.BALANCED,
-            )
+            ).unwrap()
             == BalancedTrivalent.BALANCED
         )
 
@@ -146,7 +146,7 @@ class TestBalancedTrivalent:
         assert (
             balanced_not(
                 BalancedTrivalent.BALANCED,
-            )
+            ).unwrap()
             == BalancedTrivalent.BALANCED
         )
 
@@ -155,6 +155,6 @@ class TestBalancedTrivalent:
         assert (
             balanced_not(
                 BalancedTrivalent.TRUE,
-            )
+            ).unwrap()
             == BalancedTrivalent.FALSE
         )

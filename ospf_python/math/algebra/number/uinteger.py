@@ -8,6 +8,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Self
 
+from ospf_python import _native
+
 
 @dataclass(frozen=True, order=True)
 class UInteger:
@@ -23,8 +25,7 @@ class UInteger:
 
     def __post_init__(self) -> None:
         """校验非负。/ Validate non-negative."""
-        if self.value < 0:
-            object.__setattr__(self, "value", 0)
+        _integer.initialize(self)
 
     @property
     def zero(self) -> Self:
@@ -42,22 +43,20 @@ class UInteger:
 
     def __add__(self, other: Self) -> Self:
         """加法。/ Addition."""
-        return self.__class__(self.value + other.value)
+        return _integer.add(owner=self, other=other)
 
     def __mul__(self, other: Self) -> Self:
         """乘法。/ Multiplication."""
-        return self.__class__(self.value * other.value)
+        return _integer.multiply(owner=self, other=other)
 
     def __sub__(self, other: Self) -> Self:
         """减法（截断到零）。/ Subtraction (clamped to zero)."""
-        result = self.value - other.value
-        return self.__class__(max(result, 0))
+        result = _integer.subtract_values(left=self.value, right=other.value)
+        return _integer.unsigned_result(constructor=self.__class__, result=result)
 
     def __truediv__(self, other: Self) -> Self:
         """整数除法。/ Integer division."""
-        if other.value == 0:
-            return self.__class__(0)
-        return self.__class__(self.value // other.value)
+        return _integer.divide(owner=self, other=other)
 
     def __neg__(self) -> Self:
         """取反（无符号截断为零）。/ Negation (unsigned clamps to zero)."""
@@ -67,13 +66,13 @@ class UInteger:
         """相等比较。/ Equality comparison."""
         if not isinstance(other, UInteger):
             return NotImplemented
-        return self.value == other.value
+        return _integer.equal(left=self.value, right=other.value)
 
     def __ne__(self, other: object) -> bool:
         """不等比较。/ Inequality comparison."""
         if not isinstance(other, UInteger):
             return NotImplemented
-        return self.value != other.value
+        return _integer.not_equal(left=self.value, right=other.value)
 
     def __hash__(self) -> int:
         """哈希值。/ Hash value."""
@@ -82,3 +81,6 @@ class UInteger:
     def __repr__(self) -> str:
         """字符串表示。/ String representation."""
         return f"UInteger({self.value})"
+
+
+_integer = _native._public_integer.facade(reference=UInteger.__add__, domain="uinteger")

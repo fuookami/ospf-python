@@ -3,12 +3,11 @@
 Combinatorics: Async combinations and permutations.
 """
 
-from __future__ import annotations
-
 import asyncio
 from collections.abc import Sequence
 from typing import TypeVar
 
+from ospf_python._binding.result import BindingResult
 from ospf_python.math.combinatorics.combinations import (
     combinations,
 )
@@ -22,7 +21,7 @@ T = TypeVar("T")
 async def combinations_async(
     items: Sequence[T],
     k: int,
-) -> list[list[T]]:
+) -> BindingResult[list[list[T]]]:
     """异步生成所有 k-组合。
 
     Asynchronously generate all k-combinations.
@@ -36,7 +35,7 @@ async def combinations_async(
         k: 选取个数。/ Number of items to select.
 
     Returns:
-        所有 k-组合列表。/ List of all k-combinations.
+        与同步入口相同的 Result。 / The same Result as the synchronous entry point.
     """
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(
@@ -50,7 +49,7 @@ async def combinations_async(
 async def permutations_async(
     items: Sequence[T],
     k: int,
-) -> list[list[T]]:
+) -> BindingResult[list[list[T]]]:
     """异步生成所有 k-排列。
 
     Asynchronously generate all k-permutations.
@@ -64,7 +63,7 @@ async def permutations_async(
         k: 选取个数。/ Number of items to select.
 
     Returns:
-        所有 k-排列列表。/ List of all k-permutations.
+        与同步入口相同的 Result。 / The same Result as the synchronous entry point.
     """
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(

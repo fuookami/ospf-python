@@ -5,10 +5,10 @@ Rational number type.
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 from typing import Self
 
+from ospf_python import _native
 from ospf_python.utils.functional.ord import Order
 
 
@@ -28,16 +28,7 @@ class Rational:
 
     def __post_init__(self) -> None:
         """约分并确保分母为正。/ Reduce and ensure positive denominator."""
-        if self.denominator == 0:
-            object.__setattr__(self, "denominator", 1)
-            object.__setattr__(self, "numerator", 0)
-            return
-        gcd = math.gcd(self.numerator, self.denominator)
-        num = self.numerator // gcd
-        den = self.denominator // gcd
-        if den < 0:
-            num = -num
-            den = -den
+        num, den = _native._public_rational_normalize(self.numerator, self.denominator)
         object.__setattr__(self, "numerator", num)
         object.__setattr__(self, "denominator", den)
 
@@ -57,20 +48,30 @@ class Rational:
 
     def __add__(self, other: Self) -> Self:
         """加法。/ Addition."""
-        num = self.numerator * other.denominator + other.numerator * self.denominator
-        den = self.denominator * other.denominator
-        return self.__class__(num, den)
+        constructor = self.__class__
+        return _native._public_rational_binary(
+            left=(self.numerator, self.denominator),
+            right=(other.numerator, other.denominator),
+            operation="add",
+            constructor=constructor,
+        )
 
     def __mul__(self, other: Self) -> Self:
         """乘法。/ Multiplication."""
-        return self.__class__(
-            self.numerator * other.numerator,
-            self.denominator * other.denominator,
+        constructor = self.__class__
+        return _native._public_rational_binary(
+            left=(self.numerator, self.denominator),
+            right=(other.numerator, other.denominator),
+            operation="multiply",
+            constructor=constructor,
         )
 
     def __neg__(self) -> Self:
         """取反。/ Negation."""
-        return self.__class__(-self.numerator, self.denominator)
+        constructor = self.__class__
+        return _native._public_rational_negated(
+            (self.numerator, self.denominator), constructor=constructor
+        )
 
     def __sub__(self, other: Self) -> Self:
         """减法。/ Subtraction."""
@@ -80,9 +81,12 @@ class Rational:
         """除法。/ Division."""
         if other.numerator == 0:
             return self.__class__(0)
-        return self.__class__(
-            self.numerator * other.denominator,
-            self.denominator * other.numerator,
+        constructor = self.__class__
+        return _native._public_rational_binary(
+            left=(self.numerator, self.denominator),
+            right=(other.numerator, other.denominator),
+            operation="divide",
+            constructor=constructor,
         )
 
     def __eq__(self, other: object) -> bool:
@@ -101,7 +105,10 @@ class Rational:
 
     def __lt__(self, other: Self) -> bool:
         """小于比较。/ Less-than comparison."""
-        return self.numerator * other.denominator < other.numerator * self.denominator
+        return _native._public_rational_less(
+            (self.numerator, self.denominator),
+            (other.numerator, other.denominator),
+        )
 
     def __le__(self, other: Self) -> bool:
         """小于等于。/ Less-or-equal."""

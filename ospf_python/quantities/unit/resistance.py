@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from ospf_python._binding.unit_registry import (
+    register_unit_family as _register_unit_family,
+)
 
+
+@_register_unit_family(powers=(1, 2, -3, -2, 0, 0, 0, 0, 0, 0))
 @dataclass(frozen=True)
 class Resistance:
     """电阻单位。/ Electrical resistance unit.

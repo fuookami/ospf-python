@@ -6,6 +6,15 @@ Fractal: Julia set.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, SupportsComplex, SupportsIndex
+
+from ospf_python import _native
+from ospf_python._binding import fractal as _fractal
+from ospf_python._binding.result import invalid
+from ospf_python.utils.functional.result import Ok
+
+if TYPE_CHECKING:
+    from ospf_python._binding.result import BindingResult
 
 
 @dataclass(frozen=True)
@@ -29,10 +38,10 @@ class JuliaSet:
 
     @staticmethod
     def iterate(
-        z: complex,
-        c: complex,
-        max_iter: int,
-    ) -> int:
+        z: SupportsComplex,
+        c: SupportsComplex,
+        max_iter: SupportsIndex,
+    ) -> BindingResult[int]:
         """对 z 应用迭代 z -> z^2 + c，返回逃逸时的迭代次数。
 
         Apply iteration z -> z^2 + c, returning the iteration
@@ -51,14 +60,27 @@ class JuliaSet:
             逃逸迭代次数或 max_iter。
             Escape iteration count or max_iter.
         """
-        current = z
-        for i in range(max_iter):
-            if current.real * current.real + current.imag * current.imag > 4.0:
-                return i
-            current = current * current + c
-        return max_iter
+        if (
+            type(z) is complex
+            and type(c) is complex
+            and (type(max_iter) is int or type(max_iter) is bool)
+        ):
+            count = max_iter
+            if count > _fractal._U64_MAX:
+                return _fractal._resource_failure()
+            if count <= 0:
+                return Ok(count)
+            value, transport_error = _native._fractal_escape_time(z, c, count)
+            if transport_error is None:
+                if value is None:
+                    return invalid(
+                        "原生分形结果缺失 / Native fractal result is missing"
+                    )
+                return Ok(value)
+            return _fractal._transport_failure(transport_error)
+        return _fractal.julia_iterate(z, c, max_iter)
 
-    def contains(self, x: float, y: float) -> bool:
+    def contains(self, x: float, y: float) -> BindingResult[bool]:
         """判断点 (x, y) 是否属于 Julia 集（不逃逸）。
 
         Determine if point (x, y) belongs to the Julia set
@@ -71,7 +93,24 @@ class JuliaSet:
         Returns:
             是否属于 Julia 集。/ Whether in the Julia set.
         """
-        c = complex(self.c_real, self.c_imag)
-        z = complex(x, y)
-        iters = JuliaSet.iterate(z, c, self.max_iter)
-        return iters == self.max_iter
+        if (
+            type(x) is float
+            and type(y) is float
+            and type(self.c_real) is float
+            and type(self.c_imag) is float
+        ):
+            parameter = complex(self.c_real, self.c_imag)
+            current = complex(x, y)
+            return JuliaSet.iterate(current, parameter, self.max_iter).map(
+                lambda iterations: iterations == self.max_iter
+            )
+        values = _fractal.julia_contains_pair(
+            x=x,
+            y=y,
+            c_real=self.c_real,
+            c_imag=self.c_imag,
+            max_iterations=self.max_iter,
+        )
+        return values.flat_map(
+            lambda pair: JuliaSet.iterate(pair[0], pair[1], self.max_iter)
+        ).map(lambda iterations: iterations == self.max_iter)

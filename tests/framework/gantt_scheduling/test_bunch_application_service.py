@@ -7,6 +7,9 @@ methods.
 
 from __future__ import annotations
 
+import pytest
+
+from ospf_python import _native
 from ospf_python.core.solver.mock_solver import MockSolver
 from ospf_python.framework.gantt_scheduling.application.model.gantt_problem import (
     GanttProblem,
@@ -31,6 +34,7 @@ from ospf_python.framework.gantt_scheduling.domain.task.model.task import Task
 from ospf_python.framework.gantt_scheduling.domain.task.model.task_context import (
     TaskContext,
 )
+from ospf_python.utils.error.code import ErrorCode
 
 
 def _make_problem() -> GanttProblem:
@@ -67,6 +71,17 @@ def _make_service() -> BunchApplicationService:
         resource_context=resource_ctx,
         bunch_context=bunch_ctx,
     )
+
+
+class _UnexpectedSolver:
+    """记录意外调用的求解器替身。/ Solver double that records unexpected calls."""
+
+    def __init__(self) -> None:
+        self.calls: list[object] = []
+
+    def solve(self, triad: object) -> object:
+        self.calls.append(triad)
+        raise AssertionError("default solver must not be called")
 
 
 # ==================== register 测试 / register tests ===========
@@ -409,11 +424,390 @@ class TestExtractSolution:
         assert solution.task_count > 0
 
 
+class TestExtractFiniteBunchSolution:
+    """显式原生后端的有限束列提取 / Finite bunch-column extraction with an explicit native backend."""
+
+    def test_native_backend_with_active_columns_uses_bridge(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """显式原生后端和活跃列应走 Rust 有限束列桥。"""
+        from ospf_python._binding.gantt_bunch import BunchSelection, BunchSolve
+        from ospf_python._binding.model import SolveReport
+        from ospf_python.utils.functional.result import Ok
+
+        solver = _UnexpectedSolver()
+        service = BunchApplicationService(
+            solver=solver,  # type: ignore[arg-type]
+            task_context=TaskContext(),
+            resource_context=ResourceContext(),
+            bunch_context=BunchGenerationContext(),
+            native_solver="gurobi10",
+        )
+        problem = _make_problem()
+        column = BunchColumn(
+            bunch_key="b1",
+            task_assignments=(("t1", 0.0), ("t2", 3.0)),
+            resource_key="r1",
+            cost=5.0,
+        )
+        assert service.register(problem).is_ok()
+        assert service.add_columns((column,)).is_ok()
+
+        report = SolveReport(
+            model_identity=1,
+            model_generation=0,
+            problem_status="OPTIMAL",
+            termination_reason="COMPLETED",
+            solution_presence="OPTIMAL",
+            objective=5.0,
+            values=(),
+            raw_json="{}",
+        )
+        calls: list[dict[str, object]] = []
+
+        def solve_finite(**kwargs: object) -> Ok[BunchSolve]:
+            calls.append(kwargs)
+            return Ok(
+                BunchSolve(
+                    report=report,
+                    solution=Ok(
+                        BunchSelection(columns=(column,), cost=(5, 1)),
+                    ),
+                )
+            )
+
+        monkeypatch.setattr(
+            "ospf_python._binding.gantt_bunch.solve_bunch_columns",
+            solve_finite,
+        )
+
+        result = service.extract_solution()
+
+        assert result.is_ok()
+        assert result.unwrap().objective_value == 5.0
+        assert solver.calls == []
+        assert calls[0]["problem"] is problem
+        assert calls[0]["columns"] == (column,)
+        assert calls[0]["solver"] == "gurobi10"
+
+    def test_empty_active_columns_keep_the_compiled_final_mip(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """空活跃列保留原编译最终 MIP 路径。"""
+        calls: list[object] = []
+
+        def solve_finite(**kwargs: object) -> object:
+            calls.append(kwargs)
+            raise AssertionError("finite bridge must not be called")
+
+        monkeypatch.setattr(
+            "ospf_python._binding.gantt_bunch.solve_bunch_columns",
+            solve_finite,
+        )
+        service = BunchApplicationService(
+            solver=MockSolver(),
+            task_context=TaskContext(),
+            resource_context=ResourceContext(),
+            bunch_context=BunchGenerationContext(),
+            native_solver="gurobi10",
+        )
+        assert service.register(_make_problem()).is_ok()
+
+        result = service.extract_solution()
+
+        assert result.is_failed()
+        assert result.error.code is ErrorCode.NO_SOLUTION
+        assert calls == []
+
+    @pytest.mark.skipif(
+        "gurobi10" not in _native.build_info()["native_solvers"].split(","),
+        reason="Rust gurobi10 backend not compiled",
+    )
+    def test_native_bridge_returns_exact_column_cost(self) -> None:
+        """真实 Gurobi 10 求解返回选中列的精确成本。"""
+        service = BunchApplicationService(
+            solver=MockSolver(),
+            task_context=TaskContext(),
+            resource_context=ResourceContext(),
+            bunch_context=BunchGenerationContext(),
+            native_solver="gurobi10",
+        )
+        assert service.register(_make_problem()).is_ok()
+        assert service.add_columns(
+            (
+                BunchColumn(
+                    bunch_key="b1",
+                    task_assignments=(("t1", 0.0), ("t2", 3.0)),
+                    resource_key="r1",
+                    cost=5.0,
+                ),
+            )
+        ).is_ok()
+
+        solution = service.extract_solution().unwrap()
+
+        assert solution.is_optimal
+        assert solution.objective_value == 5.0
+        assert [entry.task_key for entry in solution.schedule] == ["t1", "t2"]
+        assert solution.schedule[1].start_time == 3.0
+
+    def test_extract_solution_rejects_conflicting_duplicate_coverage(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """唯一调度映射拒绝同一任务的不同模式，不静默取第一个。
+
+        The unique schedule mapping rejects conflicting task modes.
+        """
+        from ospf_python._binding.gantt_bunch import BunchSelection, BunchSolve
+        from ospf_python._binding.model import SolveReport
+        from ospf_python.utils.functional.result import Ok
+
+        service = BunchApplicationService(
+            solver=_UnexpectedSolver(),  # type: ignore[arg-type]
+            task_context=TaskContext(),
+            resource_context=ResourceContext(),
+            bunch_context=BunchGenerationContext(),
+            native_solver="gurobi10",
+        )
+        problem = _make_problem()
+        early = BunchColumn("early", (("t1", 0.0),), "r1", 1.0)
+        late = BunchColumn("late", (("t1", 5.0),), "r1", 1.0)
+        complete = BunchColumn("all", (("t2", 3.0),), "r1", 1.0)
+        assert service.register(problem).is_ok()
+        assert service.add_columns((early, late, complete)).is_ok()
+
+        report = SolveReport(
+            model_identity=1,
+            model_generation=0,
+            problem_status="OPTIMAL",
+            termination_reason="COMPLETED",
+            solution_presence="OPTIMAL",
+            objective=3.0,
+            values=(),
+            raw_json="{}",
+        )
+
+        def solve_finite(**_: object) -> Ok[BunchSolve]:
+            return Ok(
+                BunchSolve(
+                    report=report,
+                    solution=Ok(
+                        BunchSelection(columns=(early, late, complete), cost=(3, 1)),
+                    ),
+                )
+            )
+
+        monkeypatch.setattr(
+            "ospf_python._binding.gantt_bunch.solve_bunch_columns",
+            solve_finite,
+        )
+
+        result = service.extract_solution()
+
+        assert result.is_failed()
+        assert result.error.code is ErrorCode.APPLICATION_ERROR
+
+
 # ==================== extract_bunch_solutions 测试 ===============
 
 
 class TestExtractBunchSolutions:
     """extract_bunch_solutions 方法测试。/ extract_bunch_solutions tests."""
+
+    def test_native_backend_with_active_columns_uses_bridge(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """显式原生后端和活跃列应走 Rust 有限束列桥。"""
+        from ospf_python._binding.gantt_bunch import BunchSelection, BunchSolve
+        from ospf_python._binding.model import SolveReport
+        from ospf_python.utils.functional.result import Ok
+
+        solver = _UnexpectedSolver()
+        service = BunchApplicationService(
+            solver=solver,  # type: ignore[arg-type]
+            task_context=TaskContext(),
+            resource_context=ResourceContext(),
+            bunch_context=BunchGenerationContext(),
+            native_solver="gurobi10",
+        )
+        problem = _make_problem()
+        column = BunchColumn(
+            bunch_key="b1",
+            task_assignments=(("t1", 0.0), ("t2", 3.0)),
+            resource_key="r1",
+            cost=5.0,
+        )
+        assert service.register(problem).is_ok()
+        assert service.add_columns((column,)).is_ok()
+
+        report = SolveReport(
+            model_identity=1,
+            model_generation=0,
+            problem_status="OPTIMAL",
+            termination_reason="COMPLETED",
+            solution_presence="OPTIMAL",
+            objective=5.0,
+            values=(),
+            raw_json="{}",
+        )
+        calls: list[dict[str, object]] = []
+
+        def solve_finite(**kwargs: object) -> Ok[BunchSolve]:
+            calls.append(kwargs)
+            return Ok(
+                BunchSolve(
+                    report=report,
+                    solution=Ok(
+                        BunchSelection(columns=(column,), cost=(5, 1)),
+                    ),
+                )
+            )
+
+        monkeypatch.setattr(
+            "ospf_python._binding.gantt_bunch.solve_bunch_columns",
+            solve_finite,
+        )
+
+        result = service.extract_bunch_solutions()
+
+        assert result.is_ok()
+        solutions = result.unwrap()
+        assert len(solutions) == 1
+        assert solutions[0].bunch_key == "b1"
+        assert solutions[0].total_cost == 5.0
+        assert solutions[0].resource_key == "r1"
+        assert solutions[0].task_keys == ("t1", "t2")
+        assert solutions[0].assignment_for("t2").start_time == 3.0  # type: ignore[union-attr]
+        assert solver.calls == []
+        assert calls[0]["problem"] is problem
+        assert calls[0]["columns"] == (column,)
+        assert calls[0]["solver"] == "gurobi10"
+
+    def test_empty_active_columns_keep_the_compiled_final_mip(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """空活跃列保留原编译最终 MIP 路径。"""
+        calls: list[object] = []
+
+        def solve_finite(**kwargs: object) -> object:
+            calls.append(kwargs)
+            raise AssertionError("finite bridge must not be called")
+
+        monkeypatch.setattr(
+            "ospf_python._binding.gantt_bunch.solve_bunch_columns",
+            solve_finite,
+        )
+        service = BunchApplicationService(
+            solver=MockSolver(),
+            task_context=TaskContext(),
+            resource_context=ResourceContext(),
+            bunch_context=BunchGenerationContext(),
+            native_solver="gurobi10",
+        )
+        assert service.register(_make_problem()).is_ok()
+
+        result = service.extract_bunch_solutions()
+
+        assert result.is_ok()
+        assert result.unwrap() == ()
+        assert calls == []
+
+    @pytest.mark.skipif(
+        "gurobi10" not in _native.build_info()["native_solvers"].split(","),
+        reason="Rust gurobi10 backend not compiled",
+    )
+    def test_native_bridge_returns_exact_bunch_solutions(self) -> None:
+        """真实 Gurobi 10 从选中列构造精确束编组方案。"""
+        service = BunchApplicationService(
+            solver=MockSolver(),
+            task_context=TaskContext(),
+            resource_context=ResourceContext(),
+            bunch_context=BunchGenerationContext(),
+            native_solver="gurobi10",
+        )
+        assert service.register(_make_problem()).is_ok()
+        assert service.add_columns(
+            (
+                BunchColumn(
+                    bunch_key="b1",
+                    task_assignments=(("t1", 0.0), ("t2", 3.0)),
+                    resource_key="r1",
+                    cost=5.0,
+                ),
+            )
+        ).is_ok()
+
+        solutions = service.extract_bunch_solutions().unwrap()
+
+        assert len(solutions) == 1
+        assert solutions[0].bunch_key == "b1"
+        assert solutions[0].total_cost == 5.0
+        assert solutions[0].task_keys == ("t1", "t2")
+        assert solutions[0].assignment_for("t2").start_time == 3.0  # type: ignore[union-attr]
+
+    def test_compatible_duplicate_columns_remain_separate_solutions(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """兼容重复覆盖保留每个选中列，不合并为唯一调度。
+
+        Compatible duplicate coverage keeps each selected column separate.
+        """
+        from ospf_python._binding.gantt_bunch import BunchSelection, BunchSolve
+        from ospf_python._binding.model import SolveReport
+        from ospf_python.utils.functional.result import Ok
+
+        service = BunchApplicationService(
+            solver=_UnexpectedSolver(),  # type: ignore[arg-type]
+            task_context=TaskContext(),
+            resource_context=ResourceContext(),
+            bunch_context=BunchGenerationContext(),
+            native_solver="gurobi10",
+        )
+        first = BunchColumn("first", (("t1", 0.0),), "r1", 1.0)
+        second = BunchColumn("second", (("t1", 0.0),), "r1", 2.0)
+        complete = BunchColumn("all", (("t2", 3.0),), "r1", 1.0)
+        assert service.register(_make_problem()).is_ok()
+        assert service.add_columns((first, second, complete)).is_ok()
+        report = SolveReport(
+            model_identity=1,
+            model_generation=0,
+            problem_status="OPTIMAL",
+            termination_reason="COMPLETED",
+            solution_presence="OPTIMAL",
+            objective=4.0,
+            values=(),
+            raw_json="{}",
+        )
+
+        def solve_finite(**_: object) -> Ok[BunchSolve]:
+            return Ok(
+                BunchSolve(
+                    report=report,
+                    solution=Ok(
+                        BunchSelection(
+                            columns=(first, second, complete),
+                            cost=(4, 1),
+                        ),
+                    ),
+                )
+            )
+
+        monkeypatch.setattr(
+            "ospf_python._binding.gantt_bunch.solve_bunch_columns",
+            solve_finite,
+        )
+
+        result = service.extract_bunch_solutions()
+
+        assert result.is_ok()
+        solutions = result.unwrap()
+        assert [solution.bunch_key for solution in solutions] == [
+            "first",
+            "second",
+            "all",
+        ]
+        assert solutions[0].task_keys == ("t1",)
+        assert solutions[1].task_keys == ("t1",)
 
     def test_extract_bunch_before_register_returns_failed(self) -> None:
         """未注册时提取束编组返回失败。/ Extract bunch before register fails."""

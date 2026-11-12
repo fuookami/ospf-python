@@ -10,6 +10,8 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
+from ospf_python._binding.chaotic_system import array_step_or_none
+
 
 @dataclass(frozen=True)
 class ChenSystem:
@@ -45,6 +47,12 @@ class ChenSystem:
         Returns:
             下一步状态。/ Next state.
         """
+        native = array_step_or_none(
+            system="ChenSystem", params=(self.a, self.b, self.c, self.dt), state=x
+        )
+        if native is not None:
+            return native
+
         x_, y_, z_ = x[0], x[1], x[2]
         dx = self.a * (y_ - x_)
         dy = (self.c - self.a) * x_ - x_ * z_ + self.c * y_

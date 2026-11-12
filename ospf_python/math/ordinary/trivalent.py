@@ -3,9 +3,10 @@
 Trivalent (three-valued) logic type.
 """
 
-from __future__ import annotations
-
 import enum
+
+from ospf_python._binding.result import BindingResult
+from ospf_python._binding.trivalent import logic, optional_bool
 
 
 class Trivalent(enum.Enum):
@@ -23,73 +24,60 @@ class Trivalent(enum.Enum):
     FALSE = "false"
     UNKNOWN = "unknown"
 
-    def __and__(self, other: Trivalent) -> Trivalent:
+    def __and__(self, other: "Trivalent") -> BindingResult["Trivalent"]:
         """逻辑与。/ Logical AND.
 
         Args:
             other: 另一个三值。/ Other trivalent.
 
         Returns:
-            与运算结果。/ AND result.
+            原成员或显式失败。/ Original member or explicit failure.
         """
-        if self == Trivalent.FALSE or other == Trivalent.FALSE:
-            return Trivalent.FALSE
-        if self == Trivalent.TRUE and other == Trivalent.TRUE:
-            return Trivalent.TRUE
-        return Trivalent.UNKNOWN
+        return logic(members=_MEMBERS, operation="and", left=self, right=other)
 
-    def __or__(self, other: Trivalent) -> Trivalent:
+    def __or__(self, other: "Trivalent") -> BindingResult["Trivalent"]:
         """逻辑或。/ Logical OR.
 
         Args:
             other: 另一个三值。/ Other trivalent.
 
         Returns:
-            或运算结果。/ OR result.
+            原成员或显式失败。/ Original member or explicit failure.
         """
-        if self == Trivalent.TRUE or other == Trivalent.TRUE:
-            return Trivalent.TRUE
-        if self == Trivalent.FALSE and other == Trivalent.FALSE:
-            return Trivalent.FALSE
-        return Trivalent.UNKNOWN
+        return logic(members=_MEMBERS, operation="or", left=self, right=other)
 
-    def __invert__(self) -> Trivalent:
+    def __invert__(self) -> BindingResult["Trivalent"]:
         """逻辑非。/ Logical NOT.
 
         Returns:
-            非运算结果。/ NOT result.
+            原成员或显式失败。/ Original member or explicit failure.
         """
-        if self == Trivalent.TRUE:
-            return Trivalent.FALSE
-        if self == Trivalent.FALSE:
-            return Trivalent.TRUE
-        return Trivalent.UNKNOWN
+        return logic(members=_MEMBERS, operation="not", left=self)
 
     @property
     def is_true(self) -> bool:
         """是否为真。/ Whether true."""
-        return self == Trivalent.TRUE
+        return self is Trivalent.TRUE
 
     @property
     def is_false(self) -> bool:
         """是否为假。/ Whether false."""
-        return self == Trivalent.FALSE
+        return self is Trivalent.FALSE
 
     @property
     def is_unknown(self) -> bool:
         """是否未知。/ Whether unknown."""
-        return self == Trivalent.UNKNOWN
+        return self is Trivalent.UNKNOWN
 
-    def to_bool(self) -> bool | None:
+    def to_bool(self) -> BindingResult[bool | None]:
         """转换为 Python bool 或 None。
 
         Convert to Python bool or None.
 
         Returns:
-            True/False/None。
+            True/False/None成功值或显式失败。/ Success or explicit failure.
         """
-        if self == Trivalent.TRUE:
-            return True
-        if self == Trivalent.FALSE:
-            return False
-        return None
+        return optional_bool(members=_MEMBERS, owner=self)
+
+
+_MEMBERS = (Trivalent.TRUE, Trivalent.FALSE, Trivalent.UNKNOWN)

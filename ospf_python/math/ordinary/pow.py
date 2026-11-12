@@ -3,19 +3,22 @@
 Integer power computation.
 """
 
-from __future__ import annotations
+from typing import SupportsIndex
+
+from ospf_python._binding.integer_power import pow_int as _pow_int
+from ospf_python._binding.result import BindingResult
 
 
-def pow_int(base: int, exp: int) -> int:
-    """计算整数的整数次幂。
+def pow_int(base: SupportsIndex, exp: SupportsIndex) -> BindingResult[int]:
+    """通过固定 Rust 内核计算整数的非负整数次幂。
 
-    Compute an integer raised to an integer power.
+    Compute a nonnegative integer power through the pinned Rust kernel.
 
     Args:
         base: 底数。/ Base.
         exp: 指数（非负）。/ Exponent (non-negative).
 
     Returns:
-        幂运算结果。/ Power result.
+        既有 Result，成功包含精确整数。/ Existing Result containing the exact integer.
     """
-    return int(base**exp)
+    return _pow_int(base, exp)

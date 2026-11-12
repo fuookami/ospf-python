@@ -3,9 +3,10 @@
 Three-valued logic.
 """
 
-from __future__ import annotations
-
 from enum import Enum, unique
+
+from ospf_python._binding.result import BindingResult
+from ospf_python._binding.trivalent import logic
 
 
 @unique
@@ -42,87 +43,18 @@ class BalancedTrivalent(Enum):
     BALANCED = "balanced"
 
 
-# Trivalent 操作 / Trivalent operations
-
-
-_TRIVALENT_AND: dict[tuple[Trivalent, Trivalent], Trivalent] = {
-    (Trivalent.TRUE, Trivalent.TRUE): Trivalent.TRUE,
-    (Trivalent.TRUE, Trivalent.FALSE): Trivalent.FALSE,
-    (Trivalent.TRUE, Trivalent.UNKNOWN): Trivalent.UNKNOWN,
-    (Trivalent.FALSE, Trivalent.TRUE): Trivalent.FALSE,
-    (Trivalent.FALSE, Trivalent.FALSE): Trivalent.FALSE,
-    (Trivalent.FALSE, Trivalent.UNKNOWN): Trivalent.FALSE,
-    (Trivalent.UNKNOWN, Trivalent.TRUE): Trivalent.UNKNOWN,
-    (Trivalent.UNKNOWN, Trivalent.FALSE): Trivalent.FALSE,
-    (Trivalent.UNKNOWN, Trivalent.UNKNOWN): Trivalent.UNKNOWN,
-}
-
-_TRIVALENT_OR: dict[tuple[Trivalent, Trivalent], Trivalent] = {
-    (Trivalent.TRUE, Trivalent.TRUE): Trivalent.TRUE,
-    (Trivalent.TRUE, Trivalent.FALSE): Trivalent.TRUE,
-    (Trivalent.TRUE, Trivalent.UNKNOWN): Trivalent.TRUE,
-    (Trivalent.FALSE, Trivalent.TRUE): Trivalent.TRUE,
-    (Trivalent.FALSE, Trivalent.FALSE): Trivalent.FALSE,
-    (Trivalent.FALSE, Trivalent.UNKNOWN): Trivalent.UNKNOWN,
-    (Trivalent.UNKNOWN, Trivalent.TRUE): Trivalent.TRUE,
-    (Trivalent.UNKNOWN, Trivalent.FALSE): Trivalent.UNKNOWN,
-    (Trivalent.UNKNOWN, Trivalent.UNKNOWN): Trivalent.UNKNOWN,
-}
-
-_TRIVALENT_NOT: dict[Trivalent, Trivalent] = {
-    Trivalent.TRUE: Trivalent.FALSE,
-    Trivalent.FALSE: Trivalent.TRUE,
-    Trivalent.UNKNOWN: Trivalent.UNKNOWN,
-}
-
-# BalancedTrivalent 操作 / BalancedTrivalent operations
-
-
-_BALANCED_AND: dict[
-    tuple[BalancedTrivalent, BalancedTrivalent],
-    BalancedTrivalent,
-] = {
-    (BalancedTrivalent.TRUE, BalancedTrivalent.TRUE): (BalancedTrivalent.TRUE),
-    (BalancedTrivalent.TRUE, BalancedTrivalent.FALSE): (BalancedTrivalent.FALSE),
-    (BalancedTrivalent.TRUE, BalancedTrivalent.BALANCED): (BalancedTrivalent.BALANCED),
-    (BalancedTrivalent.FALSE, BalancedTrivalent.TRUE): (BalancedTrivalent.FALSE),
-    (BalancedTrivalent.FALSE, BalancedTrivalent.FALSE): (BalancedTrivalent.FALSE),
-    (BalancedTrivalent.FALSE, BalancedTrivalent.BALANCED): (BalancedTrivalent.FALSE),
-    (BalancedTrivalent.BALANCED, BalancedTrivalent.TRUE): (BalancedTrivalent.BALANCED),
-    (BalancedTrivalent.BALANCED, BalancedTrivalent.FALSE): (BalancedTrivalent.FALSE),
-    (BalancedTrivalent.BALANCED, BalancedTrivalent.BALANCED): (
-        BalancedTrivalent.BALANCED
-    ),
-}
-
-_BALANCED_OR: dict[
-    tuple[BalancedTrivalent, BalancedTrivalent],
-    BalancedTrivalent,
-] = {
-    (BalancedTrivalent.TRUE, BalancedTrivalent.TRUE): (BalancedTrivalent.TRUE),
-    (BalancedTrivalent.TRUE, BalancedTrivalent.FALSE): (BalancedTrivalent.TRUE),
-    (BalancedTrivalent.TRUE, BalancedTrivalent.BALANCED): (BalancedTrivalent.TRUE),
-    (BalancedTrivalent.FALSE, BalancedTrivalent.TRUE): (BalancedTrivalent.TRUE),
-    (BalancedTrivalent.FALSE, BalancedTrivalent.FALSE): (BalancedTrivalent.FALSE),
-    (BalancedTrivalent.FALSE, BalancedTrivalent.BALANCED): (BalancedTrivalent.BALANCED),
-    (BalancedTrivalent.BALANCED, BalancedTrivalent.TRUE): (BalancedTrivalent.TRUE),
-    (BalancedTrivalent.BALANCED, BalancedTrivalent.FALSE): (BalancedTrivalent.BALANCED),
-    (BalancedTrivalent.BALANCED, BalancedTrivalent.BALANCED): (
-        BalancedTrivalent.BALANCED
-    ),
-}
-
-_BALANCED_NOT: dict[BalancedTrivalent, BalancedTrivalent] = {
-    BalancedTrivalent.TRUE: BalancedTrivalent.FALSE,
-    BalancedTrivalent.FALSE: BalancedTrivalent.TRUE,
-    BalancedTrivalent.BALANCED: BalancedTrivalent.BALANCED,
-}
+_TRIVALENT_MEMBERS = (Trivalent.TRUE, Trivalent.FALSE, Trivalent.UNKNOWN)
+_BALANCED_MEMBERS = (
+    BalancedTrivalent.TRUE,
+    BalancedTrivalent.FALSE,
+    BalancedTrivalent.BALANCED,
+)
 
 
 def and_(
     a: Trivalent,
     b: Trivalent,
-) -> Trivalent:
+) -> BindingResult[Trivalent]:
     """三值逻辑与运算。
 
     Trivalent AND operation.
@@ -132,15 +64,15 @@ def and_(
         b: 右操作数。/ Right operand.
 
     Returns:
-        运算结果。/ Operation result.
+        原成员或显式失败。/ Original member or explicit failure.
     """
-    return _TRIVALENT_AND[(a, b)]
+    return logic(members=_TRIVALENT_MEMBERS, operation="and", left=a, right=b)
 
 
 def or_(
     a: Trivalent,
     b: Trivalent,
-) -> Trivalent:
+) -> BindingResult[Trivalent]:
     """三值逻辑或运算。
 
     Trivalent OR operation.
@@ -150,12 +82,12 @@ def or_(
         b: 右操作数。/ Right operand.
 
     Returns:
-        运算结果。/ Operation result.
+        原成员或显式失败。/ Original member or explicit failure.
     """
-    return _TRIVALENT_OR[(a, b)]
+    return logic(members=_TRIVALENT_MEMBERS, operation="or", left=a, right=b)
 
 
-def not_(a: Trivalent) -> Trivalent:
+def not_(a: Trivalent) -> BindingResult[Trivalent]:
     """三值逻辑非运算。
 
     Trivalent NOT operation.
@@ -164,15 +96,15 @@ def not_(a: Trivalent) -> Trivalent:
         a: 操作数。/ Operand.
 
     Returns:
-        运算结果。/ Operation result.
+        原成员或显式失败。/ Original member or explicit failure.
     """
-    return _TRIVALENT_NOT[a]
+    return logic(members=_TRIVALENT_MEMBERS, operation="not", left=a)
 
 
 def balanced_and(
     a: BalancedTrivalent,
     b: BalancedTrivalent,
-) -> BalancedTrivalent:
+) -> BindingResult[BalancedTrivalent]:
     """平衡三值逻辑与运算。
 
     Balanced trivalent AND operation.
@@ -182,15 +114,15 @@ def balanced_and(
         b: 右操作数。/ Right operand.
 
     Returns:
-        运算结果。/ Operation result.
+        原成员或显式失败。/ Original member or explicit failure.
     """
-    return _BALANCED_AND[(a, b)]
+    return logic(members=_BALANCED_MEMBERS, operation="and", left=a, right=b)
 
 
 def balanced_or(
     a: BalancedTrivalent,
     b: BalancedTrivalent,
-) -> BalancedTrivalent:
+) -> BindingResult[BalancedTrivalent]:
     """平衡三值逻辑或运算。
 
     Balanced trivalent OR operation.
@@ -200,14 +132,14 @@ def balanced_or(
         b: 右操作数。/ Right operand.
 
     Returns:
-        运算结果。/ Operation result.
+        原成员或显式失败。/ Original member or explicit failure.
     """
-    return _BALANCED_OR[(a, b)]
+    return logic(members=_BALANCED_MEMBERS, operation="or", left=a, right=b)
 
 
 def balanced_not(
     a: BalancedTrivalent,
-) -> BalancedTrivalent:
+) -> BindingResult[BalancedTrivalent]:
     """平衡三值逻辑非运算。
 
     Balanced trivalent NOT operation.
@@ -216,6 +148,6 @@ def balanced_not(
         a: 操作数。/ Operand.
 
     Returns:
-        运算结果。/ Operation result.
+        原成员或显式失败。/ Original member or explicit failure.
     """
-    return _BALANCED_NOT[a]
+    return logic(members=_BALANCED_MEMBERS, operation="not", left=a)

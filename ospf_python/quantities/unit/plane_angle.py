@@ -5,7 +5,12 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
+from ospf_python._binding.unit_registry import (
+    register_unit_family as _register_unit_family,
+)
 
+
+@_register_unit_family(powers=(0, 0, 0, 0, 0, 0, 0, 0, 1, 0))
 @dataclass(frozen=True)
 class PlaneAngle:
     """平面角单位。/ Plane angle unit.

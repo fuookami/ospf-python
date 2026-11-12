@@ -11,7 +11,9 @@ from ospf_python.math.symbol.operation.quick_dsl import QuickDsl
 from ospf_python.math.symbol.polynomial.canonical_polynomial import CanonicalPolynomial
 
 dsl = QuickDsl(factory=CanonicalPolynomial)
-ev = PolynomialEvaluator(factory=CanonicalPolynomial)
+ev: PolynomialEvaluator[CanonicalPolynomial, float] = PolynomialEvaluator(
+    factory=CanonicalPolynomial
+)
 diff = Differentiator(factory=CanonicalPolynomial)
 latex = LatexRenderer(factory=CanonicalPolynomial)
 

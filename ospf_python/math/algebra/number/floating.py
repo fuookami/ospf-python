@@ -9,6 +9,7 @@ import math
 from dataclasses import dataclass
 from typing import Self
 
+from ospf_python import _native
 from ospf_python.utils.functional.ord import Order
 
 
@@ -90,53 +91,53 @@ class Floating:
 
     def __add__(self, other: Self) -> Self:
         """加法。/ Addition."""
-        return self.__class__(self.value + other.value)
+        return _floating.binary(owner=self, other=other, operation="add")
 
     def __mul__(self, other: Self) -> Self:
         """乘法。/ Multiplication."""
-        return self.__class__(self.value * other.value)
+        return _floating.binary(owner=self, other=other, operation="multiply")
 
     def __neg__(self) -> Self:
         """取反。/ Negation."""
-        return self.__class__(-self.value)
+        return _floating.negated(self)
 
     def __sub__(self, other: Self) -> Self:
         """减法。/ Subtraction."""
-        return self.__class__(self.value - other.value)
+        return _floating.binary(owner=self, other=other, operation="subtract")
 
     def __truediv__(self, other: Self) -> Self:
         """除法。/ Division."""
-        if other.value == 0.0:
+        if _floating.relation(left=other.value, right=0.0, operation="eq"):
             return self.__class__(0.0)
-        return self.__class__(self.value / other.value)
+        return _floating.binary(owner=self, other=other, operation="divide")
 
     def __eq__(self, other: object) -> bool:
         """相等比较。/ Equality comparison."""
         if not isinstance(other, Floating):
             return NotImplemented
-        return self.value == other.value
+        return _floating.relation(left=self.value, right=other.value, operation="eq")
 
     def __ne__(self, other: object) -> bool:
         """不等比较。/ Inequality comparison."""
         if not isinstance(other, Floating):
             return NotImplemented
-        return self.value != other.value
+        return _floating.relation(left=self.value, right=other.value, operation="ne")
 
     def __lt__(self, other: Self) -> bool:
         """小于比较。/ Less-than comparison."""
-        return self.value < other.value
+        return _floating.relation(left=self.value, right=other.value, operation="lt")
 
     def __le__(self, other: Self) -> bool:
         """小于等于。/ Less-or-equal."""
-        return self.value <= other.value
+        return _floating.relation(left=self.value, right=other.value, operation="le")
 
     def __gt__(self, other: Self) -> bool:
         """大于比较。/ Greater-than comparison."""
-        return self.value > other.value
+        return _floating.relation(left=self.value, right=other.value, operation="gt")
 
     def __ge__(self, other: Self) -> bool:
         """大于等于。/ Greater-or-equal."""
-        return self.value >= other.value
+        return _floating.relation(left=self.value, right=other.value, operation="ge")
 
     def __hash__(self) -> int:
         """哈希值。/ Hash value."""
@@ -148,12 +149,15 @@ class Floating:
 
     def cmp(self, other: Self) -> Order:
         """全序比较。/ Total comparison."""
-        if self.value < other.value:
+        if _floating.relation(left=self.value, right=other.value, operation="lt"):
             return Order.LT
-        if self.value > other.value:
+        if _floating.relation(left=self.value, right=other.value, operation="gt"):
             return Order.GT
         return Order.EQ
 
     def partial_cmp(self, other: Self) -> Order | None:
         """部分比较。/ Partial comparison."""
         return self.cmp(other)
+
+
+_floating = _native._public_floating

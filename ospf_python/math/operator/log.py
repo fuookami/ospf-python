@@ -5,10 +5,17 @@ Logarithm operators.
 
 from __future__ import annotations
 
-import math
+from typing import TYPE_CHECKING, SupportsFloat, SupportsIndex
+
+from ospf_python._binding.elementary_operators import ln as _ln
+from ospf_python._binding.elementary_operators import log2 as _log2
+from ospf_python._binding.elementary_operators import log10 as _log10
+
+if TYPE_CHECKING:
+    from ospf_python._binding.result import BindingResult
 
 
-def log_op(x: float) -> float:
+def log_op(x: SupportsFloat | SupportsIndex) -> BindingResult[float]:
     """计算自然对数。
 
     Compute the natural logarithm.
@@ -19,10 +26,10 @@ def log_op(x: float) -> float:
     Returns:
         ln(x) 的值。/ Value of ln(x).
     """
-    return math.log(x)
+    return _ln(x)
 
 
-def log2_op(x: float) -> float:
+def log2_op(x: SupportsFloat | SupportsIndex) -> BindingResult[float]:
     """计算以 2 为底的对数。
 
     Compute the base-2 logarithm.
@@ -33,10 +40,10 @@ def log2_op(x: float) -> float:
     Returns:
         log2(x) 的值。/ Value of log2(x).
     """
-    return math.log2(x)
+    return _log2(x)
 
 
-def log10_op(x: float) -> float:
+def log10_op(x: SupportsFloat | SupportsIndex) -> BindingResult[float]:
     """计算以 10 为底的对数。
 
     Compute the base-10 logarithm.
@@ -47,4 +54,4 @@ def log10_op(x: float) -> float:
     Returns:
         log10(x) 的值。/ Value of log10(x).
     """
-    return math.log10(x)
+    return _log10(x)

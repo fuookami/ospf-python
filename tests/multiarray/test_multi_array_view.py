@@ -71,7 +71,7 @@ class TestMappedMultiArrayView:
         mapped1 = view.map(lambda x: x * 2)
         assert mapped1.get(0, 0) == 2
         # Materialize and create new view for chaining
-        mat = mapped1.materialize()
+        mat = mapped1.materialize().unwrap()
         view2 = MultiArrayView(mat)
         mapped2 = view2.map(lambda x: x + 1)
         assert mapped2.get(0, 0) == 3
@@ -85,7 +85,7 @@ class TestViewMaterialize:
     def test_materialize_view(self) -> None:
         arr = MultiArray.from_list([1, 2, 3, 4, 5, 6], Shape2(d0=2, d1=3))
         view = MultiArrayView(arr)
-        materialized = view.materialize()
+        materialized = view.materialize().unwrap()
         assert materialized.size == 6
         assert materialized.get(0, 0) == arr.get(0, 0)
         assert materialized.get(1, 2) == arr.get(1, 2)
@@ -94,14 +94,14 @@ class TestViewMaterialize:
         arr = MultiArray.from_list([1, 2, 3, 4, 5, 6], Shape2(d0=2, d1=3))
         view = MultiArrayView(arr)
         mapped = view.map(lambda x: x * 2)
-        materialized = mapped.materialize()
+        materialized = mapped.materialize().unwrap()
         assert materialized.get(0, 0) == 2
         assert materialized.get(1, 2) == 12
 
     def test_materialize_is_independent(self) -> None:
         arr = MutableMultiArray.from_list([1, 2, 3, 4, 5, 6], Shape2(d0=2, d1=3))
         view = MultiArrayView(arr)
-        materialized = view.materialize()
+        materialized = view.materialize().unwrap()
         # Mutate source
         arr[0, 0] = 999
         # Materialized should not change

@@ -3,15 +3,18 @@
 Generic logarithm computation.
 """
 
-from __future__ import annotations
+from typing import SupportsFloat, SupportsIndex
 
-import math
+from ospf_python._binding.logarithm import log_base as _log_base
+from ospf_python._binding.result import BindingResult
 
 
-def log_base(x: float, base: float) -> float:
-    """计算以任意底数的对数。
+def log_base(
+    x: SupportsFloat | SupportsIndex, base: SupportsFloat | SupportsIndex
+) -> BindingResult[float]:
+    """通过固定Rust计算任意底数对数，保留任意宽整数域。
 
-    Compute the logarithm with an arbitrary base.
+    Compute an arbitrary-base logarithm through pinned Rust, retaining wide integers.
 
     Args:
         x: 输入值（正数）。/ Input value (positive).
@@ -19,6 +22,6 @@ def log_base(x: float, base: float) -> float:
             Base (positive and not 1).
 
     Returns:
-        对数值。/ Logarithm value.
+        包含Float64对数值的既有Result。/ Existing Result containing a Float64 logarithm.
     """
-    return math.log(x) / math.log(base)
+    return _log_base(x, base)

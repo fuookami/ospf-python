@@ -5,10 +5,15 @@ Trigonometric function operators.
 
 from __future__ import annotations
 
-import math
+from typing import TYPE_CHECKING, SupportsFloat, SupportsIndex
+
+from ospf_python._binding import elementary_operators as _elementary
+
+if TYPE_CHECKING:
+    from ospf_python._binding.result import BindingResult
 
 
-def sin_op(x: float) -> float:
+def sin_op(x: SupportsFloat | SupportsIndex) -> BindingResult[float]:
     """计算正弦值（弧度）。
 
     Compute sine (radians).
@@ -19,10 +24,10 @@ def sin_op(x: float) -> float:
     Returns:
         正弦值。/ Sine value.
     """
-    return math.sin(x)
+    return _elementary.sin(x)
 
 
-def cos_op(x: float) -> float:
+def cos_op(x: SupportsFloat | SupportsIndex) -> BindingResult[float]:
     """计算余弦值（弧度）。
 
     Compute cosine (radians).
@@ -33,10 +38,10 @@ def cos_op(x: float) -> float:
     Returns:
         余弦值。/ Cosine value.
     """
-    return math.cos(x)
+    return _elementary.cos(x)
 
 
-def tan_op(x: float) -> float:
+def tan_op(x: SupportsFloat | SupportsIndex) -> BindingResult[float]:
     """计算正切值（弧度）。
 
     Compute tangent (radians).
@@ -47,10 +52,10 @@ def tan_op(x: float) -> float:
     Returns:
         正切值。/ Tangent value.
     """
-    return math.tan(x)
+    return _elementary.tan(x)
 
 
-def asin_op(x: float) -> float:
+def asin_op(x: SupportsFloat | SupportsIndex) -> BindingResult[float]:
     """计算反正弦值（返回弧度）。
 
     Compute arcsine (returns radians).
@@ -61,10 +66,10 @@ def asin_op(x: float) -> float:
     Returns:
         反正弦弧度值。/ Arcsine in radians.
     """
-    return math.asin(x)
+    return _elementary.asin(x)
 
 
-def acos_op(x: float) -> float:
+def acos_op(x: SupportsFloat | SupportsIndex) -> BindingResult[float]:
     """计算反余弦值（返回弧度）。
 
     Compute arccosine (returns radians).
@@ -75,10 +80,10 @@ def acos_op(x: float) -> float:
     Returns:
         反余弦弧度值。/ Arccosine in radians.
     """
-    return math.acos(x)
+    return _elementary.acos(x)
 
 
-def atan_op(x: float) -> float:
+def atan_op(x: SupportsFloat | SupportsIndex) -> BindingResult[float]:
     """计算反正切值（返回弧度）。
 
     Compute arctangent (returns radians).
@@ -89,4 +94,4 @@ def atan_op(x: float) -> float:
     Returns:
         反正切弧度值。/ Arctangent in radians.
     """
-    return math.atan(x)
+    return _elementary.atan(x)

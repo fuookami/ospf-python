@@ -129,13 +129,13 @@ class TestMutableMultiArray:
 class TestMultiArrayMap:
     def test_map_elements(self) -> None:
         arr = MultiArray.from_list([1, 2, 3, 4, 5], Shape1(d0=5))
-        mapped = arr.map(lambda x: x * 2)
+        mapped = arr.map(lambda x: x * 2).unwrap()
         for i in range(5):
             assert mapped.get(i) == (i + 1) * 2
 
     def test_map_to_different_type(self) -> None:
         arr = MultiArray.from_list([1, 2, 3], Shape1(d0=3))
-        mapped = arr.map(lambda x: str(x))
+        mapped = arr.map(lambda x: str(x)).unwrap()
         assert mapped.get(0) == "1"
         assert mapped.get(2) == "3"
 
@@ -146,12 +146,12 @@ class TestMultiArrayMap:
 class TestMultiArrayReduce:
     def test_sum(self) -> None:
         arr = MultiArray.from_list([1, 2, 3, 4, 5], Shape1(d0=5))
-        total = arr.reduce(lambda a, b: a + b)
+        total = arr.reduce(lambda a, b: a + b).unwrap()
         assert total == 15
 
     def test_product(self) -> None:
         arr = MultiArray.from_list([1, 2, 3, 4], Shape1(d0=4))
-        product = arr.reduce(lambda a, b: a * b)
+        product = arr.reduce(lambda a, b: a * b).unwrap()
         assert product == 24
 
 
@@ -161,7 +161,7 @@ class TestMultiArrayReduce:
 class TestMultiArrayFlatten:
     def test_flatten(self) -> None:
         arr = MultiArray.from_list([1, 2, 3, 4, 5, 6], Shape2(d0=2, d1=3))
-        flat = arr.flatten()
+        flat = arr.flatten().unwrap()
         assert flat.size == 6
         assert flat.ndim == 1
         assert flat.get(0) == 1
@@ -174,7 +174,7 @@ class TestMultiArrayFlatten:
 class TestMultiArrayTranspose:
     def test_transpose_2d(self) -> None:
         arr = MultiArray.from_list([1, 2, 3, 4, 5, 6], Shape2(d0=2, d1=3))
-        transposed = arr.transpose()
+        transposed = arr.transpose().unwrap()
         # Original: [[1,2,3],[4,5,6]] -> Transposed: [[1,4],[2,5],[3,6]]
         assert transposed.ndim == 2
         # transposed[0,0] = arr[0,0] = 1
@@ -191,7 +191,7 @@ class TestMultiArrayTranspose:
 class TestMultiArrayReshape:
     def test_reshape(self) -> None:
         arr = MultiArray.from_list([1, 2, 3, 4, 5, 6], Shape1(d0=6))
-        reshaped = arr.reshape(DynShape(dims=(2, 3)))
+        reshaped = arr.reshape(DynShape(dims=(2, 3))).unwrap()
         assert reshaped.ndim == 2
         assert reshaped.size == 6
 
@@ -202,12 +202,12 @@ class TestMultiArrayReshape:
 class TestMultiArrayToList:
     def test_to_list_1d(self) -> None:
         arr = MultiArray.from_list([10, 20, 30, 40, 50], Shape1(d0=5))
-        lst = arr.to_list()
+        lst = arr.to_list().unwrap()
         assert lst == [10, 20, 30, 40, 50]
 
     def test_to_list_2d(self) -> None:
         arr = MultiArray.from_list([1, 2, 3, 4, 5, 6], Shape2(d0=2, d1=3))
-        lst = arr.to_list()
+        lst = arr.to_list().unwrap()
         assert lst == [[1, 2, 3], [4, 5, 6]]
 
 
@@ -241,7 +241,7 @@ class TestMultiArrayCollection:
 class TestMultiArrayFlatMap:
     def test_flat_map(self) -> None:
         arr = MultiArray.from_list([1, 2, 3], Shape1(d0=3))
-        result = arr.flat_map(lambda x: [x, x * 10])
+        result = arr.flat_map(lambda x: [x, x * 10]).unwrap()
         # flat_map applies the function and flattens the results
         # The underlying data contains all expanded values
         assert result._data.tolist() == [1, 10, 2, 20, 3, 30]

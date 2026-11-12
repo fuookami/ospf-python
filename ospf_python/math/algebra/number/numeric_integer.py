@@ -9,6 +9,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import ClassVar
 
+from ospf_python import _native
+
 
 @dataclass(frozen=True)
 class NumericInteger:
@@ -35,8 +37,9 @@ class NumericInteger:
 
     def __post_init__(self) -> None:
         """钳制值到有效范围。/ Clamp value to valid range."""
-        clamped = max(self.MIN_VALUE, min(self.MAX_VALUE, self._value))
-        if clamped != self._value:
+        # 保留命名临时值，使失败 traceback 也维持原生命周期。 / Named temporaries preserve their original lifetime even in failure tracebacks.
+        clamped = _integer.clamp_owner(self)
+        if _integer.not_equal(left=clamped, right=self._value):
             object.__setattr__(self, "_value", clamped)
 
     @property
@@ -60,8 +63,8 @@ class NumericInteger:
             和。/ The sum.
         """
         rhs = other._value if isinstance(other, NumericInteger) else other
-        result = self._value + rhs
-        clamped = max(self.MIN_VALUE, min(self.MAX_VALUE, result))
+        result = _integer.bounded_add(owner=self, rhs=rhs)
+        clamped = _integer.clamp_result(owner=self, value=result)
         return NumericInteger(clamped)
 
     def safe_mul(self, other: NumericInteger | int) -> NumericInteger:
@@ -77,8 +80,8 @@ class NumericInteger:
             积。/ The product.
         """
         rhs = other._value if isinstance(other, NumericInteger) else other
-        result = self._value * rhs
-        clamped = max(self.MIN_VALUE, min(self.MAX_VALUE, result))
+        result = _integer.bounded_multiply(owner=self, rhs=rhs)
+        clamped = _integer.clamp_result(owner=self, value=result)
         return NumericInteger(clamped)
 
     # ==================== 比较运算 ====================
@@ -87,30 +90,30 @@ class NumericInteger:
     def __eq__(self, other: object) -> bool:
         """相等比较 / Equality comparison."""
         if isinstance(other, NumericInteger):
-            return self._value == other._value
+            return _integer.equal(left=self._value, right=other._value)
         if isinstance(other, int):
-            return self._value == other
+            return _integer.equal(left=self._value, right=other)
         return NotImplemented
 
     def __lt__(self, other: NumericInteger | int) -> bool:
         """小于比较 / Less than."""
         rhs = other._value if isinstance(other, NumericInteger) else other
-        return self._value < rhs
+        return _integer.less(left=self._value, right=rhs)
 
     def __le__(self, other: NumericInteger | int) -> bool:
         """小于等于 / Less than or equal."""
         rhs = other._value if isinstance(other, NumericInteger) else other
-        return self._value <= rhs
+        return _integer.less_equal(left=self._value, right=rhs)
 
     def __gt__(self, other: NumericInteger | int) -> bool:
         """大于比较 / Greater than."""
         rhs = other._value if isinstance(other, NumericInteger) else other
-        return self._value > rhs
+        return _integer.greater(left=self._value, right=rhs)
 
     def __ge__(self, other: NumericInteger | int) -> bool:
         """大于等于 / Greater than or equal."""
         rhs = other._value if isinstance(other, NumericInteger) else other
-        return self._value >= rhs
+        return _integer.greater_equal(left=self._value, right=rhs)
 
     def __hash__(self) -> int:
         """哈希值 / Hash value."""
@@ -123,3 +126,8 @@ class NumericInteger:
     def __repr__(self) -> str:
         """开发者表示 / Developer representation."""
         return f"NumericInteger({self._value})"
+
+
+_integer = _native._public_integer.facade(
+    reference=NumericInteger.__post_init__, domain="numeric_integer"
+)

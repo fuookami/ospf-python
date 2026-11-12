@@ -156,6 +156,45 @@ class GurobiSolver(
             return SolverStatus.TIMEOUT
         return SolverStatus.ERROR
 
+    def _extract_dual_values(
+        self,
+        model: gp.Model,
+    ) -> dict[str, float] | None:
+        """提取线性 LP 对偶值 / Extract linear LP dual values.
+
+        Gurobi 不为 MIP 提供约束对偶值。仅当约束名唯一且非空时发布映射，
+        否则返回 None，避免下游按错误名称或索引使用对偶。
+        Gurobi does not expose constraint duals for MIPs. The mapping is
+        published only when names are non-empty and unique.
+
+        Args:
+            model: 已求解的 gurobipy 模型 / The solved gurobipy model.
+
+        Returns:
+            约束名到 Gurobi ``Pi`` 的映射；不可用时为 None /
+            Constraint-name to Gurobi ``Pi`` map, or None when unavailable.
+        """
+        import gurobipy as gp
+
+        if bool(getattr(model, "IsMIP", True)):
+            return None
+
+        get_constrs = getattr(model, "getConstrs", None)
+        if get_constrs is None:
+            return None
+
+        try:
+            constraints = tuple(get_constrs())
+            names = [str(constr.ConstrName) for constr in constraints]
+            if any(not name for name in names) or len(names) != len(set(names)):
+                return None
+            return {
+                name: float(constr.Pi)
+                for name, constr in zip(names, constraints, strict=True)
+            }
+        except (AttributeError, gp.GurobiError):
+            return None
+
     def _build_output(
         self,
         model: gp.Model,
@@ -186,6 +225,7 @@ class GurobiSolver(
             status=status,
             objective=model.ObjVal,
             values=SolveValue(values=values),
+            dual_values=self._extract_dual_values(model),
         )
 
     def get_status(self) -> SolverStatus:

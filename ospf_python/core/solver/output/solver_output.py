@@ -39,6 +39,11 @@ class SolverOutput:
     values: SolveValue = SolveValue()
     """变量值 / Variable values."""
 
+    dual_values: dict[str, float] | None = None
+    """约束对偶值；缺失表示求解器未提供真实对偶。 /
+    Constraint dual values; absent when the solver did not provide real duals.
+    """
+
     @property
     def is_optimal(self) -> bool:
         """是否找到最优解 / Whether optimal was found.

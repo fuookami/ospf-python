@@ -32,6 +32,7 @@ from ospf_python.quantities.unit.length import (
 )
 from ospf_python.quantities.unit.mass import GRAM, KILOGRAM
 from ospf_python.quantities.unit.time_unit import HOUR, SECOND
+from ospf_python.utils.functional.result import Failed
 
 # ── 创建 ─────────────────────────────────────────────────────────
 
@@ -66,39 +67,39 @@ class TestQuantityConversion:
     def test_meter_to_kilometer(self) -> None:
         """米转千米。/ Meter to kilometer."""
         q = Quantity(value=1000.0, unit=METER)
-        result = q.to(KILOMETER)
+        result = q.to(KILOMETER).unwrap()
         assert result.value == pytest.approx(1.0)
         assert result.unit.symbol == "km"
 
     def test_kilometer_to_meter(self) -> None:
         """千米转米。/ Kilometer to meter."""
         q = Quantity(value=2.5, unit=KILOMETER)
-        result = q.to(METER)
+        result = q.to(METER).unwrap()
         assert result.value == pytest.approx(2500.0)
         assert result.unit.symbol == "m"
 
     def test_centimeter_to_meter(self) -> None:
         """厘米转米。/ Centimeter to meter."""
         q = Quantity(value=150.0, unit=CENTIMETER)
-        result = q.to(METER)
+        result = q.to(METER).unwrap()
         assert result.value == pytest.approx(1.5)
 
     def test_millimeter_to_kilometer(self) -> None:
         """毫米转千米。/ Millimeter to kilometer."""
         q = Quantity(value=1_000_000.0, unit=MILLIMETER)
-        result = q.to(KILOMETER)
+        result = q.to(KILOMETER).unwrap()
         assert result.value == pytest.approx(1.0)
 
     def test_kg_to_gram(self) -> None:
         """千克转克。/ Kilogram to gram."""
         q = Quantity(value=1.0, unit=KILOGRAM)
-        result = q.to(GRAM)
+        result = q.to(GRAM).unwrap()
         assert result.value == pytest.approx(1000.0)
 
     def test_hour_to_second(self) -> None:
         """小时转秒。/ Hour to second."""
         q = Quantity(value=1.0, unit=HOUR)
-        result = q.to(SECOND)
+        result = q.to(SECOND).unwrap()
         assert result.value == pytest.approx(3600.0)
 
 
@@ -112,7 +113,7 @@ class TestQuantityAddition:
         """同单位相加。/ Add same-unit quantities."""
         a = Quantity(value=3.0, unit=METER)
         b = Quantity(value=5.0, unit=METER)
-        result = a + b
+        result = (a + b).unwrap()
         assert result.value == pytest.approx(8.0)
         assert result.unit.symbol == "m"
 
@@ -120,24 +121,20 @@ class TestQuantityAddition:
         """同单位加零。/ Add zero same-unit."""
         a = Quantity(value=7.0, unit=METER)
         b = Quantity(value=0.0, unit=METER)
-        result = a + b
+        result = (a + b).unwrap()
         assert result.value == pytest.approx(7.0)
 
     def test_add_different_unit_fails(self) -> None:
         """不同单位相加失败。/ Different-unit add fails."""
         a = Quantity(value=1.0, unit=METER)
         b = Quantity(value=1.0, unit=KILOGRAM)
-        with pytest.raises(TypeError, match="different units"):
-            a + b  # noqa: B015
+        assert isinstance(a + b, Failed)
 
-    def test_add_different_same_dim_fails(self) -> None:
-        """同维度不同单位相加失败。
-        Same-dimension different-unit add fails.
-        """
+    def test_add_different_same_dim_converts(self) -> None:
+        """同维度不同单位受检换算后相加。 / Add different units after checked conversion."""
         a = Quantity(value=1.0, unit=METER)
         b = Quantity(value=1.0, unit=KILOMETER)
-        with pytest.raises(TypeError, match="different units"):
-            a + b  # noqa: B015
+        assert (a + b).unwrap().value == 1001
 
 
 # ── 减法 ─────────────────────────────────────────────────────────
@@ -150,15 +147,14 @@ class TestQuantitySubtraction:
         """同单位相减。/ Subtract same-unit quantities."""
         a = Quantity(value=10.0, unit=METER)
         b = Quantity(value=3.0, unit=METER)
-        result = a - b
+        result = (a - b).unwrap()
         assert result.value == pytest.approx(7.0)
 
     def test_sub_different_unit_fails(self) -> None:
         """不同单位相减失败。/ Different-unit sub fails."""
         a = Quantity(value=1.0, unit=METER)
         b = Quantity(value=1.0, unit=SECOND)
-        with pytest.raises(TypeError, match="different units"):
-            a - b  # noqa: B015
+        assert isinstance(a - b, Failed)
 
 
 # ── 乘除法 ───────────────────────────────────────────────────────
@@ -170,33 +166,33 @@ class TestQuantityMultiplication:
     def test_mul_scalar(self) -> None:
         """标量乘法。/ Scalar multiplication."""
         q = Quantity(value=5.0, unit=METER)
-        result = q * 3.0
+        result = (q * 3.0).unwrap()
         assert result.value == pytest.approx(15.0)
         assert result.unit.symbol == "m"
 
     def test_mul_zero(self) -> None:
         """乘以零。/ Multiply by zero."""
         q = Quantity(value=5.0, unit=METER)
-        result = q * 0.0
+        result = (q * 0.0).unwrap()
         assert result.value == pytest.approx(0.0)
 
     def test_mul_negative(self) -> None:
         """乘以负数。/ Multiply by negative."""
         q = Quantity(value=4.0, unit=METER)
-        result = q * -2.0
+        result = (q * -2.0).unwrap()
         assert result.value == pytest.approx(-8.0)
 
     def test_truediv_scalar(self) -> None:
         """标量除法。/ Scalar division."""
         q = Quantity(value=20.0, unit=METER)
-        result = q / 4.0
+        result = (q / 4.0).unwrap()
         assert result.value == pytest.approx(5.0)
         assert result.unit.symbol == "m"
 
     def test_truediv_negative(self) -> None:
         """负数除法。/ Negative division."""
         q = Quantity(value=10.0, unit=METER)
-        result = q / -2.0
+        result = (q / -2.0).unwrap()
         assert result.value == pytest.approx(-5.0)
 
 
@@ -260,15 +256,15 @@ class TestQuantityValueRange:
         hi = Quantity(value=100.0, unit=METER)
         rng = QuantityValueRange(min_qty=lo, max_qty=hi)
         q = Quantity(value=50.0, unit=METER)
-        assert rng.contains(q)
+        assert rng.contains(q).unwrap()
 
     def test_contains_boundary(self) -> None:
         """边界值。/ Boundary value."""
         lo = Quantity(value=0.0, unit=METER)
         hi = Quantity(value=100.0, unit=METER)
         rng = QuantityValueRange(min_qty=lo, max_qty=hi)
-        assert rng.contains(lo)
-        assert rng.contains(hi)
+        assert rng.contains(lo).unwrap()
+        assert rng.contains(hi).unwrap()
 
     def test_contains_outside(self) -> None:
         """范围外值。/ Value outside range."""
@@ -276,7 +272,7 @@ class TestQuantityValueRange:
         hi = Quantity(value=100.0, unit=METER)
         rng = QuantityValueRange(min_qty=lo, max_qty=hi)
         q = Quantity(value=200.0, unit=METER)
-        assert not rng.contains(q)
+        assert not rng.contains(q).unwrap()
 
     def test_contains_different_unit(self) -> None:
         """不同单位范围检查。/ Range check different units."""
@@ -284,7 +280,7 @@ class TestQuantityValueRange:
         hi = Quantity(value=1.0, unit=KILOMETER)
         rng = QuantityValueRange(min_qty=lo, max_qty=hi)
         q = Quantity(value=500.0, unit=METER)
-        assert rng.contains(q)
+        assert rng.contains(q).unwrap()
 
 
 # ── 极值 ─────────────────────────────────────────────────────────
@@ -300,7 +296,7 @@ class TestMinMax:
             Quantity(value=1.0, unit=METER),
             Quantity(value=2.0, unit=METER),
         ]
-        result = min_quantity(items)
+        result = min_quantity(items).unwrap()
         assert result.value == pytest.approx(1.0)
 
     def test_max_quantity(self) -> None:
@@ -310,18 +306,18 @@ class TestMinMax:
             Quantity(value=1.0, unit=METER),
             Quantity(value=2.0, unit=METER),
         ]
-        result = max_quantity(items)
+        result = max_quantity(items).unwrap()
         assert result.value == pytest.approx(3.0)
 
     def test_min_single(self) -> None:
         """单元素最小值。/ Min of single item."""
         items = [Quantity(value=42.0, unit=METER)]
-        assert min_quantity(items).value == pytest.approx(42.0)
+        assert min_quantity(items).unwrap().value == pytest.approx(42.0)
 
     def test_max_single(self) -> None:
         """单元素最大值。/ Max of single item."""
         items = [Quantity(value=42.0, unit=METER)]
-        assert max_quantity(items).value == pytest.approx(42.0)
+        assert max_quantity(items).unwrap().value == pytest.approx(42.0)
 
 
 # ── 时长扩展 ─────────────────────────────────────────────────────
@@ -332,24 +328,24 @@ class TestDurationExtensions:
 
     def test_from_hours(self) -> None:
         """从小时创建。/ Create from hours."""
-        q = from_hours(2.0)
+        q = from_hours(2.0).unwrap()
         assert q.value == pytest.approx(7200.0)
         assert q.unit.symbol == "s"
 
     def test_from_minutes(self) -> None:
         """从分钟创建。/ Create from minutes."""
-        q = from_minutes(30.0)
+        q = from_minutes(30.0).unwrap()
         assert q.value == pytest.approx(1800.0)
         assert q.unit.symbol == "s"
 
     def test_to_timedelta(self) -> None:
         """转 timedelta。/ Convert to timedelta."""
-        q = from_hours(1.0)
-        td = to_timedelta(q)
+        q = from_hours(1.0).unwrap()
+        td = to_timedelta(q).unwrap()
         assert td == timedelta(hours=1)
 
     def test_roundtrip_hours(self) -> None:
         """小时往返转换。/ Hours roundtrip."""
-        q = from_hours(3.5)
-        td = to_timedelta(q)
+        q = from_hours(3.5).unwrap()
+        td = to_timedelta(q).unwrap()
         assert td == timedelta(hours=3.5)

@@ -34,6 +34,7 @@ class TestLinearTriadModel:
         assert m.upper_bounds == {}
         assert m.rhs == {}
         assert m.sense == {}
+        assert m.variable_types == {}
 
     def test_add_variable(self) -> None:
         """添加变量。/ Add variable."""
@@ -70,3 +71,10 @@ class TestLinearTriadModel:
         m.sense["c1"] = "<="
         assert m.rhs["c1"] == 10.0
         assert m.sense["c1"] == "<="
+
+    def test_set_variable_types(self) -> None:
+        """设置变量类型。/ Set variable types."""
+        m = LinearTriadModel()
+        m.variable_types["x1"] = "binary"
+        m.variable_types["x2"] = "integer"
+        assert m.variable_types == {"x1": "binary", "x2": "integer"}

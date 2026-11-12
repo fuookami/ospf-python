@@ -35,43 +35,43 @@ class TestTrivalent:
 
     def test_and_true_true(self) -> None:
         """真 AND 真 = 真。/ True AND True = True."""
-        assert (Trivalent.TRUE & Trivalent.TRUE).is_true
+        assert ((Trivalent.TRUE & Trivalent.TRUE).unwrap()).is_true
 
     def test_and_true_false(self) -> None:
         """真 AND 假 = 假。/ True AND False = False."""
-        assert (Trivalent.TRUE & Trivalent.FALSE).is_false
+        assert ((Trivalent.TRUE & Trivalent.FALSE).unwrap()).is_false
 
     def test_and_unknown(self) -> None:
         """真 AND 未知 = 未知。/ True AND Unknown = Unknown."""
-        result = Trivalent.TRUE & Trivalent.UNKNOWN
+        result = (Trivalent.TRUE & Trivalent.UNKNOWN).unwrap()
         assert result.is_unknown
 
     def test_or_true_false(self) -> None:
         """真 OR 假 = 真。/ True OR False = True."""
-        assert (Trivalent.TRUE | Trivalent.FALSE).is_true
+        assert ((Trivalent.TRUE | Trivalent.FALSE).unwrap()).is_true
 
     def test_or_false_false(self) -> None:
         """假 OR 假 = 假。/ False OR False = False."""
-        assert (Trivalent.FALSE | Trivalent.FALSE).is_false
+        assert ((Trivalent.FALSE | Trivalent.FALSE).unwrap()).is_false
 
     def test_or_unknown(self) -> None:
         """假 OR 未知 = 未知。/ False OR Unknown = Unknown."""
-        result = Trivalent.FALSE | Trivalent.UNKNOWN
+        result = (Trivalent.FALSE | Trivalent.UNKNOWN).unwrap()
         assert result.is_unknown
 
     def test_not_true(self) -> None:
         """NOT 真 = 假。/ NOT True = False."""
-        assert (~Trivalent.TRUE).is_false
+        assert ((~Trivalent.TRUE).unwrap()).is_false
 
     def test_not_unknown(self) -> None:
         """NOT 未知 = 未知。/ NOT Unknown = Unknown."""
-        assert (~Trivalent.UNKNOWN).is_unknown
+        assert ((~Trivalent.UNKNOWN).unwrap()).is_unknown
 
     def test_to_bool(self) -> None:
         """转换为 bool。/ Convert to bool."""
-        assert Trivalent.TRUE.to_bool() is True
-        assert Trivalent.FALSE.to_bool() is False
-        assert Trivalent.UNKNOWN.to_bool() is None
+        assert Trivalent.TRUE.to_bool().unwrap() is True
+        assert Trivalent.FALSE.to_bool().unwrap() is False
+        assert Trivalent.UNKNOWN.to_bool().unwrap() is None
 
 
 # ── Scale ─────────────────────────────────────────────────────────

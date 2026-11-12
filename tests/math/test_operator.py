@@ -109,27 +109,27 @@ class TestExpOp:
 
     def test_exp_zero(self) -> None:
         """e^0 = 1。/ e^0 = 1."""
-        assert exp_op(0.0) == 1.0
+        assert exp_op(0.0).unwrap() == 1.0
 
     def test_exp_one(self) -> None:
         """e^1 = e。/ e^1 = e."""
-        assert math.isclose(exp_op(1.0), math.e)
+        assert math.isclose(exp_op(1.0).unwrap(), math.e)
 
     def test_exp2_zero(self) -> None:
         """2^0 = 1。/ 2^0 = 1."""
-        assert exp2_op(0.0) == 1.0
+        assert exp2_op(0.0).unwrap() == 1.0
 
     def test_exp2_ten(self) -> None:
         """2^10 = 1024。/ 2^10 = 1024."""
-        assert exp2_op(10.0) == 1024.0
+        assert exp2_op(10.0).unwrap() == 1024.0
 
     def test_exp10_zero(self) -> None:
         """10^0 = 1。/ 10^0 = 1."""
-        assert exp10_op(0.0) == 1.0
+        assert exp10_op(0.0).unwrap() == 1.0
 
     def test_exp10_two(self) -> None:
         """10^2 = 100。/ 10^2 = 100."""
-        assert exp10_op(2.0) == 100.0
+        assert exp10_op(2.0).unwrap() == 100.0
 
 
 # ── log_op / log2_op / log10_op ────────────────────────────────
@@ -140,27 +140,27 @@ class TestLogOp:
 
     def test_log_one(self) -> None:
         """ln(1) = 0。/ ln(1) = 0."""
-        assert log_op(1.0) == 0.0
+        assert log_op(1.0).unwrap() == 0.0
 
     def test_log_e(self) -> None:
         """ln(e) = 1。/ ln(e) = 1."""
-        assert math.isclose(log_op(math.e), 1.0)
+        assert math.isclose(log_op(math.e).unwrap(), 1.0)
 
     def test_log2_one(self) -> None:
         """log2(1) = 0。/ log2(1) = 0."""
-        assert log2_op(1.0) == 0.0
+        assert log2_op(1.0).unwrap() == 0.0
 
     def test_log2_eight(self) -> None:
         """log2(8) = 3。/ log2(8) = 3."""
-        assert log2_op(8.0) == 3.0
+        assert log2_op(8.0).unwrap() == 3.0
 
     def test_log10_one(self) -> None:
         """log10(1) = 0。/ log10(1) = 0."""
-        assert log10_op(1.0) == 0.0
+        assert log10_op(1.0).unwrap() == 0.0
 
     def test_log10_thousand(self) -> None:
         """log10(1000) = 3。/ log10(1000) = 3."""
-        assert log10_op(1000.0) == 3.0
+        assert log10_op(1000.0).unwrap() == 3.0
 
 
 # ── minus_op ────────────────────────────────────────────────────

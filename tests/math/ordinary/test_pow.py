@@ -18,32 +18,32 @@ class TestPowInt:
 
     def test_basic_power(self) -> None:
         """基本幂运算。/ Basic power."""
-        assert pow_int(2, 3) == 8
+        assert pow_int(2, 3).unwrap() == 8
 
     def test_zero_exponent(self) -> None:
         """零指数。/ Zero exponent."""
-        assert pow_int(5, 0) == 1
+        assert pow_int(5, 0).unwrap() == 1
 
     def test_one_exponent(self) -> None:
         """单位指数。/ One exponent."""
-        assert pow_int(7, 1) == 7
+        assert pow_int(7, 1).unwrap() == 7
 
     def test_square(self) -> None:
         """平方。/ Square."""
-        assert pow_int(3, 2) == 9
+        assert pow_int(3, 2).unwrap() == 9
 
     def test_cube(self) -> None:
         """立方。/ Cube."""
-        assert pow_int(2, 3) == 8
+        assert pow_int(2, 3).unwrap() == 8
 
     def test_large_exponent(self) -> None:
         """大指数。/ Large exponent."""
-        assert pow_int(2, 10) == 1024
+        assert pow_int(2, 10).unwrap() == 1024
 
     def test_zero_base(self) -> None:
         """零底数。/ Zero base."""
-        assert pow_int(0, 5) == 0
+        assert pow_int(0, 5).unwrap() == 0
 
     def test_one_base(self) -> None:
         """底数为一。/ Base is one."""
-        assert pow_int(1, 100) == 1
+        assert pow_int(1, 100).unwrap() == 1

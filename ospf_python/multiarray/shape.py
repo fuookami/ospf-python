@@ -9,6 +9,8 @@ import enum
 from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
+from ospf_python import _native
+
 
 class StorageOrder(enum.Enum):
     """存储顺序 / Storage order.
@@ -76,23 +78,9 @@ def _compute_strides(
     Returns:
         步长元组。/ Strides tuple.
     """
-    ndim = len(dims)
-    if ndim == 0:
-        return ()
-    strides = [0] * ndim
-    if storage_order == StorageOrder.ROW_MAJOR:
-        # C 阶段：最后维度步长为 1
-        # C-order: last dimension has stride 1
-        strides[ndim - 1] = 1
-        for i in range(ndim - 2, -1, -1):
-            strides[i] = strides[i + 1] * dims[i + 1]
-    else:
-        # F 阶段：第一维度步长为 1
-        # F-order: first dimension has stride 1
-        strides[0] = 1
-        for i in range(1, ndim):
-            strides[i] = strides[i - 1] * dims[i - 1]
-    return tuple(strides)
+    return _native._shape_strides(
+        dims=dims, storage_order=storage_order, row_major=StorageOrder.ROW_MAJOR
+    )
 
 
 def _compute_flat_index(
@@ -110,7 +98,7 @@ def _compute_flat_index(
     Returns:
         扁平索引。/ Flat index.
     """
-    return sum(s * i for s, i in zip(strides, indices, strict=False))
+    return _native._shape_flat_index(dims=dims, strides=strides, indices=indices)
 
 
 @dataclass(frozen=True)
@@ -220,7 +208,7 @@ class Shape2:
     @property
     def size(self) -> int:
         """元素总数。/ Total number of elements."""
-        return self.d0 * self.d1
+        return _native._shape_size(self, 2)
 
     @property
     def dims(self) -> tuple[int, ...]:
@@ -289,7 +277,7 @@ class Shape3:
     @property
     def size(self) -> int:
         """元素总数。/ Total number of elements."""
-        return self.d0 * self.d1 * self.d2
+        return _native._shape_size(self, 3)
 
     @property
     def dims(self) -> tuple[int, ...]:
@@ -361,7 +349,7 @@ class Shape4:
     @property
     def size(self) -> int:
         """元素总数。/ Total number of elements."""
-        return self.d0 * self.d1 * self.d2 * self.d3
+        return _native._shape_size(self, 4)
 
     @property
     def dims(self) -> tuple[int, ...]:
@@ -380,7 +368,7 @@ class Shape4:
         return _compute_flat_index(self.dims, self.strides(), indices)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, init=False)
 class DynShape:
     """动态 N 维形状 / Dynamic N-D shape.
 
@@ -395,8 +383,34 @@ class DynShape:
     dims: tuple[int, ...]
     storage_order: StorageOrder = StorageOrder.ROW_MAJOR
 
+    def __init__(
+        self,
+        dims: tuple[int, ...],
+        storage_order: StorageOrder = StorageOrder.ROW_MAJOR,
+    ) -> None:
+        """初始化动态形状 / Initialize a dynamic shape."""
+        namespace = self.__dict__
+        namespace["dims"] = dims
+        namespace["storage_order"] = storage_order
+        if (
+            type(self) is DynShape
+            and type(dims) is tuple
+            and len(dims) == 1
+            and type(dims[0]) is int
+            and dims[0] > 0
+        ):
+            return
+        self.__post_init__()
+
     def __post_init__(self) -> None:
         """校验维度为正整数。/ Validate dimensions are positive."""
+        if (
+            type(self.dims) is tuple
+            and len(self.dims) == 1
+            and type(self.dims[0]) is int
+            and self.dims[0] > 0
+        ):
+            return
         if any(d <= 0 for d in self.dims):
             raise DimensionMismatchingException(
                 f"维度必须为正整数，实际为 {self.dims}"
@@ -411,10 +425,7 @@ class DynShape:
     @property
     def size(self) -> int:
         """元素总数。/ Total number of elements."""
-        result = 1
-        for d in self.dims:
-            result *= d
-        return result
+        return _native._shape_size(self, None)
 
     def strides(self) -> tuple[int, ...]:
         """各维度步长。/ Stride of each dimension."""
@@ -426,6 +437,11 @@ class DynShape:
         Convert multi-dimensional indices to flat index.
         """
         return _compute_flat_index(self.dims, self.strides(), indices)
+
+
+# 在类定义后固定初始化器身份，避免绑定层导入顺序吞掉用户 hook。
+# Capture the initializer identity here so binding import order cannot hide user hooks.
+_DYN_SHAPE_INIT = DynShape.__init__
 
 
 # ==================== 异常类型 ====================

@@ -10,6 +10,8 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
+from ospf_python._binding.chaotic_system import array_step_or_none
+
 
 @dataclass(frozen=True)
 class BurkeShawAttractor:
@@ -42,6 +44,12 @@ class BurkeShawAttractor:
         Returns:
             下一步状态。/ Next state.
         """
+        native = array_step_or_none(
+            system="BurkeShawAttractor", params=(self.s, self.v, self.dt), state=x
+        )
+        if native is not None:
+            return native
+
         x_, y_, z_ = x[0], x[1], x[2]
         dx = -self.s * (x_ + y_)
         dy = -y_ - self.s * x_ * z_

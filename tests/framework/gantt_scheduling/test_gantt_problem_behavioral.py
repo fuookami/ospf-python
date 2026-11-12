@@ -48,9 +48,7 @@ class TestPrecedenceRelation:
         assert rel.min_gap == pytest.approx(0.0)
 
     def test_custom_min_gap(self) -> None:
-        rel = PrecedenceRelation(
-            predecessor_key="t1", successor_key="t2", min_gap=5.0
-        )
+        rel = PrecedenceRelation(predecessor_key="t1", successor_key="t2", min_gap=5.0)
         assert rel.min_gap == pytest.approx(5.0)
 
     def test_frozen(self) -> None:
@@ -91,6 +89,39 @@ class TestGanttProblemValidation:
         result = problem.validate()
         assert result.is_failed()
 
+    @pytest.mark.parametrize("amount", [-1.0, float("nan"), float("inf")])
+    def test_validate_invalid_resource_demand_fails(self, amount: float) -> None:
+        tasks = (_make_task("t1", resource_requirements=(("r1", amount),)),)
+        resources = (_make_resource("r1"),)
+        problem = GanttProblem(name="bad_demand", tasks=tasks, resources=resources)
+
+        result = problem.validate()
+
+        assert result.is_failed()
+        assert "t1.r1" in result.error.message
+
+    def test_validate_zero_resource_demand_ok(self) -> None:
+        tasks = (_make_task("t1", resource_requirements=(("r1", 0.0),)),)
+        resources = (_make_resource("r1"),)
+        problem = GanttProblem(name="zero_demand", tasks=tasks, resources=resources)
+
+        assert problem.validate().is_ok()
+
+    def test_validate_aggregate_resource_demand_must_be_finite(self) -> None:
+        tasks = (
+            _make_task(
+                "t1",
+                resource_requirements=(("r1", 1e308), ("r1", 1e308)),
+            ),
+        )
+        resources = (_make_resource("r1"),)
+        problem = GanttProblem(name="overflow_demand", tasks=tasks, resources=resources)
+
+        result = problem.validate()
+
+        assert result.is_failed()
+        assert "t1.r1" in result.error.message
+
     def test_validate_invalid_precedence_task_fails(self) -> None:
         tasks = (_make_task("t1"),)
         resources = (_make_resource("r1"),)
@@ -116,7 +147,10 @@ class TestGanttProblemValidation:
         resources = (_make_resource("r1"),)
         rels = (PrecedenceRelation(predecessor_key="t1", successor_key="t2"),)
         problem = GanttProblem(
-            name="good_prec", tasks=tasks, resources=resources, precedence_relations=rels
+            name="good_prec",
+            tasks=tasks,
+            resources=resources,
+            precedence_relations=rels,
         )
         result = problem.validate()
         assert result.is_ok()
@@ -131,7 +165,9 @@ class TestGanttProblemQueries:
     def _make_problem(self) -> GanttProblem:
         tasks = (
             _make_task("t1", priority=3, resource_requirements=(("r1", 1.0),)),
-            _make_task("t2", priority=5, resource_requirements=(("r1", 2.0), ("r2", 1.0))),
+            _make_task(
+                "t2", priority=5, resource_requirements=(("r1", 2.0), ("r2", 1.0))
+            ),
             _make_task("t3", priority=1, resource_requirements=(("r2", 1.0),)),
         )
         resources = (_make_resource("r1"), _make_resource("r2"))

@@ -5,7 +5,12 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
+from ospf_python._binding.unit_registry import (
+    register_unit_family as _register_unit_family,
+)
 
+
+@_register_unit_family(powers=(0, 0, -2, 0, 0, 0, 0, 0, 1, 0))
 @dataclass(frozen=True)
 class AngularAcceleration:
     """角加速度单位。/ Angular acceleration unit.

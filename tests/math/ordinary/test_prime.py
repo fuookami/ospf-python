@@ -59,20 +59,20 @@ class TestPrimesUpTo:
 
     def test_primes_up_to_10(self) -> None:
         """10 以内的素数。/ Primes up to 10."""
-        assert primes_up_to(10) == [2, 3, 5, 7]
+        assert primes_up_to(10).unwrap() == [2, 3, 5, 7]
 
     def test_primes_up_to_20(self) -> None:
         """20 以内的素数。/ Primes up to 20."""
-        result = primes_up_to(20)
+        result = primes_up_to(20).unwrap()
         assert result == [2, 3, 5, 7, 11, 13, 17, 19]
 
     def test_primes_up_to_1(self) -> None:
         """1 以内无素数。/ No primes up to 1."""
-        assert primes_up_to(1) == []
+        assert primes_up_to(1).unwrap() == []
 
     def test_primes_up_to_2(self) -> None:
         """2 以内的素数。/ Primes up to 2."""
-        assert primes_up_to(2) == [2]
+        assert primes_up_to(2).unwrap() == [2]
 
 
 # ── nth_prime ───────────────────────────────────────────────────

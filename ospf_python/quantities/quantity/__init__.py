@@ -20,8 +20,14 @@ from ospf_python.quantities.quantity.min_max import (
 from ospf_python.quantities.quantity.min_max import (
     min_quantity as min_quantity,
 )
+from ospf_python.quantities.quantity.numeric_adapter import (
+    NumericAdapter as NumericAdapter,
+)
 from ospf_python.quantities.quantity.quantity import (
     Quantity as Quantity,
+)
+from ospf_python.quantities.quantity.snapshot_adapter import (
+    SnapshotAdapter as SnapshotAdapter,
 )
 from ospf_python.quantities.quantity.value_range import (
     QuantityValueRange as QuantityValueRange,

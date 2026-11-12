@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Self
 
+from ospf_python import _native
 from ospf_python.utils.functional.ord import Order
 
 
@@ -39,53 +40,51 @@ class Integer:
 
     def __add__(self, other: Self) -> Self:
         """加法。/ Addition."""
-        return self.__class__(self.value + other.value)
+        return _integer.add(owner=self, other=other)
 
     def __mul__(self, other: Self) -> Self:
         """乘法。/ Multiplication."""
-        return self.__class__(self.value * other.value)
+        return _integer.multiply(owner=self, other=other)
 
     def __neg__(self) -> Self:
         """取反。/ Negation."""
-        return self.__class__(-self.value)
+        return _integer.negate(self)
 
     def __sub__(self, other: Self) -> Self:
         """减法。/ Subtraction."""
-        return self.__class__(self.value - other.value)
+        return _integer.subtract(owner=self, other=other)
 
     def __truediv__(self, other: Self) -> Self:
-        """整数除法（截断）。/ Integer division (truncating)."""
-        if other.value == 0:
-            return self.__class__(0)
-        return self.__class__(self.value // other.value)
+        """整数除法（向下取整）。/ Integer division (flooring)."""
+        return _integer.divide(owner=self, other=other)
 
     def __eq__(self, other: object) -> bool:
         """相等比较。/ Equality comparison."""
         if not isinstance(other, Integer):
             return NotImplemented
-        return self.value == other.value
+        return _integer.equal(left=self.value, right=other.value)
 
     def __ne__(self, other: object) -> bool:
         """不等比较。/ Inequality comparison."""
         if not isinstance(other, Integer):
             return NotImplemented
-        return self.value != other.value
+        return _integer.not_equal(left=self.value, right=other.value)
 
     def __lt__(self, other: Self) -> bool:
         """小于比较。/ Less-than comparison."""
-        return self.value < other.value
+        return _integer.less(left=self.value, right=other.value)
 
     def __le__(self, other: Self) -> bool:
         """小于等于比较。/ Less-or-equal comparison."""
-        return self.value <= other.value
+        return _integer.less_equal(left=self.value, right=other.value)
 
     def __gt__(self, other: Self) -> bool:
         """大于比较。/ Greater-than comparison."""
-        return self.value > other.value
+        return _integer.greater(left=self.value, right=other.value)
 
     def __ge__(self, other: Self) -> bool:
         """大于等于比较。/ Greater-or-equal comparison."""
-        return self.value >= other.value
+        return _integer.greater_equal(left=self.value, right=other.value)
 
     def __hash__(self) -> int:
         """哈希值。/ Hash value."""
@@ -97,12 +96,15 @@ class Integer:
 
     def cmp(self, other: Self) -> Order:
         """全序比较。/ Total comparison."""
-        if self.value < other.value:
+        if _integer.less(left=self.value, right=other.value):
             return Order.LT
-        if self.value > other.value:
+        if _integer.greater(left=self.value, right=other.value):
             return Order.GT
         return Order.EQ
 
     def partial_cmp(self, other: Self) -> Order | None:
         """部分比较。/ Partial comparison."""
         return self.cmp(other)
+
+
+_integer = _native._public_integer.facade(reference=Integer.__add__, domain="integer")

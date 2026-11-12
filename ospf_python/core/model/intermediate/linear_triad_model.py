@@ -29,6 +29,7 @@ class LinearTriadModel:
         upper_bounds: 变量上界 / Variable upper bounds.
         rhs: 约束右端项 / Constraint right-hand side values.
         sense: 约束方向 / Constraint senses.
+        variable_types: 变量类型元数据 / Variable type metadata.
     """
 
     name: str = ""
@@ -41,3 +42,4 @@ class LinearTriadModel:
     upper_bounds: dict[str, float] = field(default_factory=dict)
     rhs: dict[str, float] = field(default_factory=dict)
     sense: dict[str, str] = field(default_factory=dict)
+    variable_types: dict[str, str] = field(default_factory=dict)

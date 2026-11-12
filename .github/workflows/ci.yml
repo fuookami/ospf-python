@@ -7,6 +7,43 @@ on:
     branches: [main]
 
 jobs:
+  native-wheel:
+    name: Native Distribution (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install nightly-2026-08-01 --profile minimal
+      - name: Install pinned Maturin
+        run: python -m pip install maturin==1.15.0
+      - name: Test Rust boundary
+        run: cargo test --locked --manifest-path native/Cargo.toml
+        env:
+          PYO3_PYTHON: python
+      - name: Build locked wheel
+        run: python -m maturin build --release --locked --interpreter python --out dist/wheels
+      - name: Build source distribution
+        run: python -m maturin sdist --manifest-path native/Cargo.toml --out dist/sdist
+      - name: Verify isolated installation and source rebuild
+        run: >-
+          python -c "from pathlib import Path; import subprocess, sys;
+          subprocess.run([sys.executable, 'scripts/verify_binding_distribution.py',
+          '--wheel', str(next(Path('dist/wheels').glob('*.whl'))),
+          '--sdist', str(next(Path('dist/sdist').glob('*.tar.gz')))], check=True)"
+      - name: Keep distribution artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-distribution-${{ matrix.os }}
+          path: dist/
+
   quality-gate:
     name: Quality Gate
     runs-on: ubuntu-latest
@@ -19,11 +56,13 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync --extra dev
       - name: Production quality check
         run: uv run python scripts/check-production-quality.py
       - name: Migration gates check
         run: uv run python scripts/check_migration_gates.py
+      - name: Binding migration scope check
+        run: uv run python scripts/check_binding_migration.py
 
   lint:
     name: Lint
@@ -37,7 +76,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync --extra dev
       - name: Ruff check
         run: uv run ruff check .
       - name: Ruff format check
@@ -55,7 +94,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync --extra dev
       - name: Mypy
         run: uv run mypy ospf_python examples
 
@@ -71,7 +110,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync --extra dev
       - name: Pytest
         run: uv run pytest -q
 
@@ -91,7 +130,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync --extra dev --extra ${{ matrix.solver }}
       - name: Run solver tests
         run: uv run pytest tests/ -q -k "gurobi or scip" --timeout=60
         env:
@@ -110,7 +149,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync --extra dev
       - name: Run benchmarks
         run: uv run pytest benchmarks/ --benchmark-only --benchmark-json=benchmarks/ci.json -q
       - name: Compare with baseline
@@ -129,7 +168,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync --extra dev --extra gurobi --extra scip
       - name: Run cross-solver consistency tests
         run: uv run pytest tests/core/solver/test_cross_solver_consistency.py -v
         env:

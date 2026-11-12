@@ -3,9 +3,10 @@
 Prime number utilities.
 """
 
-from __future__ import annotations
+from typing import SupportsIndex
 
-import math
+from ospf_python._binding.prime_sieve import primes_up_to as _primes_up_to
+from ospf_python._binding.result import BindingResult
 
 
 def is_prime(n: int) -> bool:
@@ -33,26 +34,18 @@ def is_prime(n: int) -> bool:
     return True
 
 
-def primes_up_to(n: int) -> list[int]:
-    """返回不超过 n 的所有素数（埃氏筛）。
+def primes_up_to(n: SupportsIndex) -> BindingResult[list[int]]:
+    """以固定 Rust 埃氏筛返回不超过 n 的素数 Result。
 
-    Return all primes up to n (Sieve of Eratosthenes).
+    Return a Result of all primes up to n using the pinned Rust sieve.
 
     Args:
-        n: 上界（含）。/ Upper bound (inclusive).
+        n: 支持 __index__ 的上界（含）。/ Inclusive bound supporting __index__.
 
     Returns:
-        素数列表。/ List of primes.
+        既有 Result，成功包含独立列表。/ Existing Result containing a detached list.
     """
-    if n < 2:
-        return []
-    sieve = [True] * (n + 1)
-    sieve[0] = sieve[1] = False
-    for i in range(2, int(math.isqrt(n)) + 1):
-        if sieve[i]:
-            for j in range(i * i, n + 1, i):
-                sieve[j] = False
-    return [i for i, is_p in enumerate(sieve) if is_p]
+    return _primes_up_to(n)
 
 
 def nth_prime(n: int) -> int:

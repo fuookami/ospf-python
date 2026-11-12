@@ -1,0 +1,49 @@
+name: Fixed Runner Performance Acceptance
+
+on:
+  workflow_dispatch:
+    inputs:
+      runner_id:
+        description: Declared fixed-runner identity
+        required: true
+        default: ospf-win-cp313-v1
+      extension_sha256:
+        description: Pre-registered native extension SHA-256
+        required: true
+      soak_seconds:
+        description: Long-term resource soak duration
+        required: true
+        default: "600"
+
+jobs:
+  storage-transform:
+    name: Storage Transform (${{ inputs.runner_id }})
+    runs-on: [self-hosted, Windows, X64, ospf-fixed]
+    timeout-minutes: 45
+    env:
+      OSPF_STORAGE_FIXED_RUNNER: ${{ inputs.runner_id }}
+      CARGO_TARGET_DIR: ${{ runner.temp }}/ospf-native-target
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned build tools
+        run: >-
+          python -m pip install
+          maturin==1.15.0
+          numpy==2.5.4
+      - name: Build locked native extension
+        run: python -m maturin develop --release --locked
+      - name: Run fixed-runner acceptance
+        run: >-
+          python benchmarks/storage_transform_fixed_runner.py
+          --output "${{ runner.temp }}/ospf-storage-transform"
+          --runner-id "${{ inputs.runner_id }}"
+          --rounds 2
+          --soak-seconds "${{ inputs.soak_seconds }}"
+          --expected-extension-sha256 "${{ inputs.extension_sha256 }}"
+          --acceptance
+      - name: Keep acceptance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: storage-transform-fixed-runner
+          path: ${{ runner.temp }}/ospf-storage-transform

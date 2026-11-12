@@ -19,7 +19,7 @@ class TestFastSum:
             [1, 2, 3, 4, 5],
             Shape1(d0=5),
         )
-        total = arr.reduce(lambda a, b: a + b)
+        total = arr.reduce(lambda a, b: a + b).unwrap()
         assert total == 15
 
     def test_sum_2d(self) -> None:
@@ -28,11 +28,11 @@ class TestFastSum:
             [1, 2, 3, 4, 5, 6],
             Shape2(d0=2, d1=3),
         )
-        total = arr.reduce(lambda a, b: a + b)
+        total = arr.reduce(lambda a, b: a + b).unwrap()
         assert total == 21
 
     def test_sum_empty(self) -> None:
         """空数组求和。/ Empty array sum."""
         arr = MultiArray.zeros(Shape1(d0=1))
-        total = arr.reduce(lambda a, b: a + b)
+        total = arr.reduce(lambda a, b: a + b).unwrap()
         assert total == 0.0

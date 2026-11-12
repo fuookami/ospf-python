@@ -20,19 +20,19 @@ class TestExpOp:
 
     def test_exp_zero(self) -> None:
         """e^0 = 1。/ e^0 = 1."""
-        assert exp_op(0.0) == 1.0
+        assert exp_op(0.0).unwrap() == 1.0
 
     def test_exp_one(self) -> None:
         """e^1 = e。/ e^1 = e."""
-        assert math.isclose(exp_op(1.0), math.e)
+        assert math.isclose(exp_op(1.0).unwrap(), math.e)
 
     def test_exp_negative(self) -> None:
         """e^(-1)。/ e^(-1)."""
-        assert math.isclose(exp_op(-1.0), 1.0 / math.e)
+        assert math.isclose(exp_op(-1.0).unwrap(), 1.0 / math.e)
 
     def test_exp_two(self) -> None:
         """e^2。/ e^2."""
-        assert math.isclose(exp_op(2.0), math.e**2)
+        assert math.isclose(exp_op(2.0).unwrap(), math.e**2)
 
 
 # ── exp2_op ─────────────────────────────────────────────────────
@@ -43,15 +43,15 @@ class TestExp2Op:
 
     def test_exp2_zero(self) -> None:
         """2^0 = 1。/ 2^0 = 1."""
-        assert exp2_op(0.0) == 1.0
+        assert exp2_op(0.0).unwrap() == 1.0
 
     def test_exp2_ten(self) -> None:
         """2^10 = 1024。/ 2^10 = 1024."""
-        assert exp2_op(10.0) == 1024.0
+        assert exp2_op(10.0).unwrap() == 1024.0
 
     def test_exp2_one(self) -> None:
         """2^1 = 2。/ 2^1 = 2."""
-        assert exp2_op(1.0) == 2.0
+        assert exp2_op(1.0).unwrap() == 2.0
 
 
 # ── exp10_op ────────────────────────────────────────────────────
@@ -62,12 +62,12 @@ class TestExp10Op:
 
     def test_exp10_zero(self) -> None:
         """10^0 = 1。/ 10^0 = 1."""
-        assert exp10_op(0.0) == 1.0
+        assert exp10_op(0.0).unwrap() == 1.0
 
     def test_exp10_two(self) -> None:
         """10^2 = 100。/ 10^2 = 100."""
-        assert exp10_op(2.0) == 100.0
+        assert exp10_op(2.0).unwrap() == 100.0
 
     def test_exp10_three(self) -> None:
         """10^3 = 1000。/ 10^3 = 1000."""
-        assert exp10_op(3.0) == 1000.0
+        assert exp10_op(3.0).unwrap() == 1000.0

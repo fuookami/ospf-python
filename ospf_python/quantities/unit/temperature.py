@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from ospf_python._binding.unit_registry import (
+    register_unit_family as _register_unit_family,
+)
 
+
+@_register_unit_family(powers=(0, 0, 0, 0, 1, 0, 0, 0, 0, 0), affine=True)
 @dataclass(frozen=True)
 class Temperature:
     """温度单位。/ Temperature unit.

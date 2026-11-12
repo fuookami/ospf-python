@@ -51,7 +51,7 @@ class Left(Either[L, R]):
     """Left 分支 / Left branch.
 
     Args:
-        value: Left 值 / Left value.
+        _value: Left 值 / Left value.
     """
 
     _value: L
@@ -82,7 +82,7 @@ class Right(Either[L, R]):
     """Right 分支 / Right branch.
 
     Args:
-        value: Right 值 / Right value.
+        _value: Right 值 / Right value.
     """
 
     _value: R

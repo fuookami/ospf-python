@@ -8,6 +8,8 @@ Contains definitions of all physical units and unit systems.
 
 from __future__ import annotations
 
+from ospf_python.quantities.unit.unit import Unit
+
 from .acceleration import Acceleration
 from .amount import Amount
 from .angular_acceleration import AngularAcceleration
@@ -53,6 +55,7 @@ from .wavenumber import Wavenumber
 __all__ = [
     # 协议 / Protocol
     "PhysicalUnit",
+    "Unit",
     # 单位系统 / Unit systems
     "UnitSystem",
     "SI",

@@ -5,6 +5,8 @@ __pycache__/
 
 # C extensions
 *.so
+*.pyd
+*.pdb
 
 # Distribution / packaging
 .Python
@@ -126,3 +128,8 @@ dmypy.json
 .idea/
 /.supergoal/
 /uv.lock
+/logs/
+
+# 基准生成数据不入库（完成定义第 9 条）/ Generated benchmark output stays untracked
+benchmarks/ci.json
+benchmarks/run.json

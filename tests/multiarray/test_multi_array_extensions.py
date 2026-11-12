@@ -30,7 +30,7 @@ class TestMultiArrayAdvanced:
             [1, 2, 3, 4, 5, 6],
             Shape2(d0=2, d1=3),
         )
-        transposed = arr.transpose()
+        transposed = arr.transpose().unwrap()
         assert transposed.ndim == 2
         assert transposed[0, 0] == 1
         assert transposed[1, 0] == 2
@@ -42,7 +42,7 @@ class TestMultiArrayAdvanced:
             [1, 2, 3, 4, 5, 6],
             Shape1(d0=6),
         )
-        reshaped = arr.reshape(DynShape(dims=(2, 3)))
+        reshaped = arr.reshape(DynShape(dims=(2, 3))).unwrap()
         assert reshaped.ndim == 2
         assert reshaped.size == 6
 
@@ -52,7 +52,7 @@ class TestMultiArrayAdvanced:
             [1, 2, 3, 4, 5, 6],
             Shape2(d0=2, d1=3),
         )
-        flat = arr.flatten()
+        flat = arr.flatten().unwrap()
         assert flat.size == 6
         assert flat.ndim == 1
 
@@ -62,7 +62,7 @@ class TestMultiArrayAdvanced:
             [1, 2, 3, 4, 5, 6],
             Shape2(d0=2, d1=3),
         )
-        lst = arr.to_list()
+        lst = arr.to_list().unwrap()
         assert lst == [[1, 2, 3], [4, 5, 6]]
 
 
@@ -97,7 +97,7 @@ class TestMultiArrayViewAdvanced:
             Shape2(d0=2, d1=3),
         )
         view = MultiArrayView(arr)
-        materialized = view.materialize()
+        materialized = view.materialize().unwrap()
         arr[0, 0] = 999
         assert materialized.get(0, 0) == 1
 

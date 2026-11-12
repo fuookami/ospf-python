@@ -45,7 +45,7 @@ class V2Left(Variant2[T1, T2]):
     """Variant2 的第一个分支 / First branch of Variant2.
 
     Args:
-        value: 值 / Value.
+        _value: 值 / Value.
     """
 
     _value: T1
@@ -70,7 +70,7 @@ class V2Right(Variant2[T1, T2]):
     """Variant2 的第二个分支 / Second branch of Variant2.
 
     Args:
-        value: 值 / Value.
+        _value: 值 / Value.
     """
 
     _value: T2

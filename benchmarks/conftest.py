@@ -6,7 +6,17 @@ Aligned to Kotlin @Param("small","medium","large") parametrization.
 
 from __future__ import annotations
 
+import os
+
 import pytest
+
+#: 与 tests/conftest.py 一致：收集前注册原生扩展依赖的 DLL 目录。
+#: Same as tests/conftest.py: register the native extension's DLL directories before collection.
+_DLL_DIRECTORIES: list[object] = []
+if os.name == "nt":
+    for _path in os.environ.get("OSPF_NATIVE_DLL_DIRS", "").split(os.pathsep):
+        if _path:
+            _DLL_DIRECTORIES.append(os.add_dll_directory(_path))
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
