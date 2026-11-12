@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "registered_at": "2026-11-11T17:45:00+08:00",
+  "mode": "smoke",
+  "rationale": "剩下 4 条可有实测的合同：chaotic_system 的标量步进与 result 桥接层三条。/ The last four measurable contracts.",
+  "threshold": 1.15,
+  "gated_minimum": 10000,
+  "alternating_rounds": 21,
+  "repeats_by_count": {"10000": 1024},
+  "cases": [
+    {"family": "chaotic_system", "label": "chaotic-scalar-step", "module": "ospf_python._binding.chaotic_system",
+     "attrs": ["chaotic_system_step"], "kwargs": {"system": "BurkeShawAttractor", "params": [1.0, 0.5, 0.01], "state": [0.5, 0.5, 0.5]}, "count": 10000},
+    {"family": "result", "label": "bridge-invalid", "module": "ospf_python._binding.result",
+     "attrs": ["invalid"], "args": ["boom"], "count": 10000},
+    {"family": "result", "label": "bridge-unsupported", "module": "ospf_python._binding.result",
+     "attrs": ["unsupported"], "args": ["nope"], "count": 10000},
+    {"family": "result", "label": "bridge-failure-context", "module": "ospf_python._binding.result",
+     "attrs": ["FailureContext"], "kwargs": {"source": "ospf-python", "category": "APPLICATION_ERROR", "rust_code": null, "error_class": "BOUNDARY"}, "count": 10000}
+  ]
+}

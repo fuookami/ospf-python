@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "registered_at": "2026-11-10T17:15:00+08:00",
+  "mode": "smoke",
+  "rationale": "机制验证用最小政策：所有 count 都低于 gated_minimum，因此不构成任何合同验收。/ Mechanism-only policy: every count sits below gated_minimum, so no contract can be accepted by this file.",
+  "threshold": 1.15,
+  "gated_minimum": 10000,
+  "alternating_rounds": 3,
+  "repeats_by_count": {
+    "4": 128,
+    "10000": 256
+  },
+  "cases": [
+    {
+      "family": "selection",
+      "label": "combinations-4x2",
+      "module": "ospf_python.math.combinatorics.combinations",
+      "attrs": [
+        "combinations"
+      ],
+      "args": [
+        [
+          1,
+          2,
+          3,
+          4
+        ],
+        2
+      ],
+      "count": 4
+    },
+    {
+      "family": "prime_sieve",
+      "label": "primes-up-to-100",
+      "module": "ospf_python.math.ordinary.prime",
+      "attrs": [
+        "primes_up_to",
+        "primes"
+      ],
+      "args": [
+        100
+      ],
+      "count": 4
+    },
+    {
+      "family": "logarithm",
+      "label": "log-base-100-10",
+      "module": "ospf_python.math.ordinary.log",
+      "attrs": [
+        "log_base"
+      ],
+      "args": [
+        100.0,
+        10.0
+      ],
+      "count": 4
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "registered_at": "2026-11-09T13:55:00+08:00",
+  "subject": "public to_list for MultiArray and MutableMultiArray",
+  "shapes": [
+    [
+      100000
+    ],
+    [
+      100000,
+      1
+    ],
+    [
+      50000,
+      2
+    ],
+    [
+      10000
+    ],
+    [
+      10000,
+      1
+    ],
+    [
+      5000,
+      2
+    ],
+    [
+      100,
+      1000
+    ],
+    [
+      10,
+      10,
+      1000
+    ],
+    [
+      10,
+      10,
+      1000,
+      1
+    ],
+    [
+      100,
+      100
+    ],
+    [
+      1000,
+      10
+    ],
+    [
+      10,
+      10,
+      100
+    ]
+  ],
+  "domains": [
+    "int16",
+    "float64",
+    "object",
+    "quantity"
+  ],
+  "classes": [
+    "MultiArray",
+    "MutableMultiArray"
+  ],
+  "layouts": [
+    "ROW_MAJOR"
+  ],
+  "excluded_layouts": {
+    "COLUMN_MAJOR": "冻结基线的列主序导出已知不正确（总是按行主序嵌套），不是该布局的有效 oracle。 / The frozen baseline's column-major export is known incorrect, so it is not a valid oracle for that layout."
+  },
+  "gated_minimum": 10000,
+  "threshold": 1.15,
+  "alternating_rounds": 21,
+  "repeats_by_domain_and_count": {
+    "int16": {
+      "10000": 512,
+      "100000": 128
+    },
+    "float64": {
+      "10000": 256,
+      "100000": 64
+    },
+    "object": {
+      "10000": 64,
+      "100000": 16
+    },
+    "quantity": {
+      "10000": 32,
+      "100000": 8
+    }
+  },
+  "expected_rows": 96,
+  "resource_warmup": 5,
+  "resource_batch_operations": 5,
+  "max_peak_increment": 25165824,
+  "max_post_warmup_growth": 4194304,
+  "soak_seconds_minimum": 600,
+  "rationale": "分域 repeats 来自 B71 的直接教训：把 512/64 原样套到 object/quantity 会让矩阵无法在合理时间内跑完（单次 to_list 要构造十万个 Python 叶子）。阈值 1.15 不变；gated_minimum=10000 与 storage_transform 政策一致；只纳入 ROW_MAJOR，因为冻结基线不是列主序的有效 oracle。 / Per-domain repeats follow B71's lesson; the 1.15 threshold is unchanged.",
+  "revision": 2,
+  "machine_idle_required": true,
+  "revision_note": "Revision 2 (2026-11-09): revision 1 used 9 samples with repeats as low as 2 for the quantity domain. A clean re-run on the same extension produced 4 gated failures with the same policy while a dedicated diagnostic with 15 samples x 8 calls per sample on those exact rows measured medians of 0.964 (quantity 100000), 1.021 (object 100000) and 0.964 (object 10000), with single-sample ratios spanning 0.48-1.27. The rows are 0.06-1.7 ms long, so revision 1 was noise-dominated rather than measuring a regression. Revision 2 raises the sample count to 21 and the repeats for the fast domains, and states that the machine must be idle because a concurrent CPU-bound job inflates those short rows. Threshold, gated minimum and shapes are unchanged."
+}
