@@ -6,6 +6,8 @@ Full-sum cutting plan generator (exhaustive).
 
 from __future__ import annotations
 
+from operator import mul
+
 from dataclasses import dataclass, field
 from itertools import product as iter_product
 
@@ -15,6 +17,7 @@ from ospf_python.framework.csp1d.domain.cutting_plan_generation.model.generation
 from ospf_python.framework.csp1d.domain.cutting_plan_generation.service.generation_collector import (
     GenerationCollector,
 )
+from ospf_python.utils.numeric import step_index
 
 
 @dataclass(frozen=True)
@@ -80,7 +83,7 @@ class FullSumGenerator:
                 constraint.max_quantity if constraint else max_qty,
             )
             if product_length > 0:
-                max_by_length = int(material_length / product_length)
+                max_by_length = step_index(material_length / product_length)
                 effective_max = min(
                     effective_max,
                     max_by_length,
@@ -89,15 +92,26 @@ class FullSumGenerator:
                 range(min_qty, effective_max + 1),
             )
 
+        # 把「产品键 / 产品长度」与长度一起提到循环外：内层每个组合都会用到它们，
+        # 而原写法每轮都要 `range(len(products))`、反复索引 `products` 两次。
+        # `sum(map(mul, combo, lengths))` 与 `sum(combo[i] * products[i][1] for i in ...)`
+        # 逐位相同（同样的相乘与累加顺序，只是把索引换成了 C 级的 zip/map）。
+        #
+        # Hoist the keys/lengths out of the combo loop (the old body rebuilt
+        # `range(len(products))` and indexed `products` twice per combo), and use
+        # `sum(map(mul, ...))`, which is bit-identical to the indexed genexpr.
+        keys = [product[0] for product in products]
+        lengths = [product[1] for product in products]
+
         for combo in iter_product(*quantity_ranges):
             if self.collector.count >= self.constraints.max_solutions:
                 break
-            total_length = sum(combo[i] * products[i][1] for i in range(len(products)))
+            total_length = sum(map(mul, combo, lengths))
             if total_length <= material_length:
                 plan = {
-                    products[i][0]: combo[i]
-                    for i in range(len(products))
-                    if combo[i] > 0
+                    key: quantity
+                    for key, quantity in zip(keys, combo)
+                    if quantity > 0
                 }
                 if plan:
                     self.collector.try_collect(plan)

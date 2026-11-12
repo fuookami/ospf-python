@@ -331,8 +331,13 @@ class CuttingPlanGenerator:
         """
         new_x2 = x + w
         new_y2 = y + h
-        has_overlap = any(
-            x < ox2 and new_x2 > ox1 and y < oy2 and new_y2 > oy1
-            for ox1, oy1, ox2, oy2 in occupied
-        )
-        return has_overlap
+        # 显式循环而不是 `any(生成器表达式)`：语义完全相同（都是首次命中即返回），
+        # 但省掉每次调用创建生成器对象的开销。本函数在 `_find_bl_position` 的网格
+        # 扫描里被调用上千次，这个开销占实测总耗时的大部分。
+        # An explicit loop instead of `any(genexpr)`: identical semantics (both
+        # short-circuit on the first hit) without allocating a generator per call.
+        # This function is called thousands of times per grid scan.
+        for ox1, oy1, ox2, oy2 in occupied:
+            if x < ox2 and new_x2 > ox1 and y < oy2 and new_y2 > oy1:
+                return True
+        return False

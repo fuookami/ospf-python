@@ -8,6 +8,7 @@ utilization.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -64,6 +65,33 @@ class ResourceAggregation:
     attributes: tuple[ResourceAttribute, ...] = ()
     availabilities: tuple[ResourceAvailability, ...] = ()
 
+    def __post_init__(self) -> None:
+        """预建资源键索引 / Pre-build the resource-key index.
+
+        `get_resource` 会在「需求 × 容量」这样的循环里被调用
+        （例如 `resource_demand_constraint.build_constraints`）。
+        原来是线性扫描 `self.resources`，于是总代价是 O(需求 × 资源数)；
+        这里一次建好索引，查询降到 O(1)。**重复键取首个**，与线性扫描语义一致。
+
+        `get_resource` is called inside loops over demands, so the former linear scan
+        made that O(demands x resources). The index makes each lookup O(1); duplicate
+        keys keep the first one, as before.
+        """
+        index: dict[str, Resource] = {}
+        for resource in self.resources:
+            index.setdefault(resource.resource_key, resource)
+        object.__setattr__(self, "_resource_index", index)
+
+        # 容量按资源分组：`get_capacity` 先按 `resource_key` 精确过滤，再对候选做两次
+        # `math.isclose`（相对贵）。分组后候选只是该资源的容量记录，而不是全部。
+        # 组内保持原始顺序，所以「取首个匹配」的语义不变。
+        capacities_by_resource: dict[str, list[ResourceCapacity]] = {}
+        for capacity in self.capacities:
+            capacities_by_resource.setdefault(capacity.resource_key, []).append(
+                capacity
+            )
+        object.__setattr__(self, "_capacities_by_resource", capacities_by_resource)
+
     def get_resource(self, resource_key: str) -> Resource | None:
         """按标识查找资源。
 
@@ -76,6 +104,9 @@ class ResourceAggregation:
             匹配的资源，不存在时返回 None。
             Matching resource, or None if not found.
         """
+        index = getattr(self, "_resource_index", None)
+        if index is not None:
+            return index.get(resource_key)
         for r in self.resources:
             if r.resource_key == resource_key:
                 return r
@@ -101,11 +132,24 @@ class ResourceAggregation:
             匹配的容量记录，不存在时返回 None。
             Matching capacity record, or None if not found.
         """
-        for c in self.capacities:
-            if (
-                c.resource_key == resource_key
-                and c.time_window_start == window_start
-                and c.time_window_end == window_end
+        by_resource = getattr(self, "_capacities_by_resource", None)
+        candidates = (
+            self.capacities
+            if by_resource is None
+            else by_resource.get(resource_key, ())
+        )
+        for c in candidates:
+            if by_resource is None and c.resource_key != resource_key:
+                continue
+            # 时间窗按 float 存储，精确 == 会让"0.1 + 0.2 注册、0.3 查询"这类同号不同位的
+            # 边界互相看不到，调用方再静默回退到 effective_capacity_during。
+            # Time windows are floats; exact == hides boundaries that are equal in value but not
+            # in bits (register 0.1 + 0.2, query 0.3), after which callers silently fall back to
+            # effective_capacity_during.
+            if math.isclose(
+                c.time_window_start, window_start, rel_tol=1e-9, abs_tol=1e-9
+            ) and math.isclose(
+                c.time_window_end, window_end, rel_tol=1e-9, abs_tol=1e-9
             ):
                 return c
         return None

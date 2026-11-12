@@ -48,11 +48,35 @@ class CapacityCapacityConstraint:
 
         Returns:
             容量约束数据元组。/ Tuple of capacity constraint data.
+
+        一次遍历把负载按槽累加好，而不是对每个容量记录再调用一次
+        `total_load_for_slot`（那是 O(容量 × 负载)）。累加顺序与逐槽 `sum(...)` 相同，
+        浮点结果一致。
+
+        **聚合类没有公开 `loads` 元组时退回逐槽访问器**——替身（例如
+        `test_capacity_scheduling.py` 的 `_StubAggregation`，其负载存成「槽 → 负载」的
+        dict）只实现 `total_load_for_slot`。两条路语义相同，只是复杂度不同。
+
+        Accumulate load per slot once instead of calling `total_load_for_slot` per
+        capacity record (O(capacities x loads)); summation order unchanged. Falls back to
+        the per-slot accessor when the aggregation does not expose a `loads` tuple.
         """
+        loads_raw = getattr(aggregation, "loads", None)
+        loads_by_slot: dict[str, float] = {}
+        if loads_raw is not None:
+            for load in loads_raw:
+                key = getattr(load, "capacity_slot_key", None)
+                if key is not None:
+                    loads_by_slot[key] = loads_by_slot.get(key, 0.0) + getattr(
+                        load, "load_amount", 0.0
+                    )
+
         constraints: list[SlotCapacity] = []
         for cap in aggregation.capacities:
-            total_demand = aggregation.total_load_for_slot(
-                cap.capacity_slot_key,
+            total_demand = (
+                loads_by_slot.get(cap.capacity_slot_key, 0.0)
+                if loads_raw is not None
+                else aggregation.total_load_for_slot(cap.capacity_slot_key)
             )
             constraints.append(
                 SlotCapacity(

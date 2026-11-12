@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "registered_at": "2026-10-31T02:17:00+08:00",
+  "seed": 278177592,
+  "counts": [
+    8,
+    10000,
+    100000
+  ],
+  "gated_count": 100000,
+  "gated_minimum": 10000,
+  "domains": [
+    "int16",
+    "float64",
+    "object",
+    "quantity"
+  ],
+  "orders": [
+    "ROW_MAJOR",
+    "COLUMN_MAJOR"
+  ],
+  "methods": [
+    "reshape",
+    "flatten"
+  ],
+  "alternating_rounds": 9,
+  "repeats_by_count": {
+    "8": 2048,
+    "10000": 512,
+    "100000": 64
+  },
+  "threshold": 1.15,
+  "expected_rows": 96,
+  "resource_warmup": 5,
+  "resource_batch_operations": 5,
+  "max_peak_increment": 25165824,
+  "max_post_warmup_growth": 4194304,
+  "samples_per_round": 16,
+  "note_on_samples_per_round": "每轮样本数（默认 4 = 原来的一轮 2 样本/侧）。判据边距只有 0.8% 时 18 个样本估不出可复现的比值：B433（0 个失败）与 B434（2 个失败）是同一二进制同一配置的两次不同结果。调到 16 只改测量精度，不改阈值与判据形式。 / Widens samples per round; changes measurement precision only."
+}

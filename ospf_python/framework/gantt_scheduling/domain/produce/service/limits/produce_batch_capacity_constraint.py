@@ -87,11 +87,31 @@ class ProduceBatchCapacityConstraint:
 
         Returns:
             容量约束数据元组。/ Tuple of capacity constraint data.
+
+        一次遍历把需求按批次累加好，而不是对每个容量记录再调用一次
+        `total_demand_for_batch`（那是 O(容量 × 分配)：500 项时 17 ms）。
+        累加顺序与逐批 `sum(...)` 相同，浮点结果一致。
+
+        Accumulate demand per batch once instead of calling `total_demand_for_batch` per
+        capacity record (O(capacities x assignments): 17 ms at 500). Summation order
+        unchanged.
         """
+        assignments_raw = getattr(aggregation, "assignments", None)
+        demands_by_batch: dict[str, float] = {}
+        if assignments_raw is not None:
+            for assignment in assignments_raw:
+                key = getattr(assignment, "batch_key", None)
+                if key is not None:
+                    demands_by_batch[key] = demands_by_batch.get(key, 0.0) + getattr(
+                        assignment, "demand", 0.0
+                    )
+
         constraints: list[BatchCapacityData] = []
         for cap in aggregation.batch_capacities:
-            total_demand = aggregation.total_demand_for_batch(
-                cap.batch_key,
+            total_demand = (
+                demands_by_batch.get(cap.batch_key, 0.0)
+                if assignments_raw is not None
+                else aggregation.total_demand_for_batch(cap.batch_key)
             )
             constraints.append(
                 BatchCapacityData(

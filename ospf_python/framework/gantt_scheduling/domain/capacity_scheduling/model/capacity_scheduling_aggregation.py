@@ -32,6 +32,19 @@ class CapacitySchedulingAggregation:
         """获取已注册容量记录。/ Get registered capacities."""
         return self._capacities
 
+    @property
+    def assignments(self) -> tuple[Any, ...]:
+        """获取全部已注册分配。/ Get every registered assignment.
+
+        与 `capacities` 同理的只读暴露。需要的调用方可以一次遍历完成分组，
+        而不必对每个工作项调用一次 `assignments_for_work_item`（那是 O(项 × 分配)）。
+
+        Read-only exposure mirroring `capacities`: callers can group in a single pass
+        instead of calling `assignments_for_work_item` per work item, which is
+        O(items x assignments).
+        """
+        return self._assignments
+
     def with_assignment(
         self,
         assignment: Any,

@@ -58,12 +58,26 @@ class BunchCapacityConstraint:
 
         Returns:
             容量约束数据元组。/ Tuple of capacity constraint data.
+
+        一次遍历把分配的需求按束编组累加好，而不是对每个容量记录再调用一次
+        `total_demand_for_bunch`（那是 O(容量 × 分配)：500 项时 17 ms）。
+        累加顺序与逐束 `sum(...)` 相同（都按分配注册的顺序），浮点结果一致。
+
+        Accumulate demand per bunch once instead of calling `total_demand_for_bunch`
+        per capacity record (O(capacities x assignments): 17 ms at 500). The summation
+        order matches the per-bunch `sum(...)`.
         """
+        demands_by_bunch: dict[str, float] = {}
+        for assignment in aggregation.assignments:
+            key = getattr(assignment, "bunch_key", None)
+            if key is not None:
+                demands_by_bunch[key] = demands_by_bunch.get(key, 0.0) + getattr(
+                    assignment, "demand", 0.0
+                )
+
         constraints: list[BunchCapacity] = []
         for cap in aggregation.capacities:
-            total_demand = aggregation.total_demand_for_bunch(
-                cap.bunch_key,
-            )
+            total_demand = demands_by_bunch.get(cap.bunch_key, 0.0)
             constraints.append(
                 BunchCapacity(
                     bunch_key=cap.bunch_key,

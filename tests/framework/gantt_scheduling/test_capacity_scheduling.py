@@ -85,9 +85,19 @@ class _StubCap:
 
 @dataclass(frozen=True)
 class _StubAssignment:
-    """桩分配记录 / Stub assignment record."""
+    """桩分配记录 / Stub assignment record.
+
+    带 `work_item_key` 是为了与真实类一致：`CapacitySchedulingAggregation` 把分配存成
+    扁平元组，靠每个分配上的 `work_item_key` 分组（`work_item_keys` 与
+    `assignments_for_work_item` 都是从这里派生的）。此前替身用「按工作项分组的 dict」，
+    分配记录本身不带键——那个形状比真实类更宽松，于是掩盖了「真实分配必须带键」这一要求。
+
+    `work_item_key` mirrors the real class, whose flat assignment tuple groups by that
+    attribute; the previous dict-of-tuples shape was laxer than the real type.
+    """
 
     assignment_amount: float = 0.0
+    work_item_key: str = ""
 
 
 @dataclass(frozen=True)
@@ -100,7 +110,7 @@ class _StubAggregation:
     capacities: tuple[_StubCap, ...] = ()
     work_item_keys: tuple[str, ...] = ()
     _loads: dict[str, float] | None = None
-    _assignments: dict[str, tuple[_StubAssignment, ...]] | None = None
+    _assignments: tuple[_StubAssignment, ...] = ()
 
     def total_load_for_slot(self, slot_key: str) -> float:
         """获取指定槽的总负载 / Get total load for slot."""
@@ -113,9 +123,21 @@ class _StubAggregation:
         key: str,
     ) -> tuple[_StubAssignment, ...]:
         """获取工作项的分配 / Get assignments for work item."""
-        if self._assignments is not None:
-            return self._assignments.get(key, ())
-        return ()
+        return tuple(a for a in self._assignments if a.work_item_key == key)
+
+    @property
+    def assignments(self) -> tuple[_StubAssignment, ...]:
+        """获取全部已注册分配 / Get every registered assignment.
+
+        真实类 `CapacitySchedulingAggregation` 有同名只读属性（约束用一次遍历
+        完成分组，避免 O(项 × 分配)）。替身必须跟着有，否则它就不再是这个类的
+        忠实替代品——B506 就是「替身比真实类多出字段」掩盖了契约断裂。
+
+        The real class exposes the same read-only property; the stub must mirror it,
+        otherwise it stops being a faithful stand-in (B506 was the inverse: a stub with
+        more fields than the real class hid a broken contract).
+        """
+        return self._assignments
 
 
 # =========================================================================
@@ -464,9 +486,7 @@ class TestCapacityDemandConstraint:
         c = CapacityDemandConstraint(required_amount=10.0)
         agg = _StubAggregation(
             work_item_keys=("w1",),
-            _assignments={
-                "w1": (_StubAssignment(10.0),),
-            },
+            _assignments=(_StubAssignment(10.0, "w1"),),
         )
         result = c.build_constraints(agg)  # type: ignore[arg-type]
         assert len(result) == 1
@@ -478,9 +498,7 @@ class TestCapacityDemandConstraint:
         c = CapacityDemandConstraint(required_amount=10.0)
         agg = _StubAggregation(
             work_item_keys=("w1",),
-            _assignments={
-                "w1": (_StubAssignment(3.0),),
-            },
+            _assignments=(_StubAssignment(3.0, "w1"),),
         )
         result = c.build_constraints(agg)  # type: ignore[arg-type]
         assert len(result) == 1
@@ -492,9 +510,7 @@ class TestCapacityDemandConstraint:
         c = CapacityDemandConstraint(required_amount=10.0)
         agg = _StubAggregation(
             work_item_keys=("w1",),
-            _assignments={
-                "w1": (_StubAssignment(3.0),),
-            },
+            _assignments=(_StubAssignment(3.0, "w1"),),
         )
         unsatisfied = c.unsatisfied_demands(agg)  # type: ignore[arg-type]
         assert len(unsatisfied) == 1
@@ -504,9 +520,7 @@ class TestCapacityDemandConstraint:
         c = CapacityDemandConstraint(required_amount=10.0)
         agg = _StubAggregation(
             work_item_keys=("w1",),
-            _assignments={
-                "w1": (_StubAssignment(10.0),),
-            },
+            _assignments=(_StubAssignment(10.0, "w1"),),
         )
         assert c.is_feasible(agg) is True  # type: ignore[arg-type]
 
@@ -515,9 +529,7 @@ class TestCapacityDemandConstraint:
         c = CapacityDemandConstraint(required_amount=10.0)
         agg = _StubAggregation(
             work_item_keys=("w1",),
-            _assignments={
-                "w1": (_StubAssignment(2.0),),
-            },
+            _assignments=(_StubAssignment(2.0, "w1"),),
         )
         assert c.is_feasible(agg) is False  # type: ignore[arg-type]
 

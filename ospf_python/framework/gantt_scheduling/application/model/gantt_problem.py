@@ -7,6 +7,7 @@ generation: tasks, resources, and precedence relations.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -65,6 +66,27 @@ class GanttProblem:
     precedence_relations: tuple[PrecedenceRelation, ...] = ()
     time_horizon: float = float("inf")
 
+    def __post_init__(self) -> None:
+        """预建任务键索引 / Pre-build the task-key index.
+
+        `task_by_key` 在构建模型时被调用在「列 × 成员」这样嵌套的循环里。
+        原来是线性扫描 `self.tasks`，总代价 O(列 × 成员 × 任务数)；这里一次建好索引，
+        每次查询降到 O(1)。**重复键取首个**，与线性扫描的语义一致。
+
+        `task_by_key` is called inside loops over columns and their members, so the
+        former linear scan made the total O(columns x members x tasks). The index makes
+        each lookup O(1); duplicate keys keep the first one, as before.
+        """
+        index: dict[str, Task] = {}
+        for task in self.tasks:
+            index.setdefault(task.task_key, task)
+        object.__setattr__(self, "_task_index", index)
+
+        resource_index: dict[str, Resource] = {}
+        for resource in self.resources:
+            resource_index.setdefault(resource.resource_key, resource)
+        object.__setattr__(self, "_resource_index", resource_index)
+
     # ==================== 验证 / Validation =====================
 
     def validate(self) -> Result[None, str, Err[str]]:
@@ -107,6 +129,21 @@ class GanttProblem:
                         f"任务引用了未知资源: {res_ref} / "
                         f"Task references unknown resource: "
                         f"{res_ref}"
+                    ),
+                )
+            )
+
+        demand_err = self._find_invalid_resource_demand()
+        if demand_err is not None:
+            task_key, resource_key, amount = demand_err
+            return Failed(
+                Err(
+                    _code=ErrorCode.ILLEGAL_ARGUMENT,
+                    _message=(
+                        "任务资源需求必须是非负有限值: "
+                        f"{task_key}.{resource_key}={amount!r} / "
+                        "Task resource demand must be finite and non-negative: "
+                        f"{task_key}.{resource_key}={amount!r}"
                     ),
                 )
             )
@@ -176,12 +213,21 @@ class GanttProblem:
     def task_by_key(self, key: str) -> Task | None:
         """按键查找任务 / Find task by key.
 
+        走 `__post_init__` 预建的索引，O(1)。索引不存在时（例如反序列化路径绕过了
+        `__init__`）退回线性扫描，保证行为不变。
+
+        Uses the index built in `__post_init__` (O(1)); falls back to the linear scan if
+        the index is absent, so behaviour is unchanged in every case.
+
         Args:
             key: 任务键 / Task key.
 
         Returns:
             匹配的任务或 None / Matching task or None.
         """
+        index = getattr(self, "_task_index", None)
+        if index is not None:
+            return index.get(key)
         for task in self.tasks:
             if task.task_key == key:
                 return task
@@ -190,12 +236,21 @@ class GanttProblem:
     def resource_by_key(self, key: str) -> Resource | None:
         """按键查找资源 / Find resource by key.
 
+        与 `task_by_key` 同理走 `__post_init__` 预建的索引（O(1)）；
+        索引不存在时退回线性扫描，保证行为不变。
+
+        Mirrors `task_by_key`: O(1) through the index built in `__post_init__`, with the
+        linear scan kept as a fallback so behaviour never changes.
+
         Args:
             key: 资源键 / Resource key.
 
         Returns:
             匹配的资源或 None / Matching resource or None.
         """
+        index = getattr(self, "_resource_index", None)
+        if index is not None:
+            return index.get(key)
         for resource in self.resources:
             if resource.resource_key == key:
                 return resource
@@ -314,6 +369,33 @@ class GanttProblem:
             for res_key, _ in task.resource_requirements:
                 if res_key not in resource_set:
                     return res_key
+        return None
+
+    def _find_invalid_resource_demand(self) -> tuple[str, str, float] | None:
+        """查找无效的资源需求量 / Find invalid resource demands.
+
+        单项必须非负且有限；同一资源的重复条目汇总后也必须有限，避免容量
+        系数变成负数或非有限值。
+        Each entry must be finite and non-negative, and the sum of duplicate
+        entries for one resource must also be finite so capacity coefficients
+        cannot become negative or non-finite.
+
+        Returns:
+            首个无效项的 (任务键, 资源键, 汇总需求量)，全部有效时返回 None。
+            The first invalid (task key, resource key, aggregate demand), or
+            None when all demands are valid.
+        """
+        for task in self.tasks:
+            seen: set[str] = set()
+            for res_key, amount in task.resource_requirements:
+                if not math.isfinite(amount) or amount < 0.0:
+                    return task.task_key, res_key, amount
+                if res_key in seen:
+                    continue
+                seen.add(res_key)
+                aggregate = task.resource_demand(res_key)
+                if not math.isfinite(aggregate):
+                    return task.task_key, res_key, aggregate
         return None
 
     def _find_invalid_precedence(self) -> str | None:

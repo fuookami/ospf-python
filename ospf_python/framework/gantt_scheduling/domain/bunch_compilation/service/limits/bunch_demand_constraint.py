@@ -72,13 +72,25 @@ class BunchDemandConstraint:
 
         Returns:
             需求满足状态元组。/ Tuple of demand satisfaction statuses.
+
+        一次遍历把每个物料项的分配比例累加好，而不是对每个物料项再调用一次
+        `assignments_for_item`（那是 O(项 × 分配)）。累加顺序与逐项 `sum(...)` 相同，
+        **输出顺序仍取 `item_keys`**，与改前逐字一致。
+
+        One pass accumulates each item's assigned ratio instead of calling
+        `assignments_for_item` per item (O(items x assignments)); the summation order
+        matches, and the emitted order still comes from `item_keys`.
         """
+        totals: dict[str, float] = {}
+        for assignment in aggregation.assignments:
+            key = getattr(assignment, "item_key", "")
+            totals[key] = totals.get(key, 0.0) + getattr(
+                assignment, "assignment_ratio", 0.0
+            )
+
         results: list[DemandSatisfaction] = []
         for item_key in aggregation.item_keys:
-            item_assignments = aggregation.assignments_for_item(
-                item_key,
-            )
-            total_ratio = sum(a.assignment_ratio for a in item_assignments)
+            total_ratio = totals.get(item_key, 0.0)
             shortfall = max(0.0, self.required_ratio - total_ratio)
             results.append(
                 DemandSatisfaction(

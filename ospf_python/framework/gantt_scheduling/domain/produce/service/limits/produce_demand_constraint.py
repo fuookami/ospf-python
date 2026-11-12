@@ -69,13 +69,25 @@ class ProduceDemandConstraint:
 
         Returns:
             需求满足状态元组。/ Tuple of demand satisfaction data.
+
+        一次遍历把每个物料项的分配量累加好，而不是对每个物料项再调用一次
+        `assignments_for_item`（那是 O(项 × 分配)）。累加顺序与逐项 `sum(...)` 相同，
+        **输出顺序仍取 `item_keys`**，与改前逐字一致。
+
+        One pass accumulates each item's assigned amount instead of calling
+        `assignments_for_item` per item (O(items x assignments)); the summation order
+        matches, and the emitted order still comes from `item_keys`.
         """
+        totals: dict[str, float] = {}
+        for assignment in aggregation.assignments:
+            key = getattr(assignment, "item_key", "")
+            totals[key] = totals.get(key, 0.0) + getattr(
+                assignment, "assignment_amount", 0.0
+            )
+
         results: list[ProduceDemandSatisfaction] = []
         for item_key in aggregation.item_keys:
-            item_assignments = aggregation.assignments_for_item(
-                item_key,
-            )
-            total_assigned = sum(a.assignment_amount for a in item_assignments)
+            total_assigned = totals.get(item_key, 0.0)
             required = (
                 self.required_amount if self.required_amount > 0.0 else total_assigned
             )

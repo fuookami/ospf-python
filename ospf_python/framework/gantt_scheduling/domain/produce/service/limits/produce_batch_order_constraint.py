@@ -75,23 +75,54 @@ class ProduceBatchOrderConstraint:
 
         Returns:
             排序约束数据元组。/ Tuple of order constraint data.
+
+        一次遍历把每个批次的「最晚结束 / 最早开始」算好，而不是对每个排序对
+        各调用两次 `assignments_for_batch`（那是 O(对数 × 分配)）。
+        `max(...)` / `min(...)` 的取值与改前相同（空集合分别得 0.0 与 +inf）。
+
+        Precompute each batch's latest end and earliest start in one pass instead of
+        calling `assignments_for_batch` twice per order pair (O(pairs x assignments)).
+        The max/min values match the previous behaviour, including the empty cases.
         """
+        assignments_raw = getattr(aggregation, "assignments", None)
+        latest_end: dict[str, float] = {}
+        earliest_start: dict[str, float] = {}
+        if assignments_raw is not None:
+            for assignment in assignments_raw:
+                key = getattr(assignment, "batch_key", None)
+                if key is None:
+                    continue
+                end_time = getattr(assignment, "end_time", 0.0)
+                start_time = getattr(assignment, "start_time", 0.0)
+                if key not in latest_end or end_time > latest_end[key]:
+                    latest_end[key] = end_time
+                if key not in earliest_start or start_time < earliest_start[key]:
+                    earliest_start[key] = start_time
+
         constraints: list[BatchOrderPair] = []
         for order in aggregation.batch_order_pairs:
-            pred_items = aggregation.assignments_for_batch(
-                order.predecessor_key,
-            )
-            succ_items = aggregation.assignments_for_batch(
-                order.successor_key,
-            )
-            pred_end = max(
-                (a.end_time for a in pred_items),
-                default=0.0,
-            )
-            succ_start = min(
-                (a.start_time for a in succ_items),
-                default=float("inf"),
-            )
+            if assignments_raw is None:
+                pred_end = max(
+                    (
+                        a.end_time
+                        for a in aggregation.assignments_for_batch(
+                            order.predecessor_key
+                        )
+                    ),
+                    default=0.0,
+                )
+                succ_start = min(
+                    (
+                        a.start_time
+                        for a in aggregation.assignments_for_batch(
+                            order.successor_key
+                        )
+                    ),
+                    default=float("inf"),
+                )
+            else:
+                pred_end = latest_end.get(order.predecessor_key, 0.0)
+                succ_start = earliest_start.get(order.successor_key, float("inf"))
             is_ok = pred_end <= succ_start + 1e-9
             constraints.append(
                 BatchOrderPair(
