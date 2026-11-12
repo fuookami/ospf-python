@@ -1,0 +1,26 @@
+# 可复现构建 / Reproducible builds
+#
+# 默认链接器会在 PE/ELF 里写入构建时间戳与 GUID（PE 的 build-id、PDB GUID，ELF 的
+# build-id），导致**同一份源码两次构建产出不同字节**。验收工作流
+# （`.github/workflows/performance-acceptance.yml`）会先重建扩展、再与预注册的
+# SHA-256 比对，因此不可复现的构建会让 `extension_hash_matches` 恒为假。
+# Default linkers embed build timestamps and GUIDs, so two builds of the same source
+# differ byte-wise; the acceptance workflow rebuilds and then compares against a
+# pre-registered SHA-256, which can never match unless builds are reproducible.
+#
+# 实测（logs/p3/b101-… 与 logs/p3/b102-…）：未加标志时同源三次构建得到三个哈希，
+# 差异集中在 3 处共 20 个字节（PE 头与调试目录）；加上 `/Brepro` 后两次强制重编
+# 得到完全相同的哈希。
+# Measured: without the flag three builds gave three hashes (20 differing bytes in the
+# PE header and debug directory); with `/Brepro` two forced rebuilds were identical.
+
+[target.x86_64-pc-windows-msvc]
+# MSVC 链接器的确定性构建开关 / MSVC linker's deterministic-build switch.
+rustflags = ["-C", "link-arg=/Brepro"]
+
+[target.aarch64-pc-windows-msvc]
+rustflags = ["-C", "link-arg=/Brepro"]
+
+[target.x86_64-unknown-linux-gnu]
+# GNU 链接器去掉 build-id 才能让产物可复现 / GNU ld embeds a build-id unless disabled.
+rustflags = ["-C", "link-arg=-Wl,--build-id=none"]

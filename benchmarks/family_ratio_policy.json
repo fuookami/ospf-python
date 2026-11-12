@@ -1,0 +1,1294 @@
+{
+  "schema_version": 3,
+  "registered_at": "2026-11-11T18:05:00+08:00",
+  "mode": "acceptance",
+  "rationale": "覆盖已证等价的纯函数族（参数可 JSON 序列化）：selection、prime_sieve、logarithm、integer_power、quantity_duration。对象类族（fractal/chaotic/quantity_arithmetic/shared_*/coordinate_materialization）与枚举参数族（trivalent）需要构造器或枚举名解析，不在本政策 v1 范围内。v2 追加 elementary_operators（12 个公开算子完整调用）、unit_registry（5 个身份闸门）、public_array_access（5 个受检读写）、storage_and_view（4 个存储/视图变换）与 shared_array_ops（5 个共享数组算子）。/ Covers the JSON-argument families that were verified equivalent; object-constructing and enum-argument families are out of scope for policy v1. v2 adds elementary_operators (12 complete public operator calls) unit_registry (5 identity gates) public_array_access (5 checked accesses) storage_and_view (4 storage/view transforms) and shared_array_ops (5 shared-array operators).。v3 追加 binding_multiarray（7 个绑定层自身方法的直接调用：to_list / transpose / equals / describe / view / iter_snapshot / from_list）——B240 指出 29 条 `_binding.multiarray` 契约此前没有任何门禁用例，公共外观层的用例只是间接经过它。 / v3 adds binding_multiarray: 7 cases that call the binding layer's own methods directly, because B240 found 29 `_binding.multiarray` contracts with no gate case of their own (the public-facade cases only pass through them indirectly).",
+  "threshold": 1.15,
+  "gated_minimum": 10000,
+  "note_on_count": "对固定开销的微调用，count 是'该用例参与判定'的标签而非输入规模；对大输入族（prime_sieve）count 同时代表输入规模。/ For fixed-cost calls, count marks the case as gated; for size-parameterised families it is the actual input size.",
+  "alternating_rounds": 21,
+  "repeats_by_count": {
+    "10000": 2048,
+    "100000": 512
+  },
+  "cases": [
+    {
+      "family": "selection",
+      "label": "combinations-16x8",
+      "module": "ospf_python.math.combinatorics.combinations",
+      "attrs": [
+        "combinations"
+      ],
+      "args": [
+        [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        8
+      ],
+      "count": 10000
+    },
+    {
+      "family": "selection",
+      "label": "permutations-8x3",
+      "module": "ospf_python.math.combinatorics.permutations",
+      "attrs": [
+        "permutations"
+      ],
+      "args": [
+        [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        3
+      ],
+      "count": 10000
+    },
+    {
+      "family": "prime_sieve",
+      "label": "primes-up-to-10000",
+      "module": "ospf_python.math.ordinary.prime",
+      "attrs": [
+        "primes_up_to",
+        "primes"
+      ],
+      "args": [
+        10000
+      ],
+      "count": 10000,
+      "also_covers": [
+        [
+          "ospf_python._binding.prime_sieve",
+          "primes_up_to"
+        ]
+      ]
+    },
+    {
+      "family": "prime_sieve",
+      "label": "primes-up-to-100000",
+      "module": "ospf_python.math.ordinary.prime",
+      "attrs": [
+        "primes_up_to",
+        "primes"
+      ],
+      "args": [
+        100000
+      ],
+      "count": 100000,
+      "also_covers": [
+        [
+          "ospf_python._binding.prime_sieve",
+          "primes_up_to"
+        ]
+      ]
+    },
+    {
+      "family": "logarithm",
+      "label": "log-base-1000-10",
+      "module": "ospf_python.math.ordinary.log",
+      "attrs": [
+        "log_base"
+      ],
+      "args": [
+        1000.0,
+        10.0
+      ],
+      "count": 10000,
+      "also_covers": [
+        [
+          "ospf_python._binding.logarithm",
+          "log_base"
+        ]
+      ]
+    },
+    {
+      "family": "integer_power",
+      "label": "pow-int-3-20",
+      "module": "ospf_python.math.ordinary.pow",
+      "attrs": [
+        "pow_int"
+      ],
+      "args": [
+        3,
+        20
+      ],
+      "count": 10000,
+      "also_covers": [
+        [
+          "ospf_python._binding.integer_power",
+          "pow_int"
+        ]
+      ]
+    },
+    {
+      "family": "quantity_duration",
+      "label": "from-hours-2",
+      "module": "ospf_python.quantities.quantity.duration_extensions",
+      "attrs": [
+        "from_hours"
+      ],
+      "args": [
+        2
+      ],
+      "count": 10000
+    },
+    {
+      "family": "elementary_operators",
+      "label": "exp-complete-call",
+      "module": "ospf_python.math.operator.exp",
+      "attrs": [
+        "exp_op"
+      ],
+      "args": [
+        1.0
+      ],
+      "count": 10000
+    },
+    {
+      "family": "elementary_operators",
+      "label": "exp2-complete-call",
+      "module": "ospf_python.math.operator.exp",
+      "attrs": [
+        "exp2_op"
+      ],
+      "args": [
+        10.0
+      ],
+      "count": 10000
+    },
+    {
+      "family": "elementary_operators",
+      "label": "exp10-complete-call",
+      "module": "ospf_python.math.operator.exp",
+      "attrs": [
+        "exp10_op"
+      ],
+      "args": [
+        2.0
+      ],
+      "count": 10000
+    },
+    {
+      "family": "elementary_operators",
+      "label": "ln-complete-call",
+      "module": "ospf_python.math.operator.log",
+      "attrs": [
+        "log_op"
+      ],
+      "args": [
+        2.718281828459045
+      ],
+      "count": 10000
+    },
+    {
+      "family": "elementary_operators",
+      "label": "log2-complete-call",
+      "module": "ospf_python.math.operator.log",
+      "attrs": [
+        "log2_op"
+      ],
+      "args": [
+        8.0
+      ],
+      "count": 10000
+    },
+    {
+      "family": "elementary_operators",
+      "label": "log10-complete-call",
+      "module": "ospf_python.math.operator.log",
+      "attrs": [
+        "log10_op"
+      ],
+      "args": [
+        1000.0
+      ],
+      "count": 10000
+    },
+    {
+      "family": "elementary_operators",
+      "label": "sin-complete-call",
+      "module": "ospf_python.math.operator.trigonometry",
+      "attrs": [
+        "sin_op"
+      ],
+      "args": [
+        1.5707963267948966
+      ],
+      "count": 10000
+    },
+    {
+      "family": "elementary_operators",
+      "label": "cos-complete-call",
+      "module": "ospf_python.math.operator.trigonometry",
+      "attrs": [
+        "cos_op"
+      ],
+      "args": [
+        3.141592653589793
+      ],
+      "count": 10000
+    },
+    {
+      "family": "elementary_operators",
+      "label": "tan-complete-call",
+      "module": "ospf_python.math.operator.trigonometry",
+      "attrs": [
+        "tan_op"
+      ],
+      "args": [
+        0.7853981633974483
+      ],
+      "count": 10000
+    },
+    {
+      "family": "elementary_operators",
+      "label": "asin-complete-call",
+      "module": "ospf_python.math.operator.trigonometry",
+      "attrs": [
+        "asin_op"
+      ],
+      "args": [
+        1.0
+      ],
+      "count": 10000
+    },
+    {
+      "family": "elementary_operators",
+      "label": "acos-complete-call",
+      "module": "ospf_python.math.operator.trigonometry",
+      "attrs": [
+        "acos_op"
+      ],
+      "args": [
+        0.0
+      ],
+      "count": 10000
+    },
+    {
+      "family": "elementary_operators",
+      "label": "atan-complete-call",
+      "module": "ospf_python.math.operator.trigonometry",
+      "attrs": [
+        "atan_op"
+      ],
+      "args": [
+        1.0
+      ],
+      "count": 10000
+    },
+    {
+      "family": "unit_registry",
+      "label": "family-construct",
+      "module": "ospf_python._binding.unit_registry",
+      "builder": "unit_registry_family",
+      "params": {},
+      "count": 10000
+    },
+    {
+      "family": "unit_registry",
+      "label": "register-runtime-unit",
+      "module": "ospf_python._binding.unit_registry",
+      "builder": "unit_registry_runtime",
+      "params": {},
+      "count": 10000
+    },
+    {
+      "family": "unit_registry",
+      "label": "register-unit-family",
+      "module": "ospf_python._binding.unit_registry",
+      "builder": "unit_registry_family_register",
+      "params": {},
+      "count": 10000
+    },
+    {
+      "family": "unit_registry",
+      "label": "native-family-gate",
+      "module": "ospf_python._binding.unit_registry",
+      "builder": "unit_registry_native_family",
+      "params": {},
+      "count": 10000
+    },
+    {
+      "family": "unit_registry",
+      "label": "arithmetic-family-gate",
+      "module": "ospf_python._binding.unit_registry",
+      "builder": "unit_registry_arithmetic_family",
+      "params": {},
+      "count": 10000
+    },
+    {
+      "family": "public_array_access",
+      "label": "array-read-2x3-row",
+      "module": "ospf_python._binding.public_array_access",
+      "builder": "public_array_read",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          2,
+          3
+        ],
+        "count": 6,
+        "indices": [
+          1,
+          1
+        ]
+      },
+      "count": 10000
+    },
+    {
+      "family": "public_array_access",
+      "label": "array-read-2x3-col",
+      "module": "ospf_python._binding.public_array_access",
+      "builder": "public_array_read",
+      "params": {
+        "order": "COLUMN_MAJOR",
+        "dims": [
+          2,
+          3
+        ],
+        "count": 6,
+        "indices": [
+          1,
+          1
+        ]
+      },
+      "count": 10000
+    },
+    {
+      "family": "public_array_access",
+      "label": "array-write-2x3-row",
+      "module": "ospf_python._binding.public_array_access",
+      "builder": "public_array_write",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          2,
+          3
+        ],
+        "count": 6,
+        "mutable": true,
+        "indices": [
+          0,
+          1
+        ],
+        "value": 77
+      },
+      "count": 10000
+    },
+    {
+      "family": "public_array_access",
+      "label": "array-read-many-2x3",
+      "module": "ospf_python._binding.public_array_access",
+      "builder": "public_array_read_many",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          2,
+          3
+        ],
+        "count": 6,
+        "indices": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      "count": 10000
+    },
+    {
+      "family": "public_array_access",
+      "label": "array-raw-snapshot-6",
+      "module": "ospf_python._binding.public_array_access",
+      "builder": "public_array_raw_snapshot",
+      "params": {
+        "count": 6
+      },
+      "count": 10000
+    },
+    {
+      "family": "storage_and_view",
+      "label": "reshape-2x3-to-3x2",
+      "module": "ospf_python._binding.storage_transform",
+      "builder": "storage_reshape",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          2,
+          3
+        ],
+        "count": 6,
+        "target": [
+          3,
+          2
+        ]
+      },
+      "count": 10000,
+      "batch": 32,
+      "repeats": 64
+    },
+    {
+      "family": "storage_and_view",
+      "label": "flatten-2x3",
+      "module": "ospf_python._binding.storage_transform",
+      "builder": "storage_flatten",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          2,
+          3
+        ],
+        "count": 6
+      },
+      "count": 10000,
+      "batch": 32,
+      "repeats": 64
+    },
+    {
+      "family": "storage_and_view",
+      "label": "view-materialize-3x4",
+      "module": "ospf_python._binding.storage_transform",
+      "builder": "shared_view_materialize",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          3,
+          4
+        ],
+        "count": 12,
+        "offsets": [
+          1,
+          1
+        ]
+      },
+      "count": 10000
+    },
+    {
+      "family": "storage_and_view",
+      "label": "view-external-failure",
+      "module": "ospf_python._binding.storage_transform",
+      "builder": "shared_view_external_failure",
+      "params": {},
+      "count": 10000
+    },
+    {
+      "family": "shared_array_ops",
+      "label": "map-2x3-row",
+      "module": "ospf_python._binding.shared_mapping",
+      "builder": "shared_mapping_map",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          2,
+          3
+        ],
+        "count": 6
+      },
+      "count": 10000
+    },
+    {
+      "family": "shared_array_ops",
+      "label": "nested-2x3-row",
+      "module": "ospf_python._binding.shared_nested",
+      "builder": "shared_nested",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          2,
+          3
+        ],
+        "count": 6
+      },
+      "count": 10000
+    },
+    {
+      "family": "shared_array_ops",
+      "label": "reduce-2x3-row",
+      "module": "ospf_python._binding.shared_reduction",
+      "builder": "shared_reduction",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          2,
+          3
+        ],
+        "count": 6
+      },
+      "count": 10000
+    },
+    {
+      "family": "shared_array_ops",
+      "label": "transpose-2x3-row",
+      "module": "ospf_python._binding.shared_transpose",
+      "builder": "shared_transpose",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          2,
+          3
+        ],
+        "count": 6
+      },
+      "count": 10000,
+      "batch": 32,
+      "repeats": 64
+    },
+    {
+      "family": "shared_array_ops",
+      "label": "coordinates-3x4-view",
+      "module": "ospf_python._binding.coordinate_materialization",
+      "builder": "coordinate_materialization",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          3,
+          4
+        ],
+        "count": 12,
+        "offsets": [
+          1,
+          1
+        ]
+      },
+      "count": 10000
+    },
+    {
+      "family": "quantity_duration",
+      "label": "from-minutes-90",
+      "module": "ospf_python.quantities.quantity.duration_extensions",
+      "attrs": [
+        "from_minutes"
+      ],
+      "args": [
+        90
+      ],
+      "count": 10000
+    },
+    {
+      "family": "binding_multiarray",
+      "label": "binding-multiarray-to-list-2x3",
+      "module": "ospf_python._binding.multiarray",
+      "builder": "binding_to_list",
+      "params": {
+        "dims": [
+          2,
+          3
+        ],
+        "order": "ROW_MAJOR"
+      },
+      "count": 10000
+    },
+    {
+      "family": "binding_multiarray",
+      "label": "binding-multiarray-transpose-2x3",
+      "module": "ospf_python._binding.multiarray",
+      "builder": "binding_transpose",
+      "params": {
+        "dims": [
+          2,
+          3
+        ],
+        "order": "ROW_MAJOR"
+      },
+      "count": 10000
+    },
+    {
+      "family": "binding_multiarray",
+      "label": "binding-multiarray-equals-2x3",
+      "module": "ospf_python._binding.multiarray",
+      "builder": "binding_equals",
+      "params": {
+        "dims": [
+          2,
+          3
+        ],
+        "order": "ROW_MAJOR"
+      },
+      "count": 10000
+    },
+    {
+      "family": "binding_multiarray",
+      "label": "binding-multiarray-describe-2x3",
+      "module": "ospf_python._binding.multiarray",
+      "builder": "binding_describe",
+      "params": {
+        "dims": [
+          2,
+          3
+        ],
+        "order": "ROW_MAJOR"
+      },
+      "count": 10000
+    },
+    {
+      "family": "binding_multiarray",
+      "label": "binding-multiarray-view-3x4",
+      "module": "ospf_python._binding.multiarray",
+      "builder": "binding_view",
+      "params": {
+        "dims": [
+          3,
+          4
+        ],
+        "order": "ROW_MAJOR"
+      },
+      "count": 10000
+    },
+    {
+      "family": "binding_multiarray",
+      "label": "binding-multiarray-iter-snapshot-2x3",
+      "module": "ospf_python._binding.multiarray",
+      "builder": "binding_iter_snapshot",
+      "params": {
+        "dims": [
+          2,
+          3
+        ],
+        "order": "ROW_MAJOR"
+      },
+      "count": 10000
+    },
+    {
+      "family": "binding_multiarray",
+      "label": "binding-multiarray-from-list-2x3",
+      "module": "ospf_python._binding.multiarray",
+      "builder": "binding_from_list",
+      "params": {
+        "dims": [
+          2,
+          3
+        ],
+        "order": "ROW_MAJOR"
+      },
+      "count": 10000
+    },
+    {
+      "family": "bpp1d_dto",
+      "label": "dto-variable-ref",
+      "module": "ospf_python._binding.bpp1d",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "VariableRef"
+        ],
+        "kwargs": {
+          "model_identity": 1
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "bpp1d_dto",
+      "label": "dto-auxiliary-variable",
+      "module": "ospf_python._binding.bpp1d",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "AuxiliaryVariable"
+        ],
+        "kwargs": {
+          "name": "x"
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "bpp1d_dto",
+      "label": "dto-extension-constraint",
+      "module": "ospf_python._binding.bpp1d",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "ExtensionConstraint"
+        ],
+        "kwargs": {
+          "name": "c",
+          "terms": [],
+          "relation": ">=",
+          "rhs": [
+            0,
+            1
+          ]
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "bpp1d_dto",
+      "label": "dto-pattern-extension-spec",
+      "module": "ospf_python._binding.bpp1d",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "PatternExtensionSpec"
+        ],
+        "kwargs": {}
+      },
+      "count": 10000
+    },
+    {
+      "family": "bpp1d_dto",
+      "label": "dto-pattern-extension",
+      "module": "ospf_python._binding.bpp1d",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "PatternExtension"
+        ],
+        "kwargs": {
+          "register": null
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "bpp1d_dto",
+      "label": "dto-compiled-column",
+      "module": "ospf_python._binding.bpp1d",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "CompiledColumn"
+        ],
+        "kwargs": {
+          "reference": "ref",
+          "variable_identity": [
+            0,
+            0
+          ],
+          "pattern": null
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "bpp1d_dto",
+      "label": "dto-pattern-pool-snapshot",
+      "module": "ospf_python._binding.bpp1d",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "PatternPoolSnapshot"
+        ],
+        "kwargs": {
+          "generation": 1,
+          "model_identity": 1,
+          "patterns": [],
+          "compiled_columns": []
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "bpp1d_dto",
+      "label": "dto-item-spec",
+      "module": "ospf_python._binding.bpp1d",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "ItemSpec"
+        ],
+        "kwargs": {
+          "id": "a",
+          "length": [
+            1,
+            1
+          ],
+          "weight": [
+            0,
+            1
+          ],
+          "amount": 1
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "bpp1d_dto",
+      "label": "dto-bin-spec",
+      "module": "ospf_python._binding.bpp1d",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "BinSpec"
+        ],
+        "kwargs": {
+          "id": "b",
+          "length": [
+            1,
+            1
+          ],
+          "max_weight": [
+            0,
+            1
+          ],
+          "cost": [
+            1,
+            1
+          ]
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "bpp1d_dto",
+      "label": "dto-pattern-registration",
+      "module": "ospf_python._binding.bpp1d",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "PatternRegistration"
+        ],
+        "kwargs": {
+          "model_identity": 1,
+          "stage": "milp",
+          "items": [],
+          "bins": [],
+          "spacing": [
+            0,
+            1
+          ],
+          "length_unit": "unit",
+          "weight_unit": "unit",
+          "objective": "bin_count",
+          "candidates": []
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "bpp1d_dto",
+      "label": "dto-pattern-extraction",
+      "module": "ospf_python._binding.bpp1d",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "PatternExtraction"
+        ],
+        "kwargs": {
+          "items": [],
+          "bins": [],
+          "spacing": [
+            0,
+            1
+          ],
+          "length_unit": "unit",
+          "weight_unit": "unit",
+          "objective": "bin_count",
+          "candidates": [],
+          "values": {}
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "model_dto",
+      "label": "dto-variable-spec",
+      "module": "ospf_python._binding.model",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "VariableSpec"
+        ],
+        "kwargs": {
+          "name": "x"
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "model_dto",
+      "label": "dto-constraint-spec",
+      "module": "ospf_python._binding.model",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "ConstraintSpec"
+        ],
+        "kwargs": {
+          "name": "c",
+          "terms": [],
+          "relation": ">=",
+          "rhs": 0
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "model_dto",
+      "label": "dto-column-spec",
+      "module": "ospf_python._binding.model",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "ColumnSpec"
+        ],
+        "kwargs": {
+          "id": "d",
+          "block": "b",
+          "values": {}
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "model_dto",
+      "label": "dto-projection-master-info",
+      "module": "ospf_python._binding.model",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "ProjectionMasterInfo"
+        ],
+        "kwargs": {
+          "source_generation": 1,
+          "integer": true,
+          "columns": 1,
+          "variables": 1,
+          "rows": 1
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "result_helpers",
+      "label": "result-invalid",
+      "module": "ospf_python._binding.result",
+      "attrs": [
+        "invalid"
+      ],
+      "args": [
+        "denied"
+      ],
+      "count": 10000
+    },
+    {
+      "family": "result_helpers",
+      "label": "result-unsupported",
+      "module": "ospf_python._binding.result",
+      "attrs": [
+        "unsupported"
+      ],
+      "args": [
+        "denied"
+      ],
+      "count": 10000
+    },
+    {
+      "family": "result_helpers",
+      "label": "dto-failure-context",
+      "module": "ospf_python._binding.result",
+      "builder": "dto",
+      "params": {
+        "attrs": [
+          "FailureContext"
+        ],
+        "kwargs": {
+          "source": "test",
+          "category": "input",
+          "rust_code": null,
+          "error_class": "ValueError"
+        }
+      },
+      "count": 10000
+    },
+    {
+      "family": "fractal_dto",
+      "label": "mandelbrot-iterate",
+      "module": "ospf_python._binding.fractal",
+      "attrs": [
+        "mandelbrot_iterate"
+      ],
+      "args": [
+        [
+          0.3,
+          0.5
+        ],
+        64
+      ],
+      "count": 10000
+    },
+    {
+      "family": "fractal_dto",
+      "label": "julia-iterate",
+      "module": "ospf_python._binding.fractal",
+      "attrs": [
+        "julia_iterate"
+      ],
+      "args": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -0.4,
+          0.6
+        ],
+        64
+      ],
+      "count": 10000
+    },
+    {
+      "family": "fractal_dto",
+      "label": "julia-contains-pair",
+      "module": "ospf_python._binding.fractal",
+      "attrs": [
+        "julia_contains_pair"
+      ],
+      "kwargs": {
+        "x": 0.0,
+        "y": 0.0,
+        "c_real": -0.4,
+        "c_imag": 0.6,
+        "max_iterations": 64
+      },
+      "count": 10000
+    },
+    {
+      "family": "trivalent_ops",
+      "label": "trivalent-logic",
+      "module": "ospf_python._binding.trivalent",
+      "builder": "trivalent_logic",
+      "params": {
+        "operation": "and",
+        "left": "TRUE",
+        "right": "TRUE"
+      },
+      "count": 10000
+    },
+    {
+      "family": "trivalent_ops",
+      "label": "trivalent-optional-bool",
+      "module": "ospf_python._binding.trivalent",
+      "builder": "trivalent_optional_bool",
+      "params": {
+        "owner": "TRUE"
+      },
+      "count": 10000
+    },
+    {
+      "family": "shared_view_ops",
+      "label": "shared-view-materialize-3x4",
+      "module": "ospf_python._binding.shared_view",
+      "builder": "shared_view_materialize",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          3,
+          4
+        ],
+        "count": 12,
+        "offsets": [
+          1,
+          1
+        ]
+      },
+      "count": 10000
+    },
+    {
+      "family": "shared_view_ops",
+      "label": "shared-view-external-failure",
+      "module": "ospf_python._binding.shared_view",
+      "builder": "shared_view_external_failure",
+      "params": {},
+      "count": 10000
+    },
+    {
+      "family": "array_callback_ops",
+      "label": "array-callback-map",
+      "module": "ospf_python._binding.multiarray",
+      "builder": "binding_map",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          2,
+          3
+        ],
+        "count": 6
+      },
+      "count": 10000,
+      "also_covers": [
+        [
+          "ospf_python._binding.array_callback",
+          "map_callback"
+        ]
+      ]
+    },
+    {
+      "family": "array_callback_ops",
+      "label": "array-callback-reduce",
+      "module": "ospf_python._binding.multiarray",
+      "builder": "binding_reduce",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          2,
+          3
+        ],
+        "count": 6
+      },
+      "count": 10000,
+      "also_covers": [
+        [
+          "ospf_python._binding.array_callback",
+          "reduce_callback"
+        ]
+      ]
+    },
+    {
+      "family": "multiarray_objects",
+      "label": "binding-iterator-2x3",
+      "module": "ospf_python._binding.multiarray",
+      "builder": "binding_iterator",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          2,
+          3
+        ],
+        "count": 6
+      },
+      "count": 10000
+    },
+    {
+      "family": "multiarray_objects",
+      "label": "binding-mutable-view-2x3",
+      "module": "ospf_python._binding.multiarray",
+      "builder": "binding_mutable_view",
+      "params": {
+        "order": "ROW_MAJOR",
+        "dims": [
+          2,
+          3
+        ],
+        "count": 6,
+        "view_dims": [
+          1,
+          2
+        ]
+      },
+      "count": 10000
+    },
+    {
+      "family": "model_dto",
+      "label": "dto-column-decision-spec",
+      "module": "ospf_python._binding.model",
+      "builder": "column_decision_spec",
+      "params": {},
+      "count": 10000,
+      "also_covers": [
+        [
+          "ospf_python._binding.model",
+          "ColumnDecisionSpec"
+        ]
+      ]
+    },
+    {
+      "family": "selection",
+      "label": "select-combinations-4x2",
+      "module": "ospf_python._binding.selection",
+      "attrs": [
+        "select"
+      ],
+      "kwargs": {
+        "items": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "k": 2,
+        "permutations": false
+      },
+      "count": 10000
+    },
+    {
+      "family": "quantity_duration",
+      "label": "binding-from-value-90-60",
+      "module": "ospf_python._binding.quantity_duration",
+      "builder": "duration_from_value",
+      "params": {
+        "value": 90,
+        "factor": 60
+      },
+      "count": 10000
+    },
+    {
+      "family": "quantity_duration",
+      "label": "binding-to-timedelta-90-60",
+      "module": "ospf_python._binding.quantity_duration",
+      "builder": "duration_to_timedelta",
+      "params": {
+        "value": 90,
+        "factor": 60
+      },
+      "count": 10000
+    },
+    {
+      "family": "quantity_arithmetic",
+      "label": "binding-calculate-add-6-2",
+      "module": "ospf_python._binding.quantity_arithmetic",
+      "builder": "quantity_calculate",
+      "params": {
+        "left": 6,
+        "right": 2,
+        "operation": "add"
+      },
+      "count": 10000
+    },
+    {
+      "family": "unit_conversion",
+      "label": "binding-convert-unit-meter-3p5",
+      "module": "ospf_python._binding.unit_conversion",
+      "builder": "convert_unit_value",
+      "params": {
+        "name": "meter",
+        "symbol": "m",
+        "powers": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "value": 3.5,
+        "reverse": false
+      },
+      "count": 10000
+    }
+  ],
+  "note_on_scope": "本门禁比较的是「当前树」与「归档的切换前基线树」——两者都走同一条原生路径。因此它判定的是「有无回归」，**不能**作为「原生是否比被替换的 Python 实现更快」的证据，也不能用来关闭 `complete-call-performance-and-resource-budgets` 这类预算合同。后者需要以 Python 内建为基线单独测量（见 B237/B238 的 30 条撤销）。 / This gate compares the current tree against the archived pre-cutover baseline tree; both go through the same native path, so it judges regression only. It is NOT evidence that native is faster than the Python implementation it replaced, and must not be used to close budget contracts.",
+  "note_on_scope_v3": "v3 的 7 个 binding_multiarray 用例同样只判「有无回归」，**不能**用来关闭 `complete-call-performance-and-resource-budgets` 类契约；且它们无法覆盖 `at_many` / `get` 两个新方法（归档基线树里还没有这两个方法）。 / The 7 v3 binding cases also only detect regressions and cannot close budget contracts; they cannot cover the new at_many/get methods because the archived baseline tree predates them.",
+  "note_on_batch": "临界用例（2x3 单次约 3,100 ns）用 batch=32 / repeats=64：每个样本做 32 次调用再除以 32，样本跨度约 109 µs，是 Windows perf_counter_ns 约 100 ns 分辨率的 1,090 倍；总调用次数 32×64=2,048 与原来 repeats=2,048 相当，不放大工作量。此前单次计时只有约 4.6 个量化步的判定余量，导致比值逐次漂移（B372/B375）。 / Marginal cases use batch=32 with repeats=64: each sample spans ~109 µs, ~1,090x the ~100 ns clock resolution, while total calls (32x64=2,048) match the original repeats count.",
+  "note_on_dto": "DTO 构造用例用 builder=dto 测「构造一个数据类」的完整开销；params.kwargs 里的字符串若命中夹具名（unit / ref）则替换为夹具对象。 / DTO cases measure the complete cost of constructing one dataclass.",
+  "note_on_also_covers": "`also_covers` 声明用例端到端穿过的额外 (模块, 符号)，供预算标签的证据判定使用。 / `also_covers` declares extra (module, symbol) pairs a case exercises end to end."
+}
