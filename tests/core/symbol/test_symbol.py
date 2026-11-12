@@ -417,6 +417,26 @@ class TestRounding:
         s = Rounding(decimals=2)
         assert s.evaluate((2.655,)) == pytest.approx(2.66)
 
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [(0.5, 1.0), (1.5, 2.0), (2.5, 3.0), (3.5, 4.0), (-0.5, -1.0), (-2.5, -3.0)],
+    )
+    def test_ties_round_half_away_from_zero(
+        self, value: float, expected: float
+    ) -> None:
+        """平局必须逢五远离零，不是银行家舍入。
+
+        Ties must round half away from zero, not to the even neighbour.
+        """
+        assert Rounding(decimals=0).evaluate((value,)) == expected
+
+    def test_decimal_tie_survives_float_multiplication(self) -> None:
+        """1.005 应得 1.01，不能被 float 乘法变成 100.49999999999999。
+
+        1.005 must give 1.01, not fall to 100.49999999999999 through float multiplication.
+        """
+        assert Rounding(decimals=2).evaluate((1.005,)) == pytest.approx(1.01)
+
 
 class TestImply:
     """蕴含测试 / Imply tests."""
@@ -461,6 +481,18 @@ class TestSameAs:
     def test_not_equal(self) -> None:
         """不等返回 0。/ Not equal returns 0."""
         assert SameAs().evaluate((5.0, 3.0)) == 0.0
+
+    def test_float_noise_still_counts_as_same(self) -> None:
+        """浮点噪点不得让相同值判为不同。0.1 + 0.2 != 0.3，但语义上相同。
+
+        Float noise must not make equal values differ: 0.1 + 0.2 != 0.3 numerically yet the
+        values are the same for this purpose.
+        """
+        assert SameAs().evaluate((0.1 + 0.2, 0.3)) == 1.0
+
+    def test_clearly_different_stays_different(self) -> None:
+        """明显不同的值仍是不同。/ Clearly different values stay different."""
+        assert SameAs().evaluate((1.0, 1.1)) == 0.0
 
     def test_insufficient(self) -> None:
         """参数不足返回 1。/ Insufficient returns 1."""

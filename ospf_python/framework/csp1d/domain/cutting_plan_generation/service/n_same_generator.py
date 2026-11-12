@@ -14,6 +14,7 @@ from ospf_python.framework.csp1d.domain.cutting_plan_generation.model.generation
 from ospf_python.framework.csp1d.domain.cutting_plan_generation.service.generation_collector import (
     GenerationCollector,
 )
+from ospf_python.utils.numeric import step_index
 
 
 @dataclass(frozen=True)
@@ -71,7 +72,7 @@ class NSameGenerator:
         for product_key, product_length, max_qty in products:
             if product_length <= 0:
                 continue
-            max_by_length = int(material_length / product_length)
+            max_by_length = step_index(material_length / product_length)
             effective_max = min(max_qty, max_by_length)
 
             constraint = self.constraints.get_constraint_for(

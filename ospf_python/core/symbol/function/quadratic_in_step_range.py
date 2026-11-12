@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from ospf_python.core.symbol.function.function_symbol import (
     FunctionSymbol,
 )
+from ospf_python.utils.numeric import step_index
 
 
 @dataclass(frozen=True)
@@ -43,7 +44,9 @@ class QuadraticInStepRange(FunctionSymbol):
         if not args or self.step == 0.0:
             return 0.0
         val = args[0]
-        idx = int(val / self.step)
+        # int() 会截断浮点噪点：0.3 / 0.1 == 2.9999999999999996 截断成 2 而非 3。
+        # int() truncates float noise: 0.3 / 0.1 == 2.9999999999999996 truncates to 2, not 3.
+        idx = step_index(val / self.step)
         return self.coeff * idx * idx
 
     @staticmethod

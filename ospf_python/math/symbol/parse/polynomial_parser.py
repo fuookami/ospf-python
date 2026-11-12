@@ -188,7 +188,7 @@ def _parse_atom(state: _ParserState) -> CanonicalPolynomial:
     # 变量 / Variable
     if tok.kind == TokenKind.VARIABLE:
         state.advance()
-        symbol = Symbol.create(tok.text)
+        symbol = Symbol.from_display_name(tok.text)
         mono = CanonicalMonomial.single(symbol)
         return CanonicalPolynomial.of(mono)
 

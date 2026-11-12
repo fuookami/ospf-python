@@ -163,3 +163,43 @@ class TestResourceAggregationBasic:
         agg2 = agg1.with_resource(r)
         assert len(agg1.resources) == 0
         assert len(agg2.resources) == 1
+
+
+class TestGetCapacityWindowTolerance:
+    """容量窗口按容差匹配 / Capacity windows match within a tolerance."""
+
+    def test_same_value_different_bits_still_matches(self) -> None:
+        """同值不同位的时间窗必须匹配。
+
+        按 0.1 + 0.2 注册、按 0.3 查询时，精确 == 会 miss，调用方再静默回退到别的容量。
+        Windows equal in value but not in bits must match: registering 0.1 + 0.2 and querying
+        0.3 misses under exact ==, after which callers silently fall back to another capacity.
+        """
+        cap = ResourceCapacity(
+            resource_key="R1",
+            time_window_start=0.1 + 0.2,
+            time_window_end=1.3,
+            max_capacity=8.0,
+        )
+        agg = ResourceAggregation(capacities=(cap,))
+        assert (
+            agg.get_capacity(resource_key="R1", window_start=0.3, window_end=1.3) is cap
+        )
+
+    def test_different_key_or_window_still_misses(self) -> None:
+        """不同资源或不同窗口仍返回 None。/ A different key or window still returns None."""
+        cap = ResourceCapacity(
+            resource_key="R1",
+            time_window_start=0.3,
+            time_window_end=1.3,
+            max_capacity=8.0,
+        )
+        agg = ResourceAggregation(capacities=(cap,))
+        assert (
+            agg.get_capacity(resource_key="R9", window_start=0.3, window_end=1.3)
+            is None
+        )
+        assert (
+            agg.get_capacity(resource_key="R1", window_start=0.3, window_end=2.0)
+            is None
+        )

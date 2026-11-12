@@ -130,6 +130,27 @@ class TestPolynomialSerde:
         deserialized = self.serde.deserialize(serialized)
         assert len(deserialized.terms) == 3
 
+    def test_roundtrip_preserves_symbol_index(self) -> None:
+        """往返必须保持 Symbol 的 index，否则求值会查不到绑定。
+
+        非零索引的显示名是 ``y_1``；反解时不还原索引会得到 ``Symbol('y_1', 0)``，
+        与原 ``Symbol('y', 1)`` 不同，求值时那一项被静默丢掉。
+        A round trip must keep the Symbol index. A non-zero index renders as ``y_1``; without
+        restoring it the parser yields ``Symbol('y_1', 0)``, a different symbol from
+        ``Symbol('y', 1)``, whose bindings are then silently dropped at evaluation time.
+        """
+        x = Symbol.create("x", 0)
+        y = Symbol.create("y", 1)
+        original = CanonicalPolynomial.of(
+            CanonicalMonomial.single(x, coefficient=2.0),
+            CanonicalMonomial.single(y, coefficient=3.0),
+            CanonicalMonomial.constant(-5.0),
+        )
+        restored = self.serde.deserialize(self.serde.serialize(original))
+        assert {s for term in original.terms for s in term.powers} == {
+            s for term in restored.terms for s in term.powers
+        }
+
 
 # ============================================================
 # InequalitySerde

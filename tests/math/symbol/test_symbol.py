@@ -9,6 +9,8 @@ equality, and mapping.
 
 from __future__ import annotations
 
+import pytest
+
 from ospf_python.math.symbol.category import Category
 from ospf_python.math.symbol.symbol import Symbol
 from ospf_python.math.symbol.symbol_identity import (
@@ -201,3 +203,32 @@ class TestSymbolIdentity:
         ident = SymbolIdentity.of(sym, "id")
         assert ident.symbol == sym
         assert ident.identity == "id"
+
+
+class TestSymbolFromDisplayName:
+    """从显示名重建符号 / Rebuilding a symbol from its display name."""
+
+    @pytest.mark.parametrize(
+        ("text", "name", "index"),
+        [
+            ("x", "x", 0),
+            ("y_1", "y", 1),
+            ("y_12", "y", 12),
+            ("y_1_2", "y_1", 2),
+            ("y_", "y_", 0),
+            ("_1", "_1", 0),
+        ],
+    )
+    def test_split(self, text: str, name: str, index: int) -> None:
+        """数字后缀还原为索引，其余保持字面名。
+
+        A numeric suffix restores the index; everything else keeps the literal name.
+        """
+        symbol = Symbol.from_display_name(text)
+        assert (symbol.name, symbol.index) == (name, index)
+
+    def test_roundtrips_display_name(self) -> None:
+        """display_name 与 from_display_name 必须互逆。/ display_name and from_display_name invert."""
+        for index in (0, 1, 7, 42):
+            symbol = Symbol(name="v", index=index)
+            assert Symbol.from_display_name(symbol.display_name) == symbol

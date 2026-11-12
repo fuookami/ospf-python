@@ -10,6 +10,8 @@ and basic einsum operations.
 
 from __future__ import annotations
 
+import pytest
+
 from ospf_python.math.multiarray.einsum.einsum import einsum
 from ospf_python.math.multiarray.einsum.einsum_error import (
     EinsumError,
@@ -57,6 +59,52 @@ class TestIndexLabel:
         """不可变性。/ Immutability."""
         label = IndexLabel(indices=("x",))
         assert label.indices == ("x",)
+
+    def test_multi_character_label_is_rejected(self) -> None:
+        """多字符标签必须报错，不得静默改写。/ Multi-character labels must be rejected.
+
+        旧实现会在循环里把 `indices` 整个替换成当前标签拆开后的元组，
+        于是 `("ab", "c")` 变成 `("a", "b")`——**`"c"` 被静默丢掉**。
+        本用例钉住「报错而不是猜意图」。
+        """
+        with pytest.raises(ValueError, match="恰好一个字符"):
+            IndexLabel(indices=("ab", "c"))
+
+    def test_empty_label_is_rejected(self) -> None:
+        """空字符串标签同样非法。/ An empty-string label is equally invalid."""
+        with pytest.raises(ValueError, match="恰好一个字符"):
+            IndexLabel(indices=("",))
+
+    def test_single_character_labels_are_untouched(self) -> None:
+        """单字符输入原样保留。/ Single-character input is preserved verbatim."""
+        label = IndexLabel(indices=("i", "j", "k"))
+        assert label.indices == ("i", "j", "k")
+        assert label.ndim == 3
+
+    def test_bare_string_is_rejected(self) -> None:
+        """裸字符串必须报错，不得半通过。/ A bare string must be rejected.
+
+        `IndexLabel(indices="ij")` 的每个字符长度都是 1，只检查元素长度会让它**通过**，
+        得到一个 `indices == "ij"` 的半坏对象：`ndim` 看似正确（2），
+        但 `__iter__` 返回 `"ij"` 而不是 `("i","j")`，`__contains__` 变成子串匹配。
+        """
+        with pytest.raises(ValueError, match="必须是元组"):
+            IndexLabel(indices="ij")  # type: ignore[arg-type]
+
+    def test_non_builtin_str_label_is_rejected(self) -> None:
+        """str 子类不得冒充标签。/ A str subclass must not pass as a label."""
+
+        class _Weird(str):
+            pass
+
+        with pytest.raises(ValueError, match="内置 str"):
+            IndexLabel(indices=(_Weird("i"),))
+
+    def test_empty_tuple_is_allowed(self) -> None:
+        """空元组合法（标量输出的下标）。/ An empty tuple is valid (scalar output)."""
+        label = IndexLabel(indices=())
+        assert label.ndim == 0
+        assert len(label) == 0
 
 
 # ── Einsum parser ─────────────────────────────────────────────────

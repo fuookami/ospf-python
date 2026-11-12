@@ -17,8 +17,8 @@ class DadrasAttractor:
 
     Dadras attractor, a 3D chaotic system.
 
-    dx/dt = a*x - y*z + c
-    dy/dt = x*z - b*y
+    dx/dt = y - a*x + b*y*z
+    dy/dt = c*y + z*(1 - x)
     dz/dt = d*x*y - h*z
 
     Attributes:
@@ -55,8 +55,16 @@ class DadrasAttractor:
         Returns:
             下一步的 (x, y, z)。/ Next (x, y, z).
         """
-        dx = self.a * x - y * z + self.c
-        dy = x * z - self.b * y
+        # 决定 5 / B315（2026-11-11）：**按线上权威与 `ospf-kotlin`/上游 Rust 统一**。
+        # 标准 Dadras 系统（Dadras & Momeni 2009）：
+        #   ẋ = y − a·x + b·y·z ,  ẏ = c·y + z(1 − x) ,  ż = d·x·y − e·z
+        # 本文件字段的角色对应：`a↔ρ`、`b↔σ`、`c↔γ`、`d↔ζ`、`h↔ε`
+        # （默认值逐一对上：3.0 / 2.7 / 1.7 / 2.0 / 9.0）。
+        # 原实现的 `dx`/`dy` 是完全不同的系统，`dz` 结构本来就对。
+        # Unified with the standard Dadras system and with `ospf-kotlin` / upstream Rust (B315).
+        # Field roles: a↔rho, b↔sigma, c↔gamma, d↔zeta, h↔epsilon (defaults match one for one).
+        dx = y - self.a * x + self.b * y * z
+        dy = self.c * y + z * (1.0 - x)
         dz = self.d * x * y - self.h * z
         return (
             x + dx * self.dt,

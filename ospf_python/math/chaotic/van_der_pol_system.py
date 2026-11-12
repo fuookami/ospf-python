@@ -44,6 +44,13 @@ class VanDerPolSystem:
         Returns:
             下一步的 (x, y)。/ Next (x, y).
         """
+        # 决定 5 / B320：**保留本文件 docstring 声明的标准 Van der Pol 形式**
+        # `dx/dt = y`、`dy/dt = mu*(1 - x²)*y - x`。
+        # B310 曾按 Kotlin 的 Liénard 缩放形式 `dx = a(x−x³/3) − y`、`dy = x/a` 改过，
+        # 那与本文件声明冲突，已回退。Kotlin/Rust 的 Liénard 形式是它们自己的表示。
+        # Keep the STANDARD Van der Pol form declared in this file's docstring (B320).
+        # B310 switched to Kotlin's scaled Lienard form, which contradicted the declaration,
+        # and that is reverted.
         dx = y
         dy = self.mu * (1 - x * x) * y - x
         return (

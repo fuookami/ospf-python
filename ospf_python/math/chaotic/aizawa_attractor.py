@@ -47,6 +47,14 @@ class AizawaAttractor:
             下一步状态。/ Next state.
         """
         x_, y_, z_ = x[0], x[1], x[2]
+        # 决定 5 / B311（2026-11-11）：**回到标准 Aizawa 式**。线上权威（两处独立来源）
+        # 给出的正是本式：`ẋ=(z−b)x−dy`、`ẏ=dx+(z−b)y`、
+        # `ż=c+az−z³/3−(x²+y²)(1+ez)+fzx³`，参数 a=0.95,b=0.7,c=0.6,d=3.5,e=0.25,f=0.1。
+        # `ospf-kotlin` 的 `AizawaAttractor.kt` 与上游 `aizawa.rs` 在这三处都偏离标准
+        # （`dx` 减完整 dy、`dz` 用 a·x、且输出分量置换），所以它们要改，不是本文件。
+        # Back to the STANDARD Aizawa form (B311). Two independent online sources give exactly
+        # this; `AizawaAttractor.kt` and `aizawa.rs` deviate in all three respects, so THEY need
+        # changing, not this file.
         dx = (z_ - self.b) * x_ - self.d * y_
         dy = self.d * x_ + (z_ - self.b) * y_
         dz = (

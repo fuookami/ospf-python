@@ -157,3 +157,16 @@ class TestTaskAggregationMutation:
         new_agg = agg.with_critical_path(("t3",))
         assert new_agg.critical_path == ("t3",)
         assert agg.critical_path == ("t1",)
+
+
+def test_critical_path_survives_float_noise_in_slack() -> None:
+    """数学上零松弛的任务必须进关键路径，即使浮点上 slack 是 1.1e-16。
+
+    旧实现用 slack == 0.0，会漏掉唯一卡死交期的任务，反而走 fallback 选中 slack 最大的。
+    A task with mathematically zero slack must be critical even when its float slack is
+    1.1e-16. The old slack == 0.0 dropped it and the fallback picked the loosest task instead.
+    """
+    tight = Task("tight", "紧", duration=0.1, earliest_start=0.7, deadline=0.8)
+    loose = Task("loose", "松", duration=9.0, earliest_start=0.0, deadline=100.0)
+    assert tight.slack != 0.0
+    assert TaskAggregation.create(tasks=(tight, loose)).critical_path == ("tight",)

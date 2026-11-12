@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from ospf_python._binding.unit_registry import (
+    register_unit_family as _register_unit_family,
+)
 
+
+@_register_unit_family(powers=(0, 1, -2, 0, 0, 0, 0, 0, 0, 0))
 @dataclass(frozen=True)
 class Acceleration:
     """加速度单位。/ Acceleration unit.
@@ -32,7 +37,10 @@ class Acceleration:
 
 # 预定义加速度单位 / Predefined acceleration units
 METRE_PER_SQ_SECOND = Acceleration("m/s^2", 1.0)
-KILOMETRE_PER_SQ_HOUR = Acceleration("km/h^2", 1.0 / 12_960_000.0)
+# 1 km/h² = 1000 m / (3600 s)² = 1000/12 960 000 m/s²。
+# 历史实现写成 1/12 960 000，漏了 km→m 的 1000 这个分子，系数小了 1000 倍。
+# 1 km/h² = 1000 m / (3600 s)²; the old 1/12_960_000 dropped the km->m factor of 1000.
+KILOMETRE_PER_SQ_HOUR = Acceleration("km/h^2", 1000.0 / (3600.0 * 3600.0))
 GRAVITY_STANDARD = Acceleration("g", 9.80665)
 FOOT_PER_SQ_SECOND = Acceleration("ft/s^2", 0.3048)
 GAL = Acceleration("Gal", 0.01)

@@ -14,13 +14,13 @@ class LoziMap:
 
     Lozi map, a 2D piecewise-linear chaotic map.
 
-    映射规则：
-    x_{n+1} = 1 - a * |x_n| + b * y_n
-    y_{n+1} = x_n
+    映射规则（以 `ospf-kotlin` 的 `LoziMap.kt` 为准，B309 已统一）：
+    x_{n+1} = 1 + y_n - a * |x_n|
+    y_{n+1} = b * x_n
 
-    Map rules:
-    x_{n+1} = 1 - a * |x_n| + b * y_n
-    y_{n+1} = x_n
+    Map rules (unified with `LoziMap.kt` in ospf-kotlin, B309):
+    x_{n+1} = 1 + y_n - a * |x_n|
+    y_{n+1} = b * x_n
 
     Attributes:
         a: 非线性参数。/ Nonlinearity parameter.
@@ -48,8 +48,14 @@ class LoziMap:
             Next (x, y) state.
         """
         x, y = state
-        x_new = 1.0 - self.a * abs(x) + self.b * y
-        y_new = x
+        # 决定 5 / B309（2026-11-11）：以 `ospf-kotlin` 为准。`LoziMap.kt` 与上游 `lozi.rs`
+        # 同为 `(1 + y - a·|x|, b·x)`，而本文件原式 `(1 - a|x| + b·y, x)` 与之不同。
+        # docstring 已同步更新——否则实现与自己的文档不符，那比「与上游不一致」更严重。
+        # Unified with `ospf-kotlin` (B309): `LoziMap.kt` and `lozi.rs` are both
+        # `(1 + y - a*|x|, b*x)`; this file shipped `(1 - a|x| + b*y, x)`. The docstring is
+        # updated too, since implementation/doc mismatch is worse than upstream mismatch.
+        x_new = 1.0 + y - self.a * abs(x)
+        y_new = self.b * x
         return (x_new, y_new)
 
     def iterate(

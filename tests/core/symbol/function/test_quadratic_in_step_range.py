@@ -12,6 +12,7 @@ import pytest
 from ospf_python.core.symbol.function.function_symbol import (
     FunctionSymbol,
 )
+from ospf_python.core.symbol.function.in_step_range import InStepRange
 from ospf_python.core.symbol.function.quadratic_in_step_range import (
     QuadraticInStepRange,
 )
@@ -67,3 +68,38 @@ class TestQuadraticInStepRange:
         """空参数返回 0。/ Empty args returns 0."""
         s = QuadraticInStepRange()
         assert s.evaluate(()) == 0.0
+
+    def test_float_noise_does_not_truncate_the_step_index(self) -> None:
+        """步长索引不得被浮点噪点截断。
+
+        0.3 / 0.1 == 2.9999999999999996，int() 会截成 2 而不是 3。
+        The step index must not be truncated by float noise: 0.3 / 0.1 == 2.9999999999999996 and
+        int() truncates it to 2 instead of 3.
+        """
+        s = QuadraticInStepRange.create(step=0.1, coeff=1.0)
+        assert s.evaluate((0.3,)) == 9.0
+        assert s.evaluate((0.7,)) == 49.0
+
+    def test_genuinely_fractional_step_index_still_truncates(self) -> None:
+        """真正的小数比仍按向零截断。/ A genuinely fractional ratio still truncates toward zero."""
+        s = QuadraticInStepRange.create(step=1.0, coeff=1.0)
+        assert s.evaluate((2.7,)) == 4.0
+
+
+class TestInStepRangeFloatNoise:
+    """浮点噪点不得让整数倍判为不在步上 / Float noise must not put a step multiple off-grid."""
+
+    def test_step_multiples_are_on_grid(self) -> None:
+        """整数倍必须返回 1。/ Step multiples must return 1."""
+        s = InStepRange.create(step=0.1, lower=0.0, upper=10.0)
+        assert s.evaluate((0.3,)) == 1.0
+        assert s.evaluate((0.7,)) == 1.0
+        assert s.evaluate((1.0,)) == 1.0
+        assert s.evaluate((6.0,)) == 1.0
+        assert s.evaluate((10.0,)) == 1.0
+
+    def test_off_grid_and_out_of_range_return_zero(self) -> None:
+        """非步点与越界返回 0。/ Off-grid and out-of-range values return 0."""
+        s = InStepRange.create(step=0.1, lower=0.0, upper=10.0)
+        assert s.evaluate((0.35,)) == 0.0
+        assert s.evaluate((11.0,)) == 0.0

@@ -35,6 +35,36 @@ class Symbol:
         """
         return Symbol(name=name, index=index)
 
+    @staticmethod
+    def from_display_name(text: str) -> Symbol:
+        """按显示名重建符号，还原 ``name_index`` 形式。
+
+        Rebuild a symbol from its display name, restoring the ``name_index`` form.
+
+        ``display_name`` 对非零索引输出 ``name_index``。不还原索引会让序列化往返得到另一个
+        符号（``Symbol('y', 1)`` 变成 ``Symbol('y_1', 0)``），求值时它的绑定查不到，
+        整个项被静默丢掉。
+        ``display_name`` renders a non-zero index as ``name_index``. Not restoring the index
+        makes a serialisation round trip yield a different symbol (``Symbol('y', 1)`` becomes
+        ``Symbol('y_1', 0)``), so its bindings are not found at evaluation time and the whole
+        term is silently dropped.
+
+        后缀能解析成整数时按索引处理，因此名为 ``y_1`` 且索引为 0 的字面量会被读成
+        ``('y', 1)`` —— 两者本来就有相同的显示名，这个格式本身就带歧义。
+        A numeric suffix is read as the index, so a literal named ``y_1`` with index 0 reads as
+        ``('y', 1)``; both already share one display name, so the format is ambiguous anyway.
+
+        Args:
+            text: 显示名。/ Display name.
+
+        Returns:
+            符号。/ Symbol.
+        """
+        name, _, suffix = text.rpartition("_")
+        if name and suffix.isdigit():
+            return Symbol(name=name, index=int(suffix))
+        return Symbol(name=text, index=0)
+
     @property
     def display_name(self) -> str:
         """获取显示名称。/ Get display name.

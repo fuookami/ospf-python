@@ -667,6 +667,21 @@ class TestPolynomialStringParserDeep:
         result = parser.parse("2*x + 3*y - 5")
         assert result is not None
 
+    def test_parse_polynomial_expression_keeps_every_term(self) -> None:
+        """每个项都必须保留，不能只留第一项。
+
+        旧实现跳过连接符时把下一项的符号一起吃掉，于是 "x + 1" 只解析出 x。
+        Every term must survive parsing. The old skip-loop consumed the next term's sign, so
+        "x + 1" parsed to x alone.
+        """
+        parser = PolynomialStringParser(factory=FACTORY)
+        result = parser.parse("2*x + 3*y - 5")
+        assert result is not None
+        assert len(result.terms) == 3
+        plain = parser.parse("x + 1")
+        assert plain is not None
+        assert len(plain.terms) == 2
+
     def test_parse_power_expression(self) -> None:
         """解析幂次表达式。/ Parse power expression."""
         parser = PolynomialStringParser(factory=FACTORY)

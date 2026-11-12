@@ -7,6 +7,7 @@ generation pricing and sensitivity analysis.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 
@@ -69,9 +70,18 @@ class ResourceShadowPriceMap:
             影子价格，不存在时返回 0.0。
             Shadow price, or 0.0 if not found.
         """
-        key = (resource_key, window_start, window_end)
+        # 时间窗是 float，精确元组相等会让"0.3 登记、0.1 + 0.2 查询"互相看不到，
+        # 定价成本静默变成 0，列生成会以为所有候选列都零成本。
+        # 与 ResourceAggregation.get_capacity 用同一套容差口径。
+        # Windows are floats; exact tuple equality hides "register 0.3, query 0.1 + 0.2", which
+        # silently zeroes the pricing cost so column generation sees every candidate as free.
+        # Same tolerance convention as ResourceAggregation.get_capacity.
         for k, price in self.resource_prices:
-            if k == key:
+            if (
+                k[0] == resource_key
+                and math.isclose(k[1], window_start, rel_tol=1e-9, abs_tol=1e-9)
+                and math.isclose(k[2], window_end, rel_tol=1e-9, abs_tol=1e-9)
+            ):
                 return price
         return 0.0
 

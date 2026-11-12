@@ -341,6 +341,57 @@ class TestTriangle:
         )
         assert not t.contains(Point(x=8.0, y=8.0))
 
+    def test_contains_boundary_vertex(self) -> None:
+        """包含边界顶点。/ Contains a boundary vertex."""
+        t = Triangle(
+            v1=Point(x=0.0, y=0.0),
+            v2=Point(x=10.0, y=0.0),
+            v3=Point(x=0.0, y=10.0),
+        )
+        assert t.contains(Point(x=0.0, y=0.0)) is True
+
+
+class TestDegenerateTriangleContains:
+    """退化三角形不包含任何点（决定 3c）。/ A degenerate triangle contains nothing (decision 3c).
+
+    修复前：三点共线时三个叉积全为 0，`has_neg` 与 `has_pos` 都是 False，
+    `contains` 因此返回 True，于是一个面积为 0 的三角形"包含"了 100 倍跨度之外的点。
+    Before the fix all three cross products were 0, so a zero-area triangle reported that
+    it contained points 100 times outside its own span.
+    """
+
+    def test_collinear_on_axis_contains_nothing(self) -> None:
+        """共线于 x 轴的退化三角形不包含远处的点。"""
+        t = Triangle(
+            v1=Point(x=0.0, y=0.0),
+            v2=Point(x=1.0, y=0.0),
+            v3=Point(x=2.0, y=0.0),
+        )
+        assert t.area() == 0.0
+        assert t.contains(Point(x=100.0, y=0.0)) is False
+        assert t.contains(Point(x=1.0, y=0.0)) is False
+        assert t.contains(Point(x=0.0, y=0.0)) is False
+
+    def test_single_repeated_vertex_contains_nothing(self) -> None:
+        """两点重合的退化三角形同样不包含任何点。"""
+        t = Triangle(
+            v1=Point(x=3.0, y=4.0),
+            v2=Point(x=3.0, y=4.0),
+            v3=Point(x=3.0, y=4.0),
+        )
+        assert t.area() == 0.0
+        assert t.contains(Point(x=3.0, y=4.0)) is False
+
+    def test_nondegenerate_triangle_unaffected(self) -> None:
+        """非退化三角形行为不变。"""
+        t = Triangle(
+            v1=Point(x=0.0, y=0.0),
+            v2=Point(x=1.0, y=0.0),
+            v3=Point(x=0.0, y=1.0),
+        )
+        assert t.contains(Point(x=0.2, y=0.2)) is True
+        assert t.contains(Point(x=5.0, y=5.0)) is False
+
 
 # ── Cuboid3 ───────────────────────────────────────────────────
 

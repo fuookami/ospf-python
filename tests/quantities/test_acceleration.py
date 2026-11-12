@@ -12,6 +12,7 @@ from ospf_python.quantities.unit.acceleration import (
     FOOT_PER_SQ_SECOND,
     GAL,
     GRAVITY_STANDARD,
+    KILOMETRE_PER_SQ_HOUR,
     METRE_PER_SQ_SECOND,
 )
 
@@ -47,3 +48,17 @@ class TestAccelerationRoundTrip:
         si = METRE_PER_SQ_SECOND.to_si(original)
         back = METRE_PER_SQ_SECOND.from_si(si)
         assert back == pytest.approx(original)
+
+
+def test_kilometre_per_sq_hour_matches_first_principles() -> None:
+    """1 km/h² = 1000 m / (3600 s)² = 7.716e-05 m/s²。
+
+    历史实现写成 1/12 960 000，漏了 km→m 的分子 1000，系数小了 1000 倍。
+    The old factor 1/12_960_000 dropped the km->m numerator of 1000, making it 1000x small.
+    """
+    assert KILOMETRE_PER_SQ_HOUR.to_si(1.0) == pytest.approx(
+        1000.0 / 3600.0**2, rel=1e-12
+    )
+    assert KILOMETRE_PER_SQ_HOUR.to_si(3600.0 * 3600.0 / 1000.0) == pytest.approx(
+        1.0, rel=1e-12
+    )

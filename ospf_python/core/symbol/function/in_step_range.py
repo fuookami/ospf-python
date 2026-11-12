@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from ospf_python.core.symbol.function.function_symbol import (
     FunctionSymbol,
 )
+from ospf_python.utils.numeric import is_near_integer
 
 
 @dataclass(frozen=True)
@@ -49,8 +50,11 @@ class InStepRange(FunctionSymbol):
         val = args[0]
         if val < self.lower or val > self.upper:
             return 0.0
-        remainder = (val - self.lower) % self.step
-        return 1.0 if abs(remainder) < 1e-9 else 0.0
+        # 浮点取模余数不可靠：(1.0 - 0.0) % 0.1 == 0.09999999999999995，
+        # 于是连步长本身都被判成"不在步上"。改判比值是否贴近整数。
+        # A float remainder is unreliable: (1.0 - 0.0) % 0.1 == 0.09999999999999995, so even the
+        # step value itself is judged off-grid. Test whether the ratio nears an integer instead.
+        return 1.0 if is_near_integer((val - self.lower) / self.step) else 0.0
 
     @staticmethod
     def create(

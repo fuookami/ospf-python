@@ -54,6 +54,17 @@ class ThomasCyclicallySymmetricAttractor:
         Returns:
             下一步的 (x, y, z)。/ Next (x, y, z).
         """
+        # 决定 5 / B309：以 `ospf-kotlin` 为准。`ThomasCyclicallySymmetricAttractor.kt`
+        # 的步进也是对角式（与 `ThomasAttractor.kt` 相同），原式是循环式。
+        # Unified with `ospf-kotlin` (B309): its step is also the diagonal form, same as
+        # `ThomasAttractor.kt`; the shipped form was cyclically shifted.
+        # 决定 5 / B311：**回到标准 Thomas 循环式**。线上权威（Wikipedia 的
+        # "Thomas' cyclically symmetric attractor" 与 deeptime 文档）给出的正是
+        # `ẋ=sin(y)−bx`、`ẏ=sin(z)−by`、`ż=sin(x)−bz`；
+        # `ospf-kotlin` 与上游 Rust 用的是对角式，偏离标准，需改它们。
+        # Back to the STANDARD cyclic Thomas form (B311). Wikipedia and deeptime both give
+        # dx=sin(y)-bx, dy=sin(z)-by, dz=sin(x)-bz; ospf-kotlin and Rust use the diagonal form
+        # and are the ones that need changing.
         dx = math.sin(y) - self.b * x
         dy = math.sin(z) - self.b * y
         dz = math.sin(x) - self.b * z

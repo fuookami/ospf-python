@@ -240,7 +240,12 @@ class TaskAggregation:
         critical = sorted(tasks, key=lambda t: t.slack)
         result: list[str] = []
         for task in critical:
-            if task.slack == 0.0:
+            # slack = max(0.0, latest_start - earliest_start)，数学上为零时浮点上常留
+            # 1e-16 量级的残差；精确相等会让真正卡死交期的任务被漏掉，反而选中 slack 最大的。
+            # slack is max(0.0, latest_start - earliest_start), so a mathematical zero usually
+            # leaves a residue near 1e-16; exact equality drops the task that actually binds
+            # the deadline and falls through to the largest-slack task instead.
+            if task.slack <= 1e-9:
                 result.append(task.task_key)
 
         # 若无 slack=0 的任务，选取持续时间最长的任务

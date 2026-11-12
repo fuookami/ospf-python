@@ -1,67 +1,21 @@
 """带容差的数值。
 
 Toleranced value.
+
+本模块只做转发：唯一实现是 ``ospf_python.math.ordinary.toleranced.Toleranced``。
+这里曾有一份独立副本，它的 ``__eq__`` 按容差比较而 ``__hash__`` 按精确字段比较，
+导致 ``a == b`` 为真却 ``b in {a}`` 为假；按容差的相等不具备传递性，本来就不能参与
+哈希契约。需要容差比较时用 ``contains`` / ``overlaps``。
+
+This module only re-exports: the single implementation lives in
+``ospf_python.math.ordinary.toleranced.Toleranced``. An independent copy used to live here whose
+``__eq__`` compared within tolerance while ``__hash__`` compared exact fields, so ``a == b``
+could be true while ``b in {a}`` was false. Tolerance-based equality is not transitive and
+therefore cannot satisfy the hash contract. Use ``contains`` / ``overlaps`` for tolerance.
 """
 
 from __future__ import annotations
 
-import math
-from dataclasses import dataclass
+from ospf_python.math.ordinary.toleranced import Toleranced
 
-
-@dataclass(frozen=True)
-class Toleranced:
-    """带容差的浮点值。
-
-    Float value with tolerance for approximate comparison.
-
-    Attributes:
-        value: 标称值。/ Nominal value.
-        tolerance: 容差范围。/ Tolerance range.
-    """
-
-    value: float
-    tolerance: float
-
-    def is_close(
-        self,
-        other: Toleranced,
-        *,
-        rel_tol: float = 1e-9,
-        abs_tol: float | None = None,
-    ) -> bool:
-        """检查与另一容差值是否接近。
-
-        Check closeness to another toleranced value.
-
-        Args:
-            other: 另一个容差值。/ Another toleranced value.
-            rel_tol: 相对容差。/ Relative tolerance.
-            abs_tol: 绝对容差，默认使用自身 tolerance。
-                Absolute tolerance, defaults to self.tolerance.
-
-        Returns:
-            是否接近。/ Whether close.
-        """
-        effective_abs = abs_tol if abs_tol is not None else self.tolerance
-        return math.isclose(
-            self.value,
-            other.value,
-            rel_tol=rel_tol,
-            abs_tol=effective_abs,
-        )
-
-    def __eq__(self, other: object) -> bool:
-        """带容差的相等比较。
-
-        Equality comparison with tolerance.
-
-        Args:
-            other: 另一个对象。/ Another object.
-
-        Returns:
-            是否在容差内相等。/ Whether equal within tolerance.
-        """
-        if not isinstance(other, Toleranced):
-            return NotImplemented
-        return abs(self.value - other.value) <= self.tolerance
+__all__ = ["Toleranced"]

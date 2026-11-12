@@ -468,9 +468,12 @@ class TestWimolBanlueAttractor:
         wb = WimolBanlueAttractor(a=0.1, dt=0.01)
         x, y, z = 1.0, 1.0, 1.0
         nx, ny, nz = wb(x, y, z)
+        # B311：按线上权威（TU Delft 论文，beta->0 时 sqrt(y²+beta²)→|y|）统一到标准式：
+        # `dy = -z*tanh(x)`、`dz = -alpha + x*y + |y|`。
+        # B311: unified to the standard form from the TU Delft reference.
         dx = y - x
         dy = -z * math.tanh(x)
-        dz = x * y - 0.1
+        dz = -0.1 + x * y + abs(y)
         assert abs(nx - (x + dx * 0.01)) < 1e-12
         assert abs(ny - (y + dy * 0.01)) < 1e-12
         assert abs(nz - (z + dz * 0.01)) < 1e-12

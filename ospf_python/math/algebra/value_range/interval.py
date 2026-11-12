@@ -138,13 +138,24 @@ class Interval(Generic[T]):
         Returns:
             是否在区间内。/ Whether in interval.
         """
-        # 使用泛型比较 / Use generic comparison
+        # 决定 3b（2026-11-11 用户裁决 A）：NaN 不是任何值域的成员，边界为 NaN 也同样拒绝。
+        # 之前的实现会让 NaN 与任何值比较都为 False，三道闸门全部放过，最后 `return True`，
+        # 于是 `ValueWrapper(nan, [0, 10]).is_valid()` 返回 True，且 `[NaN, 10]` 接受 -1e9、
+        # `[0, NaN]` 接受 1e9——该侧静默变成无界。
+        # Decision 3b: NaN is not a member of any value range, and a NaN bound is rejected too.
+        # NaN compares False against everything, so the old gate chain fell through to `return True`.
+        if value != value:  # noqa: PLR0124 — NaN 探测 / NaN probe
+            return False
         if self.lower.value is not None:
+            if self.lower.value != self.lower.value:  # NaN 边界 / NaN bound
+                return False
             if value < self.lower.value:  # type: ignore[operator]
                 return False
             if value == self.lower.value and self.lower.is_open:
                 return False
         if self.upper.value is not None:
+            if self.upper.value != self.upper.value:  # NaN 边界 / NaN bound
+                return False
             if value > self.upper.value:  # type: ignore[operator]
                 return False
             if value == self.upper.value and self.upper.is_open:

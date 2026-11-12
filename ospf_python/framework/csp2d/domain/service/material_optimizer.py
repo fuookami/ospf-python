@@ -8,8 +8,11 @@ waste minimization.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
+from ospf_python.utils.numeric import is_near_integer
 
 if TYPE_CHECKING:
     from ospf_python.framework.csp2d.domain.material.model.sheet import (
@@ -175,10 +178,14 @@ class MaterialOptimizer:
         if not self._can_fit_any(material, shape_map):
             return None  # reason: no shape fits in this material
 
+        # 面积比值受浮点噪点影响：0.7000000000000001 / 0.7 == 1.0000000000000002，
+        # 直接 ceil 会把 1 张算成 2 张，成本随之翻倍并改变材料排名。
+        # An area ratio carries float noise: 0.7000000000000001 / 0.7 == 1.0000000000000002,
+        # so a plain ceil turns one sheet into two, doubling cost and changing the ranking.
         raw_count = total_area / material.area
-        import math
-
-        plan_count = max(1, math.ceil(raw_count))
+        plan_count = max(
+            1, round(raw_count) if is_near_integer(raw_count) else math.ceil(raw_count)
+        )
 
         used_area = total_area
         total_material_area = material.area * plan_count

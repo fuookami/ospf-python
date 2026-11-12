@@ -22,6 +22,9 @@ class ThomasAttractor:
     dy/dt = sin(z) - b * y
     dz/dt = sin(x) - b * z
 
+    （B309 已与 `ospf-kotlin` 的 `ThomasAttractor.kt` 统一：对角式，不是循环式。）
+    (Unified with `ThomasAttractor.kt` in B309: diagonal, not cyclically shifted.)
+
     Attributes:
         b: 阻尼参数。/ Damping parameter.
         dt: 时间步长。/ Time step.
@@ -48,6 +51,15 @@ class ThomasAttractor:
         Returns:
             下一步的 (x, y, z)。/ Next (x, y, z).
         """
+        # 决定 5 / B309：以 `ospf-kotlin` 为准（对角式）。原式是循环式，与 Kotlin 不同。
+        # Unified with `ospf-kotlin` (B309): diagonal form; the shipped form was cyclically shifted.
+        # 决定 5 / B311：**回到标准 Thomas 循环式**。线上权威（Wikipedia 的
+        # "Thomas' cyclically symmetric attractor" 与 deeptime 文档）给出的正是
+        # `ẋ=sin(y)−bx`、`ẏ=sin(z)−by`、`ż=sin(x)−bz`；
+        # `ospf-kotlin` 与上游 Rust 用的是对角式，偏离标准，需改它们。
+        # Back to the STANDARD cyclic Thomas form (B311). Wikipedia and deeptime both give
+        # dx=sin(y)-bx, dy=sin(z)-by, dz=sin(x)-bz; ospf-kotlin and Rust use the diagonal form
+        # and are the ones that need changing.
         dx = math.sin(y) - self.b * x
         dy = math.sin(z) - self.b * y
         dz = math.sin(x) - self.b * z

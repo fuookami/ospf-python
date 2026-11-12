@@ -17,6 +17,7 @@ from ospf_python.framework.csp1d.domain.cutting_plan_generation.service.generati
 from ospf_python.framework.csp1d.domain.cutting_plan_generation.service.generation_length_pruning import (
     GenerationLengthPruning,
 )
+from ospf_python.utils.numeric import step_index
 
 
 @dataclass(frozen=True)
@@ -84,7 +85,7 @@ class NSumGenerator:
             constraint = self.constraints.get_constraint_for(
                 product_key,
             )
-            max_by_length = int(material_length / product_length)
+            max_by_length = step_index(material_length / product_length)
             effective_max = min(max_qty, max_by_length)
             if constraint:
                 effective_max = min(

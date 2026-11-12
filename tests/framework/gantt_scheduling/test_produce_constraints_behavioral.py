@@ -18,6 +18,12 @@ from ospf_python.framework.gantt_scheduling.domain.produce.service.limits.produc
     ProduceCapacityConstraint,
     ProduceCapacityData,
 )
+from ospf_python.framework.gantt_scheduling.domain.produce.service.limits.produce_demand_constraint import (
+    ProduceDemandConstraint,
+)
+from ospf_python.framework.gantt_scheduling.domain.produce.model.produce_aggregation import (
+    ProduceAggregation,
+)
 from ospf_python.framework.gantt_scheduling.domain.produce.service.limits.produce_order_constraint import (
     ProduceOrderConstraint,
     ProduceOrderPair,
@@ -443,3 +449,97 @@ class TestProduceOrderConstraint:
         agg = _StubProduceAggregation(order_pairs=())
         assert c.is_satisfied(agg) is True
         assert c.violations(agg) == ()
+
+
+# ==================== 真实 ProduceAggregation 的契约测试 ====================
+#
+# 本节用**真实**的 `ProduceAggregation` 而不是 `_StubProduceAggregation`。
+# 起因：B506 查出真实类当时只有一个 `name` 字段，而两个 produce 约束构建器要读
+# `order_pairs` / `item_keys` / `assignments_for_item(...)`，所以对真实类调用会抛
+# `AttributeError`——而上面 26 处测试都用替身，掩盖了这一点。
+#
+# These cases drive the REAL `ProduceAggregation` rather than the stub, so the
+# aggregation cannot drift away from what the constraint builders read again.
+
+
+@dataclass(frozen=True)
+class _RealLikeAssignment:
+    """与 produce 分配同形的记录 / Assignment-shaped record."""
+
+    item_key: str
+    start_time: float
+    end_time: float
+    assignment_amount: float = 1.0
+
+
+class TestRealProduceAggregationContract:
+    """真实聚合类必须满足两个 produce 约束构建器的读取契约。"""
+
+    def test_default_aggregation_is_empty_but_usable(self) -> None:
+        agg = ProduceAggregation()
+        assert agg.is_valid is True
+        assert agg.item_keys == ()
+        assert agg.order_pairs == ()
+        assert agg.assignments_for_item("missing") == ()
+
+    def test_with_builders_are_immutable(self) -> None:
+        base = ProduceAggregation()
+        one = base.with_assignment(_RealLikeAssignment("i1", 0.0, 5.0))
+        assert base._assignments == ()
+        assert len(one._assignments) == 1
+        assert one is not base
+
+    def test_item_keys_deduplicate_in_first_appearance_order(self) -> None:
+        agg = (
+            ProduceAggregation()
+            .with_assignment(_RealLikeAssignment("i2", 0.0, 1.0))
+            .with_assignment(_RealLikeAssignment("i1", 0.0, 1.0))
+            .with_assignment(_RealLikeAssignment("i2", 2.0, 3.0))
+        )
+        assert agg.item_keys == ("i2", "i1")
+        assert len(agg.assignments_for_item("i2")) == 2
+
+    def test_order_constraint_reads_real_aggregation(self) -> None:
+        agg = (
+            ProduceAggregation()
+            .with_assignment(_RealLikeAssignment("i1", 0.0, 5.0))
+            .with_assignment(_RealLikeAssignment("i2", 6.0, 10.0))
+            .with_order_pair(_StubOrderPair("i1", "i2"))
+        )
+        result = ProduceOrderConstraint().build_constraints(agg)
+        assert len(result) == 1
+        assert result[0].is_satisfied is True
+
+    def test_order_constraint_detects_violation_on_real_aggregation(self) -> None:
+        agg = (
+            ProduceAggregation()
+            .with_assignment(_RealLikeAssignment("i1", 0.0, 8.0))
+            .with_assignment(_RealLikeAssignment("i2", 5.0, 10.0))
+            .with_order_pair(_StubOrderPair("i1", "i2"))
+        )
+        result = ProduceOrderConstraint().build_constraints(agg)
+        assert len(result) == 1
+        assert result[0].is_satisfied is False
+
+    def test_demand_constraint_reads_real_aggregation(self) -> None:
+        agg = (
+            ProduceAggregation()
+            .with_assignment(_RealLikeAssignment("i1", 0.0, 1.0, assignment_amount=2.0))
+            .with_assignment(_RealLikeAssignment("i1", 1.0, 2.0, assignment_amount=3.0))
+        )
+        constraint = ProduceDemandConstraint(required_amount=5.0)
+        result = constraint.build_constraints(agg)
+        assert len(result) == 1
+        assert result[0].item_key == "i1"
+        assert result[0].assigned_amount == pytest.approx(5.0)
+        assert result[0].is_satisfied is True
+
+    def test_demand_constraint_reports_shortfall_on_real_aggregation(self) -> None:
+        agg = ProduceAggregation().with_assignment(
+            _RealLikeAssignment("i1", 0.0, 1.0, assignment_amount=2.0)
+        )
+        constraint = ProduceDemandConstraint(required_amount=5.0)
+        result = constraint.build_constraints(agg)
+        assert len(result) == 1
+        assert result[0].is_satisfied is False
+        assert result[0].shortfall == pytest.approx(3.0)

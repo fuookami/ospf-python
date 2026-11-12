@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 from ospf_python.core.symbol.function.function_symbol import (
@@ -34,7 +35,13 @@ class SameAs(FunctionSymbol):
         """
         if len(args) < 2:
             return 1.0
-        return 1.0 if args[0] == args[1] else 0.0
+        # 精确相等会把 0.1 + 0.2 与 0.3 判成不等；求解器回传的值本来就带浮点噪点。
+        # 用相对容差比较，完全相等的值仍然相等。
+        # Exact equality judges 0.1 + 0.2 different from 0.3, and solver outputs carry float
+        # noise anyway. Compare with a relative tolerance; exactly equal values still match.
+        return (
+            1.0 if math.isclose(args[0], args[1], rel_tol=1e-9, abs_tol=1e-12) else 0.0
+        )
 
     @staticmethod
     def create() -> SameAs:

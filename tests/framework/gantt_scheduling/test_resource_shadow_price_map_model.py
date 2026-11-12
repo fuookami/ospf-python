@@ -86,3 +86,23 @@ class TestResourceShadowPriceMap:
         m = ResourceShadowPriceMap()
         with pytest.raises(AttributeError):
             m.prices = ()  # type: ignore[misc]
+
+
+def test_price_lookup_tolerates_window_values_that_differ_only_in_bits() -> None:
+    """同值不同位的时间窗必须命中，否则定价成本静默归零。
+
+    按 0.3 登记、按 0.1 + 0.2 查询时，精确元组相等会 miss 返回 0.0，
+    列生成会以为所有候选列都零成本。
+    Windows equal in value but not in bits must match; under exact tuple equality a 0.3
+    registration queried as 0.1 + 0.2 misses and returns 0.0, so column generation treats
+    every candidate as free.
+    """
+    mapping = ResourceShadowPriceMap().with_resource_price(
+        resource_key="M1", window_start=0.3, window_end=1.3, price=2.5
+    )
+    assert mapping.get_resource_price(
+        resource_key="M1", window_start=0.1 + 0.2, window_end=1.3
+    ) == pytest.approx(2.5)
+    assert mapping.get_resource_price(
+        resource_key="R9", window_start=0.3, window_end=1.3
+    ) == pytest.approx(0.0)

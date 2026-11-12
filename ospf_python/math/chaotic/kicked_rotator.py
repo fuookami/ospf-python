@@ -47,6 +47,13 @@ class KickedRotator:
             Next (theta, p) state.
         """
         theta, p = state
+        # 决定 5 / B320：**保留本文件声明的返回顺序 `(theta, p)`**。
+        # docstring 声明 `p_{n+1} = p_n + K*sin(theta_n)`、`theta_{n+1} = theta_n + p_{n+1}`，
+        # 且 `Returns: 下一步 (theta, p)`。B310 曾按 Kotlin 的 `(l', θ')` 顺序改过，
+        # 那与本文件声明冲突，已回退。Kotlin/Rust 的分量顺序是它们自己的偏离。
+        # Keep the DECLARED return order `(theta, p)` (B320). The docstring declares the map
+        # and states `Returns: Next (theta, p)`; B310 flipped it to kotlin's (l', theta') order,
+        # which contradicted this file, and that is reverted. Kotlin/Rust carry their own ordering.
         p_new = p + self.K * math.sin(theta)
         theta_new = theta + p_new
         return (theta_new, p_new)

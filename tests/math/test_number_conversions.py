@@ -102,3 +102,17 @@ class TestToRational:
         """负值转换。/ Negative conversion."""
         r = to_rational(-3)
         assert r == Fraction(-3, 1)
+
+    def test_small_float_must_not_collapse_to_zero(self) -> None:
+        """小于 1e-6 的浮点不得被静默变成 0。/ A float below 1e-6 must not silently become 0."""
+        value = 1e-7
+        r = to_rational(value)
+        assert r != 0
+        assert r == Fraction(*value.as_integer_ratio())
+
+    def test_float_keeps_exact_binary_value(self) -> None:
+        """浮点按 IEEE 二进制值精确转换，不猜十进制意图。/ Exact IEEE value, no decimal guessing."""
+        value = 0.1
+        r = to_rational(value)
+        assert r == Fraction(*value.as_integer_ratio())
+        assert float(r) == value

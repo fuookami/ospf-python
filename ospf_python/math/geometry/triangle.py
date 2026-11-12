@@ -56,6 +56,15 @@ class Triangle:
         Returns:
             是否在三角形内。/ Whether inside the triangle.
         """
+        # 决定 3c（2026-11-11 用户裁决 A）：退化三角形（三点共线，面积 0）不包含任何点。
+        # 三点共线时三个叉积全为 0，`has_neg` 与 `has_pos` 都是 False，
+        # 原实现因此 `return True`，于是一个面积为 0 的三角形"包含"了 100 倍跨度之外的点。
+        # 退化时该集合是线段或单点而非二维区域，`contains` 返回 True 没有意义。
+        # Decision 3c: a degenerate triangle (collinear vertices, zero area) contains no point.
+        # With three collinear vertices all cross products are 0, so the old code returned True
+        # and a zero-area triangle "contained" points far outside its span.
+        if self.area() == 0.0:
+            return False
         d1 = _sign(point, self.v1, self.v2)
         d2 = _sign(point, self.v2, self.v3)
         d3 = _sign(point, self.v3, self.v1)

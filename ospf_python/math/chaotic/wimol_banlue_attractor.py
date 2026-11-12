@@ -20,7 +20,7 @@ class WimolBanlueAttractor:
 
     dx/dt = y - x
     dy/dt = -z * tanh(x)
-    dz/dt = x * y - a
+    dz/dt = -a + x * y + |y|
 
     Attributes:
         a: 控制参数 a。/ Control parameter a.
@@ -48,9 +48,16 @@ class WimolBanlueAttractor:
         Returns:
             下一步的 (x, y, z)。/ Next (x, y, z).
         """
+        # 决定 5 / B311：**回到标准 Wimol-Banlue 式**。线上权威（TU Delft 论文，采用
+        # `β→0` 让 `√(y²+β²)` 逼近 `|y|` 的写法）给出
+        # `ẋ = y − x`、`ẏ = −z·tanh(x)`、`ż = −α + xy + √(y²+β²) → −α + xy + |y|`。
+        # 出厂式缺了 `+|y|` 项；`ospf-kotlin` 与上游 Rust 用 `tan` 且用 `|x|`——两者都偏离。
+        # Back to the STANDARD Wimol-Banlue form (B311). The TU Delft reference (using the
+        # beta->0 limit of sqrt(y^2+beta^2) ~ |y|) gives dx=y-x, dy=-z*tanh(x),
+        # dz=-alpha+x*y+|y|. The shipped form omitted +|y|; kotlin and Rust use tan and |x|.
         dx = y - x
         dy = -z * math.tanh(x)
-        dz = x * y - self.a
+        dz = -self.a + x * y + abs(y)
         return (
             x + dx * self.dt,
             y + dy * self.dt,

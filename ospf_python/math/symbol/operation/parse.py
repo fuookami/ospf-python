@@ -150,8 +150,11 @@ class PolynomialStringParser(Generic[T]):
             terms.append(CanonicalMonomial(coefficient=coeff, powers=powers))
             pos = match.end()
 
-            # 跳过空白和连接符 / Skip whitespace and connectors
-            while pos < len(remaining) and remaining[pos] in " +-*":
+            # 只跳过空白。连接符 `+`/`-` 是下一项的符号，必须留给 term_pattern 匹配，
+            # 否则 `"x + 1"` 会把 `+ 1` 整个吞掉，只剩 `x`。
+            # Skip whitespace only. `+`/`-` are the next term's sign and must stay for
+            # term_pattern; consuming them makes `"x + 1"` swallow `+ 1` and keep only `x`.
+            while pos < len(remaining) and remaining[pos].isspace():
                 pos += 1
 
         # 处理纯常数项（如 "+ 5" 或 "- 5"）

@@ -41,7 +41,13 @@ class GenerationKnifePruning:
         """
         if self.max_knife_count <= 0:
             return False
-        return current_knife_count >= self.max_knife_count
+        # docstring 与 can_add_cuts 都定义"超过限制"才剪：恰好等于上限的方案必须保留，
+        # 否则 `P1` 长 20、料长 100、上限 5 刀时零余料的 {"P1": 5} 被整条丢掉，
+        # DFS 只能给出 1..4，逼迫方案退化成两根料。
+        # The docstring and can_add_cuts both define "exceeds the limit": a plan at exactly the
+        # limit must be kept, otherwise a zero-waste {"P1": 5} (length 20 into 100, limit 5) is
+        # dropped and DFS only yields 1..4, forcing a two-bar plan.
+        return current_knife_count > self.max_knife_count
 
     def remaining_knives(self, current_knife_count: int) -> int:
         """计算剩余可用刀数。

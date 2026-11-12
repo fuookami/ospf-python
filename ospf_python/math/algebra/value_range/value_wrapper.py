@@ -40,11 +40,3 @@ class ValueWrapper(Generic[T]):
     def is_valid(self) -> bool:
         """检查值是否在有效范围内 / Check if value is in valid range."""
         return self._range.contains(self._value)
-
-    def clamp_to_range(self) -> T:
-        """将值钳制到范围内 / Clamp value to range.
-
-        Returns:
-            T: 钳制后的值 / Clamped value.
-        """
-        return self._value
